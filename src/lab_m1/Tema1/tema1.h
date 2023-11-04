@@ -27,6 +27,10 @@ namespace m1
         void OnMouseScroll(int mouseX, int mouseY, int offsetX, int offsetY) override;
         void OnWindowResize(int width, int height) override;
 
+        void RenderScene();
+        void CreateMeshes();
+        void buyRhombus(int score);
+        
      protected:
         float cx, cy;
         glm::mat3 modelMatrix;
@@ -44,8 +48,15 @@ namespace m1
         const float lifeX = outlinePosx + 4*outlineSide + 5*space;
         const float lifeY = outlinePosy + 0.25*squareSide/2;
         const float rhombusSide = 50;
+        const float starSize = 50;
+        const std::tuple <float, float> starPos = std::make_tuple(lifeX, lifeY - starSize/2);
 
+        int allies[3][3] = {0};
         float noLives = 3;
+        int score = 50;
+        bool holdingMouse = false;
+        int mouseX, mouseY;
+        int buyX, buyY;
         
     };
 }   // namespace m1

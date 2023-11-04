@@ -61,7 +61,7 @@ Mesh* object2D::CreateRhombus(
         
     };
 
-    Mesh* square = new Mesh(name);
+    Mesh* rhombus = new Mesh(name);
     std::vector<unsigned int> indices = { 0, 1, 4,
                                           2, 3, 4,
                                           4, 3, 5,
@@ -69,15 +69,15 @@ Mesh* object2D::CreateRhombus(
                                           4, 7, 0};
 
     if (!fill) {
-        square->SetDrawMode(GL_LINE_LOOP);
+        rhombus->SetDrawMode(GL_LINE_LOOP);
     } else {
         // Draw 2 triangles. Add the remaining 2 indices
         indices.push_back(0);
         indices.push_back(2);
     }
 
-    square->InitFromData(vertices, indices);
-    return square;
+    rhombus->InitFromData(vertices, indices);
+    return rhombus;
 }
 
 Mesh* object2D::CreateStar(
@@ -87,43 +87,71 @@ Mesh* object2D::CreateStar(
     glm::vec3 color,
     bool fill)
 {
-    glm::vec3 corner = center;
+    /*glm::vec3 corner = center;
     float a = 0.4*length;
     float b = 0.2*length;
     float h = sqrt(a*b + 3*b*b/4);
-    float h2 = sqrt(a*a - b*b/4);
+    float h2 = sqrt(a*a - b*b/4);*/
 
     // 0.38, 0.24
     // 0.71 down, 0.6 up, 0.34 side, angle = 36 deg
+    float angle = 2*glm::pi<float>()/10;
+    float outerRadius = 25.0f;
+    float innerRadius = 10.0f;
     
     std::vector<VertexFormat> vertices =
     {   // star, length = a + b + a, a = 0.38 length, b = 0.24 length
-        VertexFormat(corner, color), // Left 0
+        /*VertexFormat(corner, color), // Left 0
         VertexFormat(corner + glm::vec3(length, 0, 0), color), // Right 1
         VertexFormat(corner + glm::vec3(a + b/2, -h, 0), color), // Bottom 2
         VertexFormat(corner + glm::vec3(0.33*a, - h - h2, 0), color), // Bottom left 3
         VertexFormat(corner + glm::vec3(a + b/2, h2, 0), color), // Top 4
         VertexFormat(corner + glm::vec3(a + b + 0.1*a, -2*h/3, 0), color), // Mid Right 5
-        VertexFormat(corner + glm::vec3(a + b + 0.66*a, - h - h2, 0), color), // Bottom right 6
+        VertexFormat(corner + glm::vec3(a + b + 0.66*a, - h - h2, 0), color), // Bottom right 6*/
+        
+
+        VertexFormat(center, color), // Center 0
+        VertexFormat(center + glm::vec3(outerRadius, 0, 0), color), // 1
+        VertexFormat(center + glm::vec3(innerRadius*cos(angle), innerRadius*sin(angle), 0), color), // 2
+        VertexFormat(center + glm::vec3(outerRadius*cos(angle*2), outerRadius*sin(angle*2), 0), color), // 3
+        VertexFormat(center + glm::vec3(innerRadius*cos(angle*3), innerRadius*sin(angle*3), 0), color), // 4
+        VertexFormat(center + glm::vec3(outerRadius*cos(angle*4), outerRadius*sin(angle*4), 0), color), // 5
+        VertexFormat(center + glm::vec3(innerRadius*cos(angle*5), innerRadius*sin(angle*5), 0), color), // 6
+        VertexFormat(center + glm::vec3(outerRadius*cos(angle*6), outerRadius*sin(angle*6), 0), color), // 7
+        VertexFormat(center + glm::vec3(innerRadius*cos(angle*7), innerRadius*sin(angle*7), 0), color), // 8
+        VertexFormat(center + glm::vec3(outerRadius*cos(angle*8), outerRadius*sin(angle*8), 0), color), // 9
+        VertexFormat(center + glm::vec3(innerRadius*cos(angle*9), innerRadius*sin(angle*9), 0), color) // 10
+    };
+
+    Mesh* star = new Mesh(name);
+    std::vector<unsigned int> indices = {
+        1, 2, 0,
+        2, 3, 0,
+        3, 4, 0,
+        4, 5, 0,
+        5, 6, 0,
+        6, 7, 0,
+        7, 8, 0,
+        8, 9, 0,
+        9, 10, 0,
+        10, 1, 0
+        
+        /*0, 1, 2,
+        3, 4, 5,
+        6, 2, 5*/
         
     };
 
-    Mesh* square = new Mesh(name);
-    std::vector<unsigned int> indices = { 0, 1, 2,
-                                          3, 4, 5,
-                                         6, 2, 5
-    };
-
     if (!fill) {
-        square->SetDrawMode(GL_LINE_LOOP);
+        star->SetDrawMode(GL_LINE_LOOP);
     } else {
         // Draw 2 triangles. Add the remaining 2 indices
         indices.push_back(0);
         indices.push_back(2);
     }
 
-    square->InitFromData(vertices, indices);
-    return square;
+    star->InitFromData(vertices, indices);
+    return star;
 }
 
 Mesh* object2D::CreateHexagon(
@@ -133,36 +161,55 @@ Mesh* object2D::CreateHexagon(
     glm::vec3 color,
     bool fill)
 {
-    glm::vec3 corner = leftCorner;
+    glm::vec3 middle = leftCorner;
+    float h = sqrt(3)*length/2;
+    
+    float outline = length/3;
 
     std::vector<VertexFormat> vertices =
     {
-        VertexFormat(corner, color), // Top Left 0
-        VertexFormat(corner + glm::vec3(length/2, 0, 0), color), // Top Right 1
-        VertexFormat(corner + glm::vec3(length/2, -length, 0), color), // Bottom Right 2
-        VertexFormat(corner + glm::vec3(0, -length, 0), color), // Bottom Left 3
-        VertexFormat(corner + glm::vec3(length/2 + length/3, -length/2, 0), color), // Mid right 4
-        VertexFormat(corner + glm::vec3(-length/3, -length/2, 0), color) // Mid left 5
-        
+        VertexFormat(middle, color), // Middle 0
+        VertexFormat(middle + glm::vec3(length, 0, 0), color), // Right 1
+        VertexFormat(middle + glm::vec3(length/2, h, 0), color), // Top right 2
+        VertexFormat(middle + glm::vec3(-length/2, h, 0), color), // Top left 3
+        VertexFormat(middle + glm::vec3(-length, 0, 0), color), // Left 4
+        VertexFormat(middle + glm::vec3(-length/2, -h, 0), color), // Bottom left 5
+        VertexFormat(middle + glm::vec3(length/2, -h, 0), color), // Bottom right 6
+        VertexFormat(middle + glm::vec3(1.5*length, 0, 0), glm::vec3(0,0,1)), // Outline right 7
+        VertexFormat(middle + glm::vec3(1.5*length/2, 1.5*h, 0), glm::vec3(0,0,1)), // Outline top right 8
+        VertexFormat(middle + glm::vec3(-1.5*length/2, 1.5*h, 0), glm::vec3(0,0,1)), // Outline top left 9
+        VertexFormat(middle + glm::vec3(-1.5*length, 0, 0), glm::vec3(0,0,1)), // Outline left 10
+        VertexFormat(middle + glm::vec3(-1.5*length/2, -1.5*h, 0), glm::vec3(0,0,1)), // Outline bottom left 11
+        VertexFormat(middle + glm::vec3(1.5*length/2, -1.5*h, 0), glm::vec3(0,0,1)) // Outline bottom right 12
         
     };
 
-    Mesh* square = new Mesh(name);
-    std::vector<unsigned int> indices = {0, 1, 2,
-    1, 4, 2,
-    0, 2, 3,
-    0, 3, 5};
+    Mesh* hexa = new Mesh(name);
+    std::vector<unsigned int> indices = {
+        0, 2, 1,
+        0, 3, 2,
+        0, 4, 3,
+        0, 5, 4,
+        0, 6, 5,
+        0, 1, 6,
+        0, 8, 7,
+        0, 9, 8,
+        0, 10, 9,
+        0, 11, 10,
+        0, 12, 11,
+        0, 7, 12
+    };
 
     if (!fill) {
-        square->SetDrawMode(GL_LINE_LOOP);
+        hexa->SetDrawMode(GL_LINE_LOOP);
     } else {
         // Draw 2 triangles. Add the remaining 2 indices
         indices.push_back(0);
         indices.push_back(2);
     }
 
-    square->InitFromData(vertices, indices);
-    return square;
+    hexa->InitFromData(vertices, indices);
+    return hexa;
 }
 
 

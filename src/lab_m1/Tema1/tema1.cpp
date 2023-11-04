@@ -75,16 +75,26 @@ void Tema1::Init()
     Mesh* rhombusTurquoise = object2D::CreateRhombus("rhombusTurquoise", corner, rhombusSide, glm::vec3(64.0/255, 224.0/255, 208.0/255), true);
     AddMeshToList(rhombusTurquoise);
 
-    Mesh* star = object2D::CreateStar("star", corner, 100, glm::vec3(1, 1, 0), true);
-    AddMeshToList(star);
+    Mesh* priceStar = object2D::CreateStar("priceStar", corner, starSize, glm::vec3(1, 1, 0), true);
+    AddMeshToList(priceStar);
 
     Mesh* grass = object2D::CreateSquare("grass", corner, squareSide, glm::vec3(72.0f/255, 254.0f/255, 109.0f/255), true);
     AddMeshToList(grass);
 
-    Mesh* hexagon = object2D::CreateHexagon("hexagon", corner, squareSide, glm::vec3(1, 1, 0), true);
-    AddMeshToList(hexagon);
-}
+    Mesh* enemyPink = object2D::CreateHexagon("enemyPink", corner, squareSide, glm::vec3(227.0/255, 115.0/255, 131.0/255), true);
+    AddMeshToList(enemyPink);
 
+    Mesh* enemyYellow = object2D::CreateHexagon("enemyYellow", corner, squareSide, glm::vec3(247.0/255, 239.0/255, 121.0/255), true);
+    AddMeshToList(enemyYellow);
+    
+    Mesh* enemyPurple = object2D::CreateHexagon("enemyPurple", corner, squareSide, glm::vec3(148.0/255, 0, 211.0/255), true);
+    AddMeshToList(enemyPurple);
+
+    Mesh* enemyTurquoise = object2D::CreateHexagon("enemyTurquoise", corner, squareSide, glm::vec3(64.0/255, 224.0/255, 208.0/255), true);
+    AddMeshToList(enemyTurquoise);
+
+
+}
 
 void Tema1::FrameStart()
 {
@@ -99,6 +109,157 @@ void Tema1::FrameStart()
 
 
 void Tema1::Update(float deltaTimeSeconds)
+{
+    
+    RenderScene();
+
+    // Render points
+    for(int i = 0; i < score; ++i)
+    {
+        modelMatrix = glm::mat3(1);
+        modelMatrix *= transform2D::Translate(get<0>(starPos) + i*starSize/2, get<1>(starPos));
+        modelMatrix *= transform2D::Scale(0.5, 0.5);
+        modelMatrix *= transform2D::Rotate(glm::pi<float>()/10);
+        RenderMesh2D(meshes["priceStar"], shaders["VertexColor"], modelMatrix);
+        
+    }
+    
+    // Test star
+    modelMatrix = glm::mat3(1);
+    modelMatrix *= transform2D::Translate( 600, 500);
+    //modelMatrix *= transform2D::Scale(50, 50);
+    angularStep += 0.5*deltaTimeSeconds;
+    modelMatrix *= transform2D::Rotate(angularStep);
+    RenderMesh2D(meshes["priceStar"], shaders["VertexColor"], modelMatrix);
+
+    // Test hexagon
+    modelMatrix = glm::mat3(1);
+    modelMatrix *= transform2D::Translate( 700, 300);
+    modelMatrix *= transform2D::Scale(0.25f, 0.25f);
+   // angularStep += 0.5*deltaTimeSeconds;
+    modelMatrix *= transform2D::Rotate(angularStep);
+    RenderMesh2D(meshes["enemyPink"], shaders["VertexColor"], modelMatrix);
+    
+    modelMatrix = glm::mat3(1);
+    modelMatrix *= transform2D::Translate( 800, 300);
+    modelMatrix *= transform2D::Scale(0.25f, 0.25f);
+    //angularStep += 0.5*deltaTimeSeconds;
+    modelMatrix *= transform2D::Rotate(angularStep);
+    RenderMesh2D(meshes["enemyYellow"], shaders["VertexColor"], modelMatrix);
+
+    
+    modelMatrix = glm::mat3(1);
+    modelMatrix *= transform2D::Translate( 900, 300);
+    modelMatrix *= transform2D::Scale(0.25f, 0.25f);
+    //angularStep += 0.5*deltaTimeSeconds;
+    modelMatrix *= transform2D::Rotate(angularStep);
+    RenderMesh2D(meshes["enemyPurple"], shaders["VertexColor"], modelMatrix);
+
+    
+    modelMatrix = glm::mat3(1);
+    modelMatrix *= transform2D::Translate( 1000, 300);
+    modelMatrix *= transform2D::Scale(0.25f, 0.25f);
+    //angularStep += 0.5*deltaTimeSeconds;
+    modelMatrix *= transform2D::Rotate(angularStep);
+    RenderMesh2D(meshes["enemyTurquoise"], shaders["VertexColor"], modelMatrix);
+    
+    
+}
+
+
+void Tema1::FrameEnd()
+{
+}
+
+
+/*
+ *  These are callback functions. To find more about callbacks and
+ *  how they behave, see `input_controller.h`.
+ */
+
+
+void Tema1::OnInputUpdate(float deltaTime, int mods)
+{
+}
+
+
+void Tema1::OnKeyPress(int key, int mods)
+{
+    // Add key press event
+}
+
+
+void Tema1::OnKeyRelease(int key, int mods)
+{
+    // Add key release event
+}
+
+
+void Tema1::OnMouseMove(int mouseX, int mouseY, int deltaX, int deltaY)
+{
+    // Add mouse move event
+    if(holdingMouse)
+    {
+        mouseX = window->GetResolution().x - mouseX;
+        mouseY = window->GetResolution().y - mouseY;
+
+        Tema1::mouseX = mouseX;
+        Tema1::mouseY = mouseY;
+    }
+}
+
+
+void Tema1::OnMouseBtnPress(int mouseX, int mouseY, int button, int mods)
+{
+    // Add mouse button press event
+    holdingMouse = true;
+    mouseX = window->GetResolution().x - mouseX;
+    mouseY = window->GetResolution().y - mouseY;
+    Tema1::mouseX = mouseX;
+    Tema1::mouseY = mouseY;
+    Tema1::buyX = mouseX;
+    Tema1::buyY = mouseY;
+    
+}
+
+
+void Tema1::OnMouseBtnRelease(int mouseX, int mouseY, int button, int mods)
+{
+    // Add mouse button release event
+    holdingMouse = false;
+    Tema1::buyX = 0;
+    Tema1::buyY = 0;
+}
+
+
+void Tema1::OnMouseScroll(int mouseX, int mouseY, int offsetX, int offsetY)
+{
+}
+
+
+void Tema1::OnWindowResize(int width, int height)
+{
+}
+
+void Tema1::buyRhombus(int x, int y, int score)
+{
+    while(holdingMouse)
+    {
+        // Pink rhombus
+        if(Tema1::mouseX >= outlinePosx && Tema1::mouseY <= outlinePosx + outlineSide &&
+           Tema1::mouseY >= outlinePosy && Tema1::mouseY <= outlinePosy + outlineSide)
+        {
+            if(score >= 1)
+            {
+                score -= 1;
+                
+            }
+        }
+    }
+}
+
+
+void Tema1::RenderScene()
 {
     // Render the "Base" line
     modelMatrix = glm::mat3(1);
@@ -189,80 +350,62 @@ void Tema1::Update(float deltaTimeSeconds)
     for(int i = 0; i < noLives; ++i) // render the no of lives
     {
         modelMatrix = glm::mat3(1);
-        modelMatrix *= transform2D::Translate(outlinePosx + 4*outlineSide + (5+i)*space + i*(0.75*squareSide), outlinePosy + space);
+        modelMatrix *= transform2D::Translate( lifeX  + i*(0.75*squareSide + space),  lifeY);
         modelMatrix *= transform2D::Scale(0.75, 0.75);
         RenderMesh2D(meshes["redSquare"], shaders["VertexColor"], modelMatrix);
     }
 
-    // Test star
-    modelMatrix = glm::mat3(1);
-    modelMatrix *= transform2D::Translate( 600, 500);
-    RenderMesh2D(meshes["star"], shaders["VertexColor"], modelMatrix);
 
-    // Test hexagon
+    // Render the price stars
+    // Pink rhombus, 1 star
     modelMatrix = glm::mat3(1);
-    modelMatrix *= transform2D::Translate( 700, 300);
+    modelMatrix *= transform2D::Translate(outlinePosx + outlineSide/2, outlinePosy-starSize/3);
+    modelMatrix *= transform2D::Rotate(glm::pi<float>()/10);
     modelMatrix *= transform2D::Scale(0.5, 0.5);
-    angularStep += deltaTimeSeconds;
-    modelMatrix *= transform2D::Rotate(angularStep);
-    modelMatrix *= transform2D::Translate(-squareSide/4, squareSide/2);
-    RenderMesh2D(meshes["hexagon"], shaders["VertexColor"], modelMatrix);
+    RenderMesh2D(meshes["priceStar"], shaders["VertexColor"], modelMatrix);
+
+    // Turquoise rhombus, 2 stars
+    modelMatrix = glm::mat3(1);
+    modelMatrix *= transform2D::Translate(outlinePosx + space + 1.5f*outlineSide - 0.3f*starSize, outlinePosy-starSize/3);
+    modelMatrix *= transform2D::Rotate(glm::pi<float>()/10);
+    modelMatrix *= transform2D::Scale(0.5, 0.5);
+    RenderMesh2D(meshes["priceStar"], shaders["VertexColor"], modelMatrix);
+
+    modelMatrix = glm::mat3(1);
+    modelMatrix *= transform2D::Translate(outlinePosx + space + 1.5f*outlineSide + 0.3f*starSize, outlinePosy-starSize/3);
+    modelMatrix *= transform2D::Rotate(glm::pi<float>()/10);
+    modelMatrix *= transform2D::Scale(0.5, 0.5);
+    RenderMesh2D(meshes["priceStar"], shaders["VertexColor"], modelMatrix);
+
+    // Yellow rhombus, 2 stars
+    modelMatrix = glm::mat3(1);
+    modelMatrix *= transform2D::Translate(outlinePosx + 2*space + 2.5f*outlineSide - 0.3f*starSize, outlinePosy-starSize/3);
+    modelMatrix *= transform2D::Rotate(glm::pi<float>()/10);
+    modelMatrix *= transform2D::Scale(0.5, 0.5);
+    RenderMesh2D(meshes["priceStar"], shaders["VertexColor"], modelMatrix);
     
+    modelMatrix = glm::mat3(1);
+    modelMatrix *= transform2D::Translate(outlinePosx + 2*space + 2.5f*outlineSide + 0.3f*starSize, outlinePosy-starSize/3);
+    modelMatrix *= transform2D::Rotate(glm::pi<float>()/10);
+    modelMatrix *= transform2D::Scale(0.5, 0.5);
+    RenderMesh2D(meshes["priceStar"], shaders["VertexColor"], modelMatrix);
     
-}
+    // Purple rhombus, 3 stars
+    modelMatrix = glm::mat3(1);
+    modelMatrix *= transform2D::Translate(outlinePosx + 3*space + 3.5f*outlineSide - 0.5f*starSize, outlinePosy-starSize/3);
+    modelMatrix *= transform2D::Rotate(glm::pi<float>()/10);
+    modelMatrix *= transform2D::Scale(0.5, 0.5);
+    RenderMesh2D(meshes["priceStar"], shaders["VertexColor"], modelMatrix);
 
+    modelMatrix = glm::mat3(1);
+    modelMatrix *= transform2D::Translate(outlinePosx + 3*space + 3.5f*outlineSide, outlinePosy-starSize/3);
+    modelMatrix *= transform2D::Rotate(glm::pi<float>()/10);
+    modelMatrix *= transform2D::Scale(0.5, 0.5);
+    RenderMesh2D(meshes["priceStar"], shaders["VertexColor"], modelMatrix);
 
-void Tema1::FrameEnd()
-{
-}
-
-
-/*
- *  These are callback functions. To find more about callbacks and
- *  how they behave, see `input_controller.h`.
- */
-
-
-void Tema1::OnInputUpdate(float deltaTime, int mods)
-{
-}
-
-
-void Tema1::OnKeyPress(int key, int mods)
-{
-    // Add key press event
-}
-
-
-void Tema1::OnKeyRelease(int key, int mods)
-{
-    // Add key release event
-}
-
-
-void Tema1::OnMouseMove(int mouseX, int mouseY, int deltaX, int deltaY)
-{
-    // Add mouse move event
-}
-
-
-void Tema1::OnMouseBtnPress(int mouseX, int mouseY, int button, int mods)
-{
-    // Add mouse button press event
-}
-
-
-void Tema1::OnMouseBtnRelease(int mouseX, int mouseY, int button, int mods)
-{
-    // Add mouse button release event
-}
-
-
-void Tema1::OnMouseScroll(int mouseX, int mouseY, int offsetX, int offsetY)
-{
-}
-
-
-void Tema1::OnWindowResize(int width, int height)
-{
+    modelMatrix = glm::mat3(1);
+    modelMatrix *= transform2D::Translate(outlinePosx + 3*space + 3.5f*outlineSide + 0.5f*starSize, outlinePosy-starSize/3);
+    modelMatrix *= transform2D::Rotate(glm::pi<float>()/10);
+    modelMatrix *= transform2D::Scale(0.5, 0.5);
+    RenderMesh2D(meshes["priceStar"], shaders["VertexColor"], modelMatrix);
 }
