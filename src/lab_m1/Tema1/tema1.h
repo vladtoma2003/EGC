@@ -3,6 +3,8 @@
 #include "components/simple_scene.h"
 
 
+class Rhombus;
+
 namespace m1
 {
     class Tema1 : public gfxc::SimpleScene
@@ -27,9 +29,12 @@ namespace m1
         void OnMouseScroll(int mouseX, int mouseY, int offsetX, int offsetY) override;
         void OnWindowResize(int width, int height) override;
 
-        void RenderScene();
+        void RenderScene(float deltaTime);
         void CreateMeshes();
-        void buyRhombus(int score);
+        void buyRhombus(int x, int y, int buyX, int buyY);
+        void RenderHoldingRhombus(int x, int y, int buyX, int buyY);
+        void PlaceRhombus(int x, int y);
+        void DestroyRhombus(int x, int y);
         
      protected:
         float cx, cy;
@@ -53,10 +58,19 @@ namespace m1
 
         int allies[3][3] = {0};
         float noLives = 3;
-        int score = 50;
+        int score = 10;
         bool holdingMouse = false;
         int mouseX, mouseY;
         int buyX, buyY;
+        int releaseX, releaseY;
+        bool holdingRhombus = false;
+        int currentColor = 0; // 0 - Empty, 1 - Pink, 2 - Turquoise, 3 - Yellow, 4 - Purple
+        int price = 0;
+        std::vector<std::tuple<int, float, bool>> board = { // color, size
+            std::make_tuple(0, 0, false), std::make_tuple(0, 0, false), std::make_tuple(0, 0, false),
+            std::make_tuple(0, 0, false), std::make_tuple(0, 0, false), std::make_tuple(0, 0, false),
+            std::make_tuple(0, 0, false), std::make_tuple(0, 0, false), std::make_tuple(0, 0, false)
+        };
         
     };
 }   // namespace m1

@@ -87,29 +87,12 @@ Mesh* object2D::CreateStar(
     glm::vec3 color,
     bool fill)
 {
-    /*glm::vec3 corner = center;
-    float a = 0.4*length;
-    float b = 0.2*length;
-    float h = sqrt(a*b + 3*b*b/4);
-    float h2 = sqrt(a*a - b*b/4);*/
-
-    // 0.38, 0.24
-    // 0.71 down, 0.6 up, 0.34 side, angle = 36 deg
     float angle = 2*glm::pi<float>()/10;
     float outerRadius = 25.0f;
     float innerRadius = 10.0f;
     
     std::vector<VertexFormat> vertices =
-    {   // star, length = a + b + a, a = 0.38 length, b = 0.24 length
-        /*VertexFormat(corner, color), // Left 0
-        VertexFormat(corner + glm::vec3(length, 0, 0), color), // Right 1
-        VertexFormat(corner + glm::vec3(a + b/2, -h, 0), color), // Bottom 2
-        VertexFormat(corner + glm::vec3(0.33*a, - h - h2, 0), color), // Bottom left 3
-        VertexFormat(corner + glm::vec3(a + b/2, h2, 0), color), // Top 4
-        VertexFormat(corner + glm::vec3(a + b + 0.1*a, -2*h/3, 0), color), // Mid Right 5
-        VertexFormat(corner + glm::vec3(a + b + 0.66*a, - h - h2, 0), color), // Bottom right 6*/
-        
-
+    {  
         VertexFormat(center, color), // Center 0
         VertexFormat(center + glm::vec3(outerRadius, 0, 0), color), // 1
         VertexFormat(center + glm::vec3(innerRadius*cos(angle), innerRadius*sin(angle), 0), color), // 2
@@ -135,11 +118,7 @@ Mesh* object2D::CreateStar(
         8, 9, 0,
         9, 10, 0,
         10, 1, 0
-        
-        /*0, 1, 2,
-        3, 4, 5,
-        6, 2, 5*/
-        
+
     };
 
     if (!fill) {

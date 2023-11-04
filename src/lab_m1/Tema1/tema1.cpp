@@ -63,16 +63,16 @@ void Tema1::Init()
     Mesh* outlineSquare = object2D::CreateSquare("outlineSquare", corner, outlineSide, glm::vec3(0, 0, 0));
     AddMeshToList(outlineSquare);
 
-    Mesh* rhombusPink = object2D::CreateRhombus("rhombusPink", corner, rhombusSide, glm::vec3(227.0/255, 115.0/255, 131.0/255), true);
+    Mesh* rhombusPink = object2D::CreateRhombus("rhombus1", corner, rhombusSide, glm::vec3(227.0/255, 115.0/255, 131.0/255), true);
     AddMeshToList(rhombusPink);
 
-    Mesh* rhombusYellow = object2D::CreateRhombus("rhombusYellow", corner, rhombusSide, glm::vec3(247.0/255, 239.0/255, 121.0/255), true);
+    Mesh* rhombusYellow = object2D::CreateRhombus("rhombus2", corner, rhombusSide, glm::vec3(247.0/255, 239.0/255, 121.0/255), true);
     AddMeshToList(rhombusYellow);
 
-    Mesh* rhombusPurple = object2D::CreateRhombus("rhombusPurple", corner, rhombusSide, glm::vec3(148.0/255, 0, 211.0/255), true);
+    Mesh* rhombusPurple = object2D::CreateRhombus("rhombus3", corner, rhombusSide, glm::vec3(148.0/255, 0, 211.0/255), true);
     AddMeshToList(rhombusPurple);
 
-    Mesh* rhombusTurquoise = object2D::CreateRhombus("rhombusTurquoise", corner, rhombusSide, glm::vec3(64.0/255, 224.0/255, 208.0/255), true);
+    Mesh* rhombusTurquoise = object2D::CreateRhombus("rhombus4", corner, rhombusSide, glm::vec3(64.0/255, 224.0/255, 208.0/255), true);
     AddMeshToList(rhombusTurquoise);
 
     Mesh* priceStar = object2D::CreateStar("priceStar", corner, starSize, glm::vec3(1, 1, 0), true);
@@ -110,8 +110,9 @@ void Tema1::FrameStart()
 
 void Tema1::Update(float deltaTimeSeconds)
 {
+    buyRhombus(Tema1::mouseX, Tema1::mouseY, Tema1::buyX, Tema1::buyY);
     
-    RenderScene();
+    RenderScene(deltaTimeSeconds);
 
     // Render points
     for(int i = 0; i < score; ++i)
@@ -200,7 +201,7 @@ void Tema1::OnMouseMove(int mouseX, int mouseY, int deltaX, int deltaY)
     // Add mouse move event
     if(holdingMouse)
     {
-        mouseX = window->GetResolution().x - mouseX;
+        mouseX = mouseX;
         mouseY = window->GetResolution().y - mouseY;
 
         Tema1::mouseX = mouseX;
@@ -213,12 +214,14 @@ void Tema1::OnMouseBtnPress(int mouseX, int mouseY, int button, int mods)
 {
     // Add mouse button press event
     holdingMouse = true;
-    mouseX = window->GetResolution().x - mouseX;
+    mouseX = mouseX;
     mouseY = window->GetResolution().y - mouseY;
     Tema1::mouseX = mouseX;
     Tema1::mouseY = mouseY;
     Tema1::buyX = mouseX;
     Tema1::buyY = mouseY;
+    std::cout << mouseX << " " << mouseY << "\n";
+    DestroyRhombus(mouseX, mouseY);
     
 }
 
@@ -229,6 +232,8 @@ void Tema1::OnMouseBtnRelease(int mouseX, int mouseY, int button, int mods)
     holdingMouse = false;
     Tema1::buyX = 0;
     Tema1::buyY = 0;
+    Tema1::releaseX = mouseX;
+    Tema1::releaseY = mouseY;
 }
 
 
@@ -241,25 +246,218 @@ void Tema1::OnWindowResize(int width, int height)
 {
 }
 
-void Tema1::buyRhombus(int x, int y, int score)
+void Tema1::buyRhombus(int x, int y, int buyX, int buyY){
+    RenderHoldingRhombus(x, y, buyX, buyY);
+    PlaceRhombus(x, y);
+    std::cout << Tema1::score << endl;
+    std::cout << price << endl;
+}
+
+void Tema1::PlaceRhombus(int x, int y)
 {
-    while(holdingMouse)
-    {
-        // Pink rhombus
-        if(Tema1::mouseX >= outlinePosx && Tema1::mouseY <= outlinePosx + outlineSide &&
-           Tema1::mouseY >= outlinePosy && Tema1::mouseY <= outlinePosy + outlineSide)
+    if(!holdingMouse && holdingRhombus)
+    { // life + (j+0.5)*squareSide + (j+1)*space, life + i*squareSide + i*space
+        if(x >= life + 0.5*squareSide + space && x <= life + 1.5*squareSide + space &&
+           y >= life  && y <= life + squareSide &&
+           get<0>(board[0]) == 0)
         {
-            if(score >= 1)
-            {
-                score -= 1;
-                
-            }
+            get<0>(board[0]) = currentColor;
+            get<1>(board[0]) = 1;
+           Tema1::score -= price;
+            holdingRhombus = false;
+        }
+        if(x >= life + 1.5*squareSide + 2*space && x <= life + 2.5*squareSide + 2*space &&
+           y >= life  && y <= life + squareSide &&
+           get<0>(board[1]) == 0)
+        {
+            get<0>(board[1]) = currentColor;
+            get<1>(board[1]) = 1;
+            score -= price;
+            holdingRhombus = false;
+        }
+        if(x >= life + 2.5*squareSide + 3*space && x <= life + 3.5*squareSide + 3*space &&
+           y >= life  && y <= life + squareSide &&
+           get<0>(board[2]) == 0)
+        {
+            get<0>(board[2]) = currentColor;
+            get<1>(board[2]) = 1;
+            score -= price;
+            holdingRhombus = false;
+        }
+        if(x >= life + 0.5*squareSide + space && x <= life + 1.5*squareSide + space &&
+           y >= life + squareSide + space && y <= life + 2*squareSide + space &&
+           get<0>(board[3]) == 0)
+        {
+            get<0>(board[3]) = currentColor;
+            get<1>(board[3]) = 1;
+            score -= price;
+            holdingRhombus = false;
+        }
+        if(x >= life + 1.5*squareSide + 2*space && x <= life + 2.5*squareSide + 2*space &&
+           y >= life + squareSide + space && y <= life + 2*squareSide + space &&
+           get<0>(board[4]) == 0)
+        {
+            get<0>(board[4]) = currentColor;
+            get<1>(board[4]) = 1;
+            score -= price;
+            holdingRhombus = false;
+        }
+        if(x >= life + 2.5*squareSide + 3*space && x <= life + 3.5*squareSide + 3*space &&
+           y >= life + squareSide + space && y <= life + 2*squareSide + space &&
+           get<0>(board[5]) == 0)
+        {
+            get<0>(board[5]) = currentColor;
+            get<1>(board[5]) = 1;
+            score -= price;
+            holdingRhombus = false;
+        }
+        if(x >= life + 0.5*squareSide + space && x <= life + 1.5*squareSide + space &&
+           y >= life + 2*squareSide + 2*space && y <= life + 3*squareSide + 2*space &&
+           get<0>(board[6]) == 0)
+        {
+            get<0>(board[6]) = currentColor;
+            get<1>(board[6]) = 1;
+            score -= price;
+            holdingRhombus = false;
+        }
+        if(x >= life + 1.5*squareSide + 2*space && x <= life + 2.5*squareSide + 2*space &&
+           y >= life + 2*squareSide + 2*space && y <= life + 3*squareSide + 2*space &&
+           get<0>(board[7]) == 0)
+        {
+            get<0>(board[7]) = currentColor;
+            get<1>(board[7]) = 1;
+            score -= price;
+            holdingRhombus = false;
+        }
+        if(x >= life + 2.5*squareSide + 3*space && x <= life + 3.5*squareSide + 3*space &&
+           y >= life + 2*squareSide + 2*space && y <= life + 3*squareSide + 2*space &&
+           get<0>(board[8]) == 0)
+        {
+            get<0>(board[8]) = currentColor;
+            get<1>(board[8]) = 1;
+            score -= price;
+            holdingRhombus = false;
         }
     }
 }
 
+void Tema1::DestroyRhombus(int x, int y)
+{
+    if(x >= life + 0.5*squareSide + space && x <= life + 1.5*squareSide + space &&
+       y >= life  && y <= life + squareSide &&
+       get<0>(board[0]) != 0)
+    {
+        get<2>(board[0]) = true;
+    }
+    if(x >= life + 1.5*squareSide + 2*space && x <= life + 2.5*squareSide + 2*space &&
+       y >= life  && y <= life + squareSide &&
+       get<0>(board[1]) != 0)
+    {
+        get<2>(board[1]) = true;
+    }
+    if(x >= life + 2.5*squareSide + 3*space && x <= life + 3.5*squareSide + 3*space &&
+       y >= life  && y <= life + squareSide &&
+       get<0>(board[2]) != 0)
+    {
+        get<2>(board[2]) = true;
+    }
+    if(x >= life + 0.5*squareSide + space && x <= life + 1.5*squareSide + space &&
+       y >= life + squareSide + space && y <= life + 2*squareSide + space &&
+       get<0>(board[3]) != 0)
+    {
+        get<2>(board[3]) = true;
+    }
+    if(x >= life + 1.5*squareSide + 2*space && x <= life + 2.5*squareSide + 2*space &&
+       y >= life + squareSide + space && y <= life + 2*squareSide + space &&
+       get<0>(board[4]) != 0)
+    {
+        get<2>(board[4]) = true;
+    }
+    if(x >= life + 2.5*squareSide + 3*space && x <= life + 3.5*squareSide + 3*space &&
+       y >= life + squareSide + space && y <= life + 2*squareSide + space &&
+       get<0>(board[5]) != 0)
+    {
+        get<2>(board[5]) = true;
+    }
+    if(x >= life + 0.5*squareSide + space && x <= life + 1.5*squareSide + space &&
+       y >= life + 2*squareSide + 2*space && y <= life + 3*squareSide + 2*space &&
+       get<0>(board[6]) != 0)
+    {
+        get<2>(board[6]) = true;
+    }
+    if(x >= life + 1.5*squareSide + 2*space && x <= life + 2.5*squareSide + 2*space &&
+       y >= life + 2*squareSide + 2*space && y <= life + 3*squareSide + 2*space &&
+       get<0>(board[7]) != 0)
+    {
+        get<2>(board[7]) = true;
+    }
+    if(x >= life + 2.5*squareSide + 3*space && x <= life + 3.5*squareSide + 3*space &&
+       y >= life + 2*squareSide + 2*space && y <= life + 3*squareSide + 2*space &&
+       get<0>(board[8]) != 0)
+    {
+        get<2>(board[8]) = true;
+    }
+}
 
-void Tema1::RenderScene()
+
+void Tema1::RenderHoldingRhombus(int x, int y, int buyX, int buyY)
+{
+    //Render the rhombus that is being held
+    if(holdingMouse)
+    {
+        // Pink rhombus
+        std::cout << "buy rhombus:" << x << " " << y << endl;
+        if(buyX >= outlinePosx && buyX <= outlinePosx + outlineSide &&
+           buyY >= outlinePosy && buyY <= outlinePosy + outlineSide &&
+           score >= 1)
+        {
+            modelMatrix = glm::mat3(1);
+            modelMatrix *= transform2D::Translate(x - 2*rhombusSide/3, y);
+            RenderMesh2D(meshes["rhombus1"], shaders["VertexColor"], modelMatrix);
+            holdingRhombus = true;
+            currentColor = 1;
+            price = 1;
+        }
+
+        // Turquoise rhombus
+        if(buyX >= outlinePosx + outlineSide + space && buyX <= outlinePosx + 2*outlineSide + space &&
+           buyY >= outlinePosy && buyY <= outlinePosy + outlineSide && score >= 2)
+        {
+            modelMatrix = glm::mat3(1);
+            modelMatrix *= transform2D::Translate(x - 2*rhombusSide/3, y);
+            RenderMesh2D(meshes["rhombus2"], shaders["VertexColor"], modelMatrix);
+            holdingRhombus = true;
+            currentColor = 2;
+            price = 2;
+        }
+
+        // Yellow rhombus
+        if(buyX >= outlinePosx + 2*outlineSide + 2*space && buyX <= outlinePosx + 3*outlineSide + 2*space &&
+           buyY >= outlinePosy && buyY <= outlinePosy + outlineSide && score >= 2)
+        {
+            modelMatrix = glm::mat3(1);
+            modelMatrix *= transform2D::Translate(x - 2*rhombusSide/3, y);
+            RenderMesh2D(meshes["rhombus3"], shaders["VertexColor"], modelMatrix);
+            holdingRhombus = true;
+            currentColor = 3;
+            price = 2;
+        }
+
+        // Purple rhombus
+        if(buyX >= outlinePosx + 3*outlineSide + 3*space && buyX <= outlinePosx + 4*outlineSide + 3*space &&
+           buyY >= outlinePosy && buyY <= outlinePosy + outlineSide && score >= 3)
+        {
+            modelMatrix = glm::mat3(1);
+            modelMatrix *= transform2D::Translate(x - 2*rhombusSide/3, y);
+            RenderMesh2D(meshes["rhombus4"], shaders["VertexColor"], modelMatrix);
+            holdingRhombus = true;
+            currentColor = 4;
+            price = 3;
+        }
+    }
+}
+
+void Tema1::RenderScene(float deltaTime)
 {
     // Render the "Base" line
     modelMatrix = glm::mat3(1);
@@ -267,84 +465,58 @@ void Tema1::RenderScene()
     modelMatrix *= transform2D::Scale(0.5, 3 + 2*space/squareSide);
     RenderMesh2D(meshes["redSquare"], shaders["VertexColor"], modelMatrix);
 
-    
+    //formula: life + squareSide - squareSide/2 = pornesc de la viata, adaug un patrat si tai
+    // jumate(bara de final este jumatate de patrat pe ox) si apoi adaug spatiul dintre patrate
+    for(int i = 0; i < 9; ++i)
+    {
+        if(std::get<0>(board[i]) != 0)
+        {
+            modelMatrix = glm::mat3(1);
+            modelMatrix *= transform2D::Translate(life + (i%3+0.5)*squareSide + (i%3+1)*space + 0.5*rhombusSide,
+                life + (i/3)*squareSide + (i/3)*space + 1.2*rhombusSide);
+            modelMatrix *= transform2D::Scale(std::get<1>(board[i]), std::get<1>(board[i]));
+            RenderMesh2D(meshes["rhombus" + std::to_string(std::get<0>(board[i]))], shaders["VertexColor"], modelMatrix);
+        }
+        if(std::get<2>(board[i]))
+        {
+            std::cout << "coaieee\n";
+            std::get<1>(board[i]) -= 0.75*deltaTime;
+            if(std::get<1>(board[i]) <= 0)
+            {
+                std::get<0>(board[i]) = 0;
+                std::get<1>(board[i]) = 0;
+                std::get<2>(board[i]) = false;
+            }
+        }
+        modelMatrix = glm::mat3(1);
+        modelMatrix *= transform2D::Translate(life + (i%3+0.5)*squareSide + (i%3+1)*space, life + (i/3)*squareSide + (i/3)*space);
+        RenderMesh2D(meshes["grass"], shaders["VertexColor"], modelMatrix);
+    }
+
+    // Outline of rhombus shop
+    for(int i = 0; i < 4; ++i)
+    {
+        glm::mat3 modelMatrix = glm::mat3(1);
+        modelMatrix *= transform2D::Translate( outlinePosx + i*(outlineSide + space), outlinePosy);
+        RenderMesh2D(meshes["outlineSquare"], shaders["VertexColor"], modelMatrix);
+    }
+
     // Render rombus shop
     modelMatrix = glm::mat3(1);
     modelMatrix *= transform2D::Translate(outlinePosx + 2*rhombusSide/3, outlinePosy + 1.35*rhombusSide);
-    RenderMesh2D(meshes["rhombusPink"], shaders["VertexColor"], modelMatrix);
+    RenderMesh2D(meshes["rhombus1"], shaders["VertexColor"], modelMatrix);
 
     modelMatrix = glm::mat3(1);
     modelMatrix *= transform2D::Translate(outlinePosx + 2*rhombusSide/3 + outlineSide + space, outlinePosy + 1.35*rhombusSide);
-    RenderMesh2D(meshes["rhombusTurquoise"], shaders["VertexColor"], modelMatrix);
+    RenderMesh2D(meshes["rhombus2"], shaders["VertexColor"], modelMatrix);
 
     modelMatrix = glm::mat3(1);
     modelMatrix *= transform2D::Translate(outlinePosx + 2*rhombusSide/3 + 2*outlineSide + 2*space, outlinePosy + 1.35*rhombusSide);
-    RenderMesh2D(meshes["rhombusYellow"], shaders["VertexColor"], modelMatrix);
+    RenderMesh2D(meshes["rhombus3"], shaders["VertexColor"], modelMatrix);
 
     modelMatrix = glm::mat3(1);
     modelMatrix *= transform2D::Translate(outlinePosx + 2*rhombusSide/3 + 3*outlineSide + 3*space, outlinePosy + 1.35*rhombusSide);
-    RenderMesh2D(meshes["rhombusPurple"], shaders["VertexColor"], modelMatrix);
-    
-    // Row 1 of the board - formula: life + squareSide - squareSide/2 = pornesc de la viata, adaug un patrat si tai
-    // jumate(bara de final este jumatate de patrat pe ox) si apoi adaug spatiul dintre patrate
-    modelMatrix = glm::mat3(1);
-    modelMatrix *= transform2D::Translate(life + squareSide - squareSide/2 + space, life);
-    RenderMesh2D(meshes["grass"], shaders["VertexColor"], modelMatrix);
-
-    modelMatrix = glm::mat3(1);
-    modelMatrix *= transform2D::Translate(life + 2*squareSide - squareSide/2 + 2*space, life);
-    RenderMesh2D(meshes["grass"], shaders["VertexColor"], modelMatrix);
-
-    modelMatrix = glm::mat3(1);
-    modelMatrix *= transform2D::Translate(life + 3*squareSide - squareSide/2 + 3*space, life);
-    RenderMesh2D(meshes["grass"], shaders["VertexColor"], modelMatrix);
-
-    
-    // Row 2 of the board
-    modelMatrix = glm::mat3(1);
-    modelMatrix *= transform2D::Translate(life + squareSide - squareSide/2 + space, life + squareSide + space);
-    RenderMesh2D(meshes["grass"], shaders["VertexColor"], modelMatrix);
-
-    modelMatrix = glm::mat3(1);
-    modelMatrix *= transform2D::Translate(life + 2*squareSide - squareSide/2 + 2*space, life + squareSide + space);
-    RenderMesh2D(meshes["grass"], shaders["VertexColor"], modelMatrix);
-
-    modelMatrix = glm::mat3(1);
-    modelMatrix *= transform2D::Translate(life + 3*squareSide - squareSide/2 + 3*space, life + squareSide + space);
-    RenderMesh2D(meshes["grass"], shaders["VertexColor"], modelMatrix);
-
-    
-    // Row 3 of the board
-    modelMatrix = glm::mat3(1);
-    modelMatrix *= transform2D::Translate(life + squareSide - squareSide/2 + space, life + 2*squareSide + 2*space);
-    RenderMesh2D(meshes["grass"], shaders["VertexColor"], modelMatrix);
-
-    modelMatrix = glm::mat3(1);
-    modelMatrix *= transform2D::Translate(life + 2*squareSide - squareSide/2 + 2*space, life + 2*squareSide + 2*space);
-    RenderMesh2D(meshes["grass"], shaders["VertexColor"], modelMatrix);
-
-    modelMatrix = glm::mat3(1);
-    modelMatrix *= transform2D::Translate(life + 3*squareSide - squareSide/2 + 3*space, life + 2*squareSide + 2*space);
-    RenderMesh2D(meshes["grass"], shaders["VertexColor"], modelMatrix);
-
-    
-    // Rhombus Shop
-    modelMatrix = glm::mat3(1);
-    modelMatrix *= transform2D::Translate( outlinePosx, outlinePosy);
-    RenderMesh2D(meshes["outlineSquare"], shaders["VertexColor"], modelMatrix);
-
-    modelMatrix = glm::mat3(1);
-    modelMatrix *= transform2D::Translate( outlinePosx + outlineSide + space, outlinePosy);
-    RenderMesh2D(meshes["outlineSquare"], shaders["VertexColor"], modelMatrix);
-
-    modelMatrix = glm::mat3(1);
-    modelMatrix *= transform2D::Translate( outlinePosx + 2*outlineSide + 2*space, outlinePosy);
-    RenderMesh2D(meshes["outlineSquare"], shaders["VertexColor"], modelMatrix);
-
-    modelMatrix = glm::mat3(1);
-    modelMatrix *= transform2D::Translate( outlinePosx + 3*outlineSide + 3*space, outlinePosy);
-    RenderMesh2D(meshes["outlineSquare"], shaders["VertexColor"], modelMatrix);
-
+    RenderMesh2D(meshes["rhombus4"], shaders["VertexColor"], modelMatrix);
     
     // Render the lives - posibil sa le schimb sa arate ca niste inimi
     for(int i = 0; i < noLives; ++i) // render the no of lives
@@ -354,8 +526,7 @@ void Tema1::RenderScene()
         modelMatrix *= transform2D::Scale(0.75, 0.75);
         RenderMesh2D(meshes["redSquare"], shaders["VertexColor"], modelMatrix);
     }
-
-
+    
     // Render the price stars
     // Pink rhombus, 1 star
     modelMatrix = glm::mat3(1);
