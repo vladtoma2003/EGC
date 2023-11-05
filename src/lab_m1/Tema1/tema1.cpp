@@ -311,7 +311,13 @@ void Tema1::ShootStars(float deltaTime)
         if((int)get<3>(board[i]) % 5 == 0)
         {
             get<3>(board[i]) += 0.5;
-            if(get<0>(board[i]) == 1) // Pink
+            if(checkEnemysRow(i/3, get<0>(board[i]), enemies))
+            {
+                std::cout << "Checked enemy row\n";
+                projectiles.push_back(std::make_tuple(life + (i%3 + 0.5)*(squareSide+space) + 0.5*squareSide,
+                    life + (i/3)*(squareSide+space) + 0.5*squareSide, get<0>(board[i]), 0));
+            }
+            /*if(get<0>(board[i]) == 1) // Pink
             {
                 projectiles.push_back(std::make_tuple(life + (i%3 + 0.5)*(squareSide+space) + 0.5*squareSide,
                     life + (i/3)*(squareSide+space) + 0.5*squareSide, 1, 0));
@@ -330,10 +336,23 @@ void Tema1::ShootStars(float deltaTime)
             {
                 projectiles.push_back(std::make_tuple(life + (i%3 + 0.5)*(squareSide+space) + 0.5*squareSide,
                     life + (i/3)*(squareSide+space) + 0.5*squareSide, 4, 0));
-            }
+            }*/
         }
     }
 }
+
+bool Tema1::checkEnemysRow(int row, int color, std::vector<std::tuple<float, float, int, int>> enemies)
+{
+    for(auto enemy : enemies)
+    {
+        if((int) get<1>(enemy) == (int)(life + row*squareSide + row*space + 0.5*squareSide) && get<2>(enemy) == color)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
 
 void Tema1::SpawnEnemies(float deltaTime)
 {

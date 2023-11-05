@@ -41,6 +41,7 @@ namespace m1
         void DestroyProjectiles();
         void SpawnEnemies(float deltaTime);
         void DestroyEnemies();
+        bool checkEnemysRow(int row, int color, std::vector<std::tuple<float, float, int, int>> enemies);
         
      protected:
         float cx, cy;
