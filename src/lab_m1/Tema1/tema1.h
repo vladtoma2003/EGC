@@ -37,6 +37,8 @@ namespace m1
         void DestroyRhombus(int x, int y);
         void SpawnStars(float time);
         void CollectStars();
+        void ShootStars(float deltaTime);
+        void DestroyProjectiles();
         
      protected:
         float cx, cy;
@@ -69,12 +71,15 @@ namespace m1
         int currentColor = 0; // 0 - Empty, 1 - Pink, 2 - Turquoise, 3 - Yellow, 4 - Purple
         int price = 0;
         float timeElapsed = 0;
+        float timeElapsed2 = 0;
 
-        std::vector<std::tuple<float, float>> stars;
-        std::vector<std::tuple<int, float, bool>> board = { // color, size
-            std::make_tuple(0, 0, false), std::make_tuple(0, 0, false), std::make_tuple(0, 0, false),
-            std::make_tuple(0, 0, false), std::make_tuple(0, 0, false), std::make_tuple(0, 0, false),
-            std::make_tuple(0, 0, false), std::make_tuple(0, 0, false), std::make_tuple(0, 0, false)
+        std::vector<std::tuple<float, float, int, int>> enemies; // x, y, color, hitpoints
+        std::vector<std::tuple<float, float, int, float>> projectiles; // x, y, color, angularStep
+        std::vector<std::tuple<float, float>> stars; // x, y
+        std::vector<std::tuple<int, float, bool, float>> board = { // color, size, destroy, time since last shoot
+            std::make_tuple(0, 0, false, 0), std::make_tuple(0, 0, false, 0), std::make_tuple(0, 0, false, 0),
+            std::make_tuple(0, 0, false, 0), std::make_tuple(0, 0, false, 0), std::make_tuple(0, 0, false, 0),
+            std::make_tuple(0, 0, false, 0), std::make_tuple(0, 0, false, 0), std::make_tuple(0, 0, false, 0)
         };
         
     };

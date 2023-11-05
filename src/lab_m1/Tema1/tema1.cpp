@@ -1,5 +1,6 @@
 #include "lab_m1/Tema1/tema1.h"
 
+#include <complex>
 #include <corecrt_wctype.h>
 #include <vector>
 #include <iostream>
@@ -38,11 +39,7 @@ void Tema1::Init()
     GetCameraInput()->SetActive(false);
 
     glm::vec3 corner = glm::vec3(0, 0, 0);
-
-    // TODO(student): Compute coordinates of a square's center, and store
-    // then in the `cx` and `cy` class variables (see the header). Use
-    // `corner` and `squareSide`. These two class variables will be used
-    // in the `Update()` function. Think about it, why do you need them?
+    
     cx = corner.x + squareSide / 2;
     cy = corner.y + squareSide / 2;
 
@@ -93,7 +90,19 @@ void Tema1::Init()
     Mesh* enemyTurquoise = object2D::CreateHexagon("enemyTurquoise", corner, squareSide, glm::vec3(64.0/255, 224.0/255, 208.0/255), true);
     AddMeshToList(enemyTurquoise);
 
+    Mesh* pinkStar = object2D::CreateStar("star1", corner, starSize, glm::vec3(227.0/255, 115.0/255, 131.0/255), true);
+    AddMeshToList(pinkStar);
 
+    Mesh* yellowStar = object2D::CreateStar("star2", corner, starSize, glm::vec3(247.0/255, 239.0/255, 121.0/255), true);
+    AddMeshToList(yellowStar);
+
+    Mesh* purpleStar = object2D::CreateStar("star3", corner, starSize, glm::vec3(148.0/255, 0, 211.0/255), true);
+    AddMeshToList(purpleStar);
+
+    Mesh* turquoiseStar = object2D::CreateStar("star4", corner, starSize, glm::vec3(64.0/255, 224.0/255, 208.0/255), true);
+    AddMeshToList(turquoiseStar);
+    
+    
 }
 
 void Tema1::FrameStart()
@@ -112,7 +121,11 @@ void Tema1::Update(float deltaTimeSeconds)
 {
     buyRhombus(Tema1::mouseX, Tema1::mouseY, Tema1::buyX, Tema1::buyY);
 
+    ShootStars(deltaTimeSeconds);
+    
     SpawnStars(deltaTimeSeconds);
+
+    DestroyProjectiles();
     
     RenderScene(deltaTimeSeconds);
 
@@ -261,147 +274,84 @@ void Tema1::PlaceRhombus(int x, int y)
 {
     if(!holdingMouse && holdingRhombus)
     { // life + (j+0.5)*squareSide + (j+1)*space, life + i*squareSide + i*space
-        if(x >= life + 0.5*squareSide + space && x <= life + 1.5*squareSide + space &&
-           y >= life  && y <= life + squareSide &&
-           get<0>(board[0]) == 0)
+        for(int i = 0; i < 9; ++i)
         {
-            get<0>(board[0]) = currentColor;
-            get<1>(board[0]) = 1;
-           Tema1::score -= price;
-            holdingRhombus = false;
-        }
-        if(x >= life + 1.5*squareSide + 2*space && x <= life + 2.5*squareSide + 2*space &&
-           y >= life  && y <= life + squareSide &&
-           get<0>(board[1]) == 0)
-        {
-            get<0>(board[1]) = currentColor;
-            get<1>(board[1]) = 1;
-            score -= price;
-            holdingRhombus = false;
-        }
-        if(x >= life + 2.5*squareSide + 3*space && x <= life + 3.5*squareSide + 3*space &&
-           y >= life  && y <= life + squareSide &&
-           get<0>(board[2]) == 0)
-        {
-            get<0>(board[2]) = currentColor;
-            get<1>(board[2]) = 1;
-            score -= price;
-            holdingRhombus = false;
-        }
-        if(x >= life + 0.5*squareSide + space && x <= life + 1.5*squareSide + space &&
-           y >= life + squareSide + space && y <= life + 2*squareSide + space &&
-           get<0>(board[3]) == 0)
-        {
-            get<0>(board[3]) = currentColor;
-            get<1>(board[3]) = 1;
-            score -= price;
-            holdingRhombus = false;
-        }
-        if(x >= life + 1.5*squareSide + 2*space && x <= life + 2.5*squareSide + 2*space &&
-           y >= life + squareSide + space && y <= life + 2*squareSide + space &&
-           get<0>(board[4]) == 0)
-        {
-            get<0>(board[4]) = currentColor;
-            get<1>(board[4]) = 1;
-            score -= price;
-            holdingRhombus = false;
-        }
-        if(x >= life + 2.5*squareSide + 3*space && x <= life + 3.5*squareSide + 3*space &&
-           y >= life + squareSide + space && y <= life + 2*squareSide + space &&
-           get<0>(board[5]) == 0)
-        {
-            get<0>(board[5]) = currentColor;
-            get<1>(board[5]) = 1;
-            score -= price;
-            holdingRhombus = false;
-        }
-        if(x >= life + 0.5*squareSide + space && x <= life + 1.5*squareSide + space &&
-           y >= life + 2*squareSide + 2*space && y <= life + 3*squareSide + 2*space &&
-           get<0>(board[6]) == 0)
-        {
-            get<0>(board[6]) = currentColor;
-            get<1>(board[6]) = 1;
-            score -= price;
-            holdingRhombus = false;
-        }
-        if(x >= life + 1.5*squareSide + 2*space && x <= life + 2.5*squareSide + 2*space &&
-           y >= life + 2*squareSide + 2*space && y <= life + 3*squareSide + 2*space &&
-           get<0>(board[7]) == 0)
-        {
-            get<0>(board[7]) = currentColor;
-            get<1>(board[7]) = 1;
-            score -= price;
-            holdingRhombus = false;
-        }
-        if(x >= life + 2.5*squareSide + 3*space && x <= life + 3.5*squareSide + 3*space &&
-           y >= life + 2*squareSide + 2*space && y <= life + 3*squareSide + 2*space &&
-           get<0>(board[8]) == 0)
-        {
-            get<0>(board[8]) = currentColor;
-            get<1>(board[8]) = 1;
-            score -= price;
-            holdingRhombus = false;
+            if(x >= life + (i%3 + 0.5) * squareSide + (i%3 + 1) * space && x <= life + (i%3 + 1.5) * squareSide + (i%3 + 1) * space &&
+               y >= life + (i/3) * squareSide + (i/3) * space && y <= life + (i/3 + 1) * squareSide + (i/3) * space &&
+               get<0>(board[i]) == 0)
+            {
+                get<0>(board[i]) = currentColor;
+                get<1>(board[i]) = 1;
+                score -= price;
+                holdingRhombus = false;
+            }
         }
     }
 }
 
 void Tema1::DestroyRhombus(int x, int y)
 {
-    if(x >= life + 0.5*squareSide + space && x <= life + 1.5*squareSide + space &&
-       y >= life  && y <= life + squareSide &&
-       get<0>(board[0]) != 0)
+    for(int i = 0; i < 9; ++i)
     {
-        get<2>(board[0]) = true;
-    }
-    if(x >= life + 1.5*squareSide + 2*space && x <= life + 2.5*squareSide + 2*space &&
-       y >= life  && y <= life + squareSide &&
-       get<0>(board[1]) != 0)
-    {
-        get<2>(board[1]) = true;
-    }
-    if(x >= life + 2.5*squareSide + 3*space && x <= life + 3.5*squareSide + 3*space &&
-       y >= life  && y <= life + squareSide &&
-       get<0>(board[2]) != 0)
-    {
-        get<2>(board[2]) = true;
-    }
-    if(x >= life + 0.5*squareSide + space && x <= life + 1.5*squareSide + space &&
-       y >= life + squareSide + space && y <= life + 2*squareSide + space &&
-       get<0>(board[3]) != 0)
-    {
-        get<2>(board[3]) = true;
-    }
-    if(x >= life + 1.5*squareSide + 2*space && x <= life + 2.5*squareSide + 2*space &&
-       y >= life + squareSide + space && y <= life + 2*squareSide + space &&
-       get<0>(board[4]) != 0)
-    {
-        get<2>(board[4]) = true;
-    }
-    if(x >= life + 2.5*squareSide + 3*space && x <= life + 3.5*squareSide + 3*space &&
-       y >= life + squareSide + space && y <= life + 2*squareSide + space &&
-       get<0>(board[5]) != 0)
-    {
-        get<2>(board[5]) = true;
-    }
-    if(x >= life + 0.5*squareSide + space && x <= life + 1.5*squareSide + space &&
-       y >= life + 2*squareSide + 2*space && y <= life + 3*squareSide + 2*space &&
-       get<0>(board[6]) != 0)
-    {
-        get<2>(board[6]) = true;
-    }
-    if(x >= life + 1.5*squareSide + 2*space && x <= life + 2.5*squareSide + 2*space &&
-       y >= life + 2*squareSide + 2*space && y <= life + 3*squareSide + 2*space &&
-       get<0>(board[7]) != 0)
-    {
-        get<2>(board[7]) = true;
-    }
-    if(x >= life + 2.5*squareSide + 3*space && x <= life + 3.5*squareSide + 3*space &&
-       y >= life + 2*squareSide + 2*space && y <= life + 3*squareSide + 2*space &&
-       get<0>(board[8]) != 0)
-    {
-        get<2>(board[8]) = true;
+        if(x >= life + (i%3 + 0.5)*(squareSide + space) && x <= life + (i%3 + 1.5)*(squareSide + space) &&
+           y >= life + (i/3)*(squareSide + space) && y <= life + (i/3 + 1)*(squareSide + space) &&
+           get<0>(board[i]) != 0)
+        {
+            get<2>(board[i]) = true;
+        }
     }
 }
+
+void Tema1::ShootStars(float deltaTime)
+{
+    for(int i = 0; i < 9; ++i)
+    {
+        // ma plimb prin board
+        if(get<0>(board[i]) == 0)
+        {
+            continue;
+        }
+        get<3>(board[i]) += deltaTime;
+        if((int)get<3>(board[i]) % 5 == 0)
+        {
+            get<3>(board[i]) += 0.5;
+            if(get<0>(board[i]) == 1) // Pink
+            {
+                projectiles.push_back(std::make_tuple(life + (i%3 + 0.5)*(squareSide+space) + 0.5*squareSide,
+                    life + (i/3)*(squareSide+space) + 0.5*squareSide, 1, 0));
+            }
+            if(get<0>(board[i]) == 2) // Yellow
+            {
+                projectiles.push_back(std::make_tuple(life + (i%3 + 0.5)*(squareSide+space) + 0.5*squareSide,
+                    life + (i/3)*(squareSide+space) + 0.5*squareSide, 2, 0));
+            }
+            if(get<0>(board[i]) == 3) // Purple
+            {
+                projectiles.push_back(std::make_tuple(life + (i%3 + 0.5)*(squareSide+space) + 0.5*squareSide,
+                    life + (i/3)*(squareSide+space) + 0.5*squareSide, 3, 0));
+            }
+            if(get<0>(board[i]) == 4) // Turquoise
+            {
+                projectiles.push_back(std::make_tuple(life + (i%3 + 0.5)*(squareSide+space) + 0.5*squareSide,
+                    life + (i/3)*(squareSide+space) + 0.5*squareSide, 4, 0));
+            }
+        }
+        
+    }
+}
+
+void Tema1::DestroyProjectiles()
+{
+    if(projectiles.empty() == false)
+        for(int i = 0; i < projectiles.size(); ++i)
+        {
+            if(get<0>(projectiles[i]) >= window->GetResolution().x)
+            {
+                projectiles.erase(projectiles.begin() + i);
+            }
+        }
+}
+
 
 void Tema1::SpawnStars(float time)
 {
@@ -426,15 +376,9 @@ void Tema1::CollectStars()
 {
     for(int i = 0; i < stars.size(); ++i)
     {
-        std::cout << "coaie\n";
-        std::cout << get<0>(stars[i]) << " " << get<1>(stars[i]) << "\n";
-        std::cout << Tema1::mouseX << " " << Tema1::mouseY << "\n";
-        std:: cout << get<0>(stars[i]) - starSize/2 << " " << get<0>(stars[i]) + starSize/2 << "\n";
-        std::cout << get<1>(stars[i]) - starSize/2 << " " << get<1>(stars[i]) + starSize/2 << "\n";
         if(Tema1::mouseX >= get<0>(stars[i]) - starSize/2 && Tema1::mouseX <= get<0>(stars[i]) + starSize/2 &&
            Tema1::mouseY >= get<1>(stars[i]) - starSize/2 && Tema1::mouseY <= get<1>(stars[i]) + starSize/2)
         {
-            std::cout << "coaie cplm\n";
             stars.erase(stars.begin() + i);
             Tema1::score += 1;
         }
@@ -505,6 +449,22 @@ void Tema1::RenderScene(float deltaTime)
             RenderMesh2D(meshes["priceStar"], shaders["VertexColor"], modelMatrix);
         }
     }
+
+    // Render projectiles
+    if(projectiles.empty() == false)
+    {
+        for(int i = 0; i < projectiles.size(); ++i)
+        {
+            modelMatrix = glm::mat3(1);
+            get<0>(projectiles[i]) += 100*deltaTime;
+            modelMatrix *= transform2D::Translate(get<0>(projectiles[i]), get<1>(projectiles[i]));
+            get<3>(projectiles[i]) += -1*deltaTime;
+            modelMatrix *= transform2D::Rotate(get<3>(projectiles[i]));
+            // modelMatrix *= transform2D::Scale(0.25, 0.25);
+            RenderMesh2D(meshes["star"+std::to_string(get<2>(projectiles[i]))], shaders["VertexColor"], modelMatrix);
+            // projectiles.erase(projectiles.begin() + i);
+        }
+    }
     
     // Render the "Base" line
     modelMatrix = glm::mat3(1);
@@ -532,6 +492,7 @@ void Tema1::RenderScene(float deltaTime)
                 std::get<0>(board[i]) = 0;
                 std::get<1>(board[i]) = 0;
                 std::get<2>(board[i]) = false;
+                std::get<3>(board[i]) = 0;
             }
         }
         modelMatrix = glm::mat3(1);
