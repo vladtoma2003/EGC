@@ -78,16 +78,16 @@ void Tema1::Init()
     Mesh* grass = object2D::CreateSquare("grass", corner, squareSide, glm::vec3(72.0f/255, 254.0f/255, 109.0f/255), true);
     AddMeshToList(grass);
 
-    Mesh* enemyPink = object2D::CreateHexagon("enemyPink", corner, squareSide, glm::vec3(227.0/255, 115.0/255, 131.0/255), true);
+    Mesh* enemyPink = object2D::CreateHexagon("enemy1", corner, squareSide, glm::vec3(227.0/255, 115.0/255, 131.0/255), true);
     AddMeshToList(enemyPink);
 
-    Mesh* enemyYellow = object2D::CreateHexagon("enemyYellow", corner, squareSide, glm::vec3(247.0/255, 239.0/255, 121.0/255), true);
+    Mesh* enemyYellow = object2D::CreateHexagon("enemy2", corner, squareSide, glm::vec3(247.0/255, 239.0/255, 121.0/255), true);
     AddMeshToList(enemyYellow);
     
-    Mesh* enemyPurple = object2D::CreateHexagon("enemyPurple", corner, squareSide, glm::vec3(148.0/255, 0, 211.0/255), true);
+    Mesh* enemyPurple = object2D::CreateHexagon("enemy3", corner, squareSide, glm::vec3(148.0/255, 0, 211.0/255), true);
     AddMeshToList(enemyPurple);
 
-    Mesh* enemyTurquoise = object2D::CreateHexagon("enemyTurquoise", corner, squareSide, glm::vec3(64.0/255, 224.0/255, 208.0/255), true);
+    Mesh* enemyTurquoise = object2D::CreateHexagon("enemy4", corner, squareSide, glm::vec3(64.0/255, 224.0/255, 208.0/255), true);
     AddMeshToList(enemyTurquoise);
 
     Mesh* pinkStar = object2D::CreateStar("star1", corner, starSize, glm::vec3(227.0/255, 115.0/255, 131.0/255), true);
@@ -126,8 +126,12 @@ void Tema1::Update(float deltaTimeSeconds)
     SpawnStars(deltaTimeSeconds);
 
     DestroyProjectiles();
+
+    DestroyEnemies();
     
     RenderScene(deltaTimeSeconds);
+
+    SpawnEnemies(deltaTimeSeconds);
 
     // Render points
     for(int i = 0; i < score; ++i)
@@ -140,14 +144,6 @@ void Tema1::Update(float deltaTimeSeconds)
         
     }
     
-    // Test star
-    // modelMatrix = glm::mat3(1);
-    // modelMatrix *= transform2D::Translate( 600, 500);
-    // //modelMatrix *= transform2D::Scale(50, 50);
-    // angularStep += 0.5*deltaTimeSeconds;
-    // modelMatrix *= transform2D::Rotate(angularStep);
-    // RenderMesh2D(meshes["priceStar"], shaders["VertexColor"], modelMatrix);
-
     // Test hexagon
     modelMatrix = glm::mat3(1);
     modelMatrix *= transform2D::Translate( 700, 300);
@@ -336,9 +332,35 @@ void Tema1::ShootStars(float deltaTime)
                     life + (i/3)*(squareSide+space) + 0.5*squareSide, 4, 0));
             }
         }
-        
     }
 }
+
+void Tema1::SpawnEnemies(float deltaTime)
+{
+    timeElapsed2 += deltaTime;
+    if((int)timeElapsed2 % 5 == 0)
+    {
+        timeElapsed2 += 1;
+        int line = rand() % 3;
+        int color = rand() % 4 + 1;
+        int hp = 3;
+        enemies.push_back(std::make_tuple(window->GetResolution().x,
+            life + line*squareSide + line*space + 0.5*squareSide, color, hp));
+    }
+}
+
+void Tema1::DestroyEnemies()
+{
+    if(enemies.empty() == false)
+        for(int i = 0; i < enemies.size(); ++i)
+        {
+            if(get<0>(enemies[i]) <= life + squareSide/4)
+            {
+                enemies.erase(enemies.begin() + i);
+            }
+        }
+}
+
 
 void Tema1::DestroyProjectiles()
 {
@@ -450,6 +472,19 @@ void Tema1::RenderScene(float deltaTime)
         }
     }
 
+    // Render enemies
+    if(enemies.empty() == false)
+    {
+        for(int i = 0; i < enemies.size(); ++i)
+        {
+            modelMatrix = glm::mat3(1);
+            get<0>(enemies[i]) -= 100*deltaTime;
+            modelMatrix *= transform2D::Translate(get<0>(enemies[i]), get<1>(enemies[i]));
+            modelMatrix *= transform2D::Scale(0.25, 0.25);
+            RenderMesh2D(meshes["enemy" + std::to_string(get<2>(enemies[i]))], shaders["VertexColor"], modelMatrix);
+        }
+    }
+    
     // Render projectiles
     if(projectiles.empty() == false)
     {

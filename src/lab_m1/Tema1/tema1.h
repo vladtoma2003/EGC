@@ -39,6 +39,8 @@ namespace m1
         void CollectStars();
         void ShootStars(float deltaTime);
         void DestroyProjectiles();
+        void SpawnEnemies(float deltaTime);
+        void DestroyEnemies();
         
      protected:
         float cx, cy;
@@ -62,7 +64,7 @@ namespace m1
 
         int allies[3][3] = {0};
         float noLives = 3;
-        int score = 0;
+        int score = 5;
         bool holdingMouse = false;
         int mouseX, mouseY;
         int buyX, buyY;
