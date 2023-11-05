@@ -57,22 +57,22 @@ void Lab3::Init()
     // Initialize angularStep
     angularStep = 0;
 
-    Mesh* square1 = object2D::CreateSquare("square1", corner, squareSide, glm::vec3(1, 0, 0), true);
+    Mesh* square1 = object2D::createsq("square1", corner, squareSide, glm::vec3(1, 0, 0), true);
     AddMeshToList(square1);
 
-    Mesh* square2 = object2D::CreateSquare("square2", corner, squareSide, glm::vec3(0, 1, 0));
+    Mesh* square2 = object2D::createsq("square2", corner, squareSide, glm::vec3(0, 1, 0));
     AddMeshToList(square2);
 
-    Mesh* square3 = object2D::CreateSquare("square3", corner, squareSide, glm::vec3(0, 0, 1));
+    Mesh* square3 = object2D::createsq("square3", corner, squareSide, glm::vec3(0, 0, 1));
     AddMeshToList(square3);
 
-    Mesh* car = object2D::CreateSquare("car", corner, carSide, glm::vec3(0.78f, 0.21f, 0.6f), true);
+    Mesh* car = object2D::createsq("car", corner, carSide, glm::vec3(0.78f, 0.21f, 0.6f), true);
     AddMeshToList(car);
 
-    Mesh *rectangle = object2D::CreateSquare("rectangle", corner, carSide, glm::vec3(0.78f, 0.21f, 0.6f), true);
+    Mesh *rectangle = object2D::createsq("rectangle", corner, carSide, glm::vec3(0.78f, 0.21f, 0.6f), true);
     AddMeshToList(rectangle);
 
-    Mesh *tire = object2D::CreateSquare("tire", corner, carSide, glm::vec3(1, 1, 1), false);
+    Mesh *tire = object2D::createsq("tire", corner, carSide, glm::vec3(1, 1, 1), false);
     AddMeshToList(tire);
 }
 

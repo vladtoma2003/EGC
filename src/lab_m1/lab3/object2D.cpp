@@ -6,7 +6,7 @@
 #include "utils/gl_utils.h"
 
 
-Mesh* object2D::CreateSquare(
+Mesh* object2D::createsq(
     const std::string &name,
     glm::vec3 leftBottomCorner,
     float length,

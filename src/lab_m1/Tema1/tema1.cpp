@@ -111,6 +111,8 @@ void Tema1::FrameStart()
 void Tema1::Update(float deltaTimeSeconds)
 {
     buyRhombus(Tema1::mouseX, Tema1::mouseY, Tema1::buyX, Tema1::buyY);
+
+    SpawnStars(deltaTimeSeconds);
     
     RenderScene(deltaTimeSeconds);
 
@@ -126,12 +128,12 @@ void Tema1::Update(float deltaTimeSeconds)
     }
     
     // Test star
-    modelMatrix = glm::mat3(1);
-    modelMatrix *= transform2D::Translate( 600, 500);
-    //modelMatrix *= transform2D::Scale(50, 50);
-    angularStep += 0.5*deltaTimeSeconds;
-    modelMatrix *= transform2D::Rotate(angularStep);
-    RenderMesh2D(meshes["priceStar"], shaders["VertexColor"], modelMatrix);
+    // modelMatrix = glm::mat3(1);
+    // modelMatrix *= transform2D::Translate( 600, 500);
+    // //modelMatrix *= transform2D::Scale(50, 50);
+    // angularStep += 0.5*deltaTimeSeconds;
+    // modelMatrix *= transform2D::Rotate(angularStep);
+    // RenderMesh2D(meshes["priceStar"], shaders["VertexColor"], modelMatrix);
 
     // Test hexagon
     modelMatrix = glm::mat3(1);
@@ -222,6 +224,8 @@ void Tema1::OnMouseBtnPress(int mouseX, int mouseY, int button, int mods)
     Tema1::buyY = mouseY;
     std::cout << mouseX << " " << mouseY << "\n";
     DestroyRhombus(mouseX, mouseY);
+    if(!stars.empty())
+        CollectStars();
     
 }
 
@@ -234,6 +238,8 @@ void Tema1::OnMouseBtnRelease(int mouseX, int mouseY, int button, int mods)
     Tema1::buyY = 0;
     Tema1::releaseX = mouseX;
     Tema1::releaseY = mouseY;
+    // holdingRhombus = false;
+
 }
 
 
@@ -248,9 +254,7 @@ void Tema1::OnWindowResize(int width, int height)
 
 void Tema1::buyRhombus(int x, int y, int buyX, int buyY){
     RenderHoldingRhombus(x, y, buyX, buyY);
-    PlaceRhombus(x, y);
-    std::cout << Tema1::score << endl;
-    std::cout << price << endl;
+    PlaceRhombus(mouseX, mouseY);
 }
 
 void Tema1::PlaceRhombus(int x, int y)
@@ -399,6 +403,43 @@ void Tema1::DestroyRhombus(int x, int y)
     }
 }
 
+void Tema1::SpawnStars(float time)
+{
+    timeElapsed += time;
+    if((int)timeElapsed % 5 == 0 && stars.size() < 10)
+    {
+        timeElapsed += 0.5;
+        int noOfStars = rand() % 3 + 1;
+        for(int i = 0; i < noOfStars; ++i)
+        {
+            int x = rand() % (int)(window->GetResolution().x - 4*squareSide + 3*space - starSize);
+            int y = rand() % (int)(window->GetResolution().y - starSize);
+            x = x + 4*squareSide + 3*space - starSize;
+            
+            y = window->GetResolution().y - y;
+            stars.push_back(std::make_tuple(x, y));
+        }
+    }
+}
+
+void Tema1::CollectStars()
+{
+    for(int i = 0; i < stars.size(); ++i)
+    {
+        std::cout << "coaie\n";
+        std::cout << get<0>(stars[i]) << " " << get<1>(stars[i]) << "\n";
+        std::cout << Tema1::mouseX << " " << Tema1::mouseY << "\n";
+        std:: cout << get<0>(stars[i]) - starSize/2 << " " << get<0>(stars[i]) + starSize/2 << "\n";
+        std::cout << get<1>(stars[i]) - starSize/2 << " " << get<1>(stars[i]) + starSize/2 << "\n";
+        if(Tema1::mouseX >= get<0>(stars[i]) - starSize/2 && Tema1::mouseX <= get<0>(stars[i]) + starSize/2 &&
+           Tema1::mouseY >= get<1>(stars[i]) - starSize/2 && Tema1::mouseY <= get<1>(stars[i]) + starSize/2)
+        {
+            std::cout << "coaie cplm\n";
+            stars.erase(stars.begin() + i);
+            Tema1::score += 1;
+        }
+    }
+}
 
 void Tema1::RenderHoldingRhombus(int x, int y, int buyX, int buyY)
 {
@@ -406,7 +447,6 @@ void Tema1::RenderHoldingRhombus(int x, int y, int buyX, int buyY)
     if(holdingMouse)
     {
         // Pink rhombus
-        std::cout << "buy rhombus:" << x << " " << y << endl;
         if(buyX >= outlinePosx && buyX <= outlinePosx + outlineSide &&
            buyY >= outlinePosy && buyY <= outlinePosy + outlineSide &&
            score >= 1)
@@ -417,11 +457,8 @@ void Tema1::RenderHoldingRhombus(int x, int y, int buyX, int buyY)
             holdingRhombus = true;
             currentColor = 1;
             price = 1;
-        }
-
-        // Turquoise rhombus
-        if(buyX >= outlinePosx + outlineSide + space && buyX <= outlinePosx + 2*outlineSide + space &&
-           buyY >= outlinePosy && buyY <= outlinePosy + outlineSide && score >= 2)
+        } else if(buyX >= outlinePosx + outlineSide + space && buyX <= outlinePosx + 2*outlineSide + space &&
+           buyY >= outlinePosy && buyY <= outlinePosy + outlineSide && score >= 2) // Turquoise rhombus
         {
             modelMatrix = glm::mat3(1);
             modelMatrix *= transform2D::Translate(x - 2*rhombusSide/3, y);
@@ -429,11 +466,8 @@ void Tema1::RenderHoldingRhombus(int x, int y, int buyX, int buyY)
             holdingRhombus = true;
             currentColor = 2;
             price = 2;
-        }
-
-        // Yellow rhombus
-        if(buyX >= outlinePosx + 2*outlineSide + 2*space && buyX <= outlinePosx + 3*outlineSide + 2*space &&
-           buyY >= outlinePosy && buyY <= outlinePosy + outlineSide && score >= 2)
+        }  else if(buyX >= outlinePosx + 2*outlineSide + 2*space && buyX <= outlinePosx + 3*outlineSide + 2*space &&
+           buyY >= outlinePosy && buyY <= outlinePosy + outlineSide && score >= 2)  // Yellow rhombus
         {
             modelMatrix = glm::mat3(1);
             modelMatrix *= transform2D::Translate(x - 2*rhombusSide/3, y);
@@ -441,11 +475,8 @@ void Tema1::RenderHoldingRhombus(int x, int y, int buyX, int buyY)
             holdingRhombus = true;
             currentColor = 3;
             price = 2;
-        }
-
-        // Purple rhombus
-        if(buyX >= outlinePosx + 3*outlineSide + 3*space && buyX <= outlinePosx + 4*outlineSide + 3*space &&
-           buyY >= outlinePosy && buyY <= outlinePosy + outlineSide && score >= 3)
+        } else if(buyX >= outlinePosx + 3*outlineSide + 3*space && buyX <= outlinePosx + 4*outlineSide + 3*space &&
+           buyY >= outlinePosy && buyY <= outlinePosy + outlineSide && score >= 3)  // Purple rhombus
         {
             modelMatrix = glm::mat3(1);
             modelMatrix *= transform2D::Translate(x - 2*rhombusSide/3, y);
@@ -453,12 +484,28 @@ void Tema1::RenderHoldingRhombus(int x, int y, int buyX, int buyY)
             holdingRhombus = true;
             currentColor = 4;
             price = 3;
+        } else
+        {
+            holdingRhombus = false;
         }
     }
 }
 
 void Tema1::RenderScene(float deltaTime)
 {
+
+    // Render the stars that can be collected
+    if(stars.empty() == false)
+    {
+        for(int i = 0; i < stars.size(); ++i)
+        {
+            modelMatrix = glm::mat3(1);
+            modelMatrix *= transform2D::Translate(get<0>(stars[i]), get<1>(stars[i]));
+            modelMatrix *= transform2D::Rotate(glm::pi<float>()/10);
+            RenderMesh2D(meshes["priceStar"], shaders["VertexColor"], modelMatrix);
+        }
+    }
+    
     // Render the "Base" line
     modelMatrix = glm::mat3(1);
     modelMatrix *= transform2D::Translate(life, life);
@@ -479,7 +526,6 @@ void Tema1::RenderScene(float deltaTime)
         }
         if(std::get<2>(board[i]))
         {
-            std::cout << "coaieee\n";
             std::get<1>(board[i]) -= 0.75*deltaTime;
             if(std::get<1>(board[i]) <= 0)
             {

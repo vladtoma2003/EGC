@@ -35,6 +35,8 @@ namespace m1
         void RenderHoldingRhombus(int x, int y, int buyX, int buyY);
         void PlaceRhombus(int x, int y);
         void DestroyRhombus(int x, int y);
+        void SpawnStars(float time);
+        void CollectStars();
         
      protected:
         float cx, cy;
@@ -58,7 +60,7 @@ namespace m1
 
         int allies[3][3] = {0};
         float noLives = 3;
-        int score = 10;
+        int score = 0;
         bool holdingMouse = false;
         int mouseX, mouseY;
         int buyX, buyY;
@@ -66,6 +68,9 @@ namespace m1
         bool holdingRhombus = false;
         int currentColor = 0; // 0 - Empty, 1 - Pink, 2 - Turquoise, 3 - Yellow, 4 - Purple
         int price = 0;
+        float timeElapsed = 0;
+
+        std::vector<std::tuple<float, float>> stars;
         std::vector<std::tuple<int, float, bool>> board = { // color, size
             std::make_tuple(0, 0, false), std::make_tuple(0, 0, false), std::make_tuple(0, 0, false),
             std::make_tuple(0, 0, false), std::make_tuple(0, 0, false), std::make_tuple(0, 0, false),
