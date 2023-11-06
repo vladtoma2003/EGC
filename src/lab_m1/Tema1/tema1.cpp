@@ -101,7 +101,9 @@ void Tema1::Init()
 
     Mesh* turquoiseStar = object2D::CreateStar("star4", corner, starSize, glm::vec3(64.0/255, 224.0/255, 208.0/255), true);
     AddMeshToList(turquoiseStar);
-    
+
+    Mesh* collectStars = object2D::CreateStar("collectStars", corner, starSize, glm::vec3(1, 0, 1), true);
+    AddMeshToList(collectStars);
     
 }
 
@@ -119,63 +121,21 @@ void Tema1::FrameStart()
 
 void Tema1::Update(float deltaTimeSeconds)
 {
+    DetectCollision();
+    
     buyRhombus(Tema1::mouseX, Tema1::mouseY, Tema1::buyX, Tema1::buyY);
 
     ShootStars(deltaTimeSeconds);
     
     SpawnStars(deltaTimeSeconds);
 
-    DestroyProjectiles();
+    // DestroyProjectiles();
 
     DestroyEnemies();
     
     RenderScene(deltaTimeSeconds);
 
     SpawnEnemies(deltaTimeSeconds);
-
-    // Render points
-    for(int i = 0; i < score; ++i)
-    {
-        modelMatrix = glm::mat3(1);
-        modelMatrix *= transform2D::Translate(get<0>(starPos) + i*starSize/2, get<1>(starPos));
-        modelMatrix *= transform2D::Scale(0.5, 0.5);
-        modelMatrix *= transform2D::Rotate(glm::pi<float>()/10);
-        RenderMesh2D(meshes["priceStar"], shaders["VertexColor"], modelMatrix);
-        
-    }
-    
-    // Test hexagon
-    modelMatrix = glm::mat3(1);
-    modelMatrix *= transform2D::Translate( 700, 300);
-    modelMatrix *= transform2D::Scale(0.25f, 0.25f);
-   // angularStep += 0.5*deltaTimeSeconds;
-    modelMatrix *= transform2D::Rotate(angularStep);
-    RenderMesh2D(meshes["enemyPink"], shaders["VertexColor"], modelMatrix);
-    
-    modelMatrix = glm::mat3(1);
-    modelMatrix *= transform2D::Translate( 800, 300);
-    modelMatrix *= transform2D::Scale(0.25f, 0.25f);
-    //angularStep += 0.5*deltaTimeSeconds;
-    modelMatrix *= transform2D::Rotate(angularStep);
-    RenderMesh2D(meshes["enemyYellow"], shaders["VertexColor"], modelMatrix);
-
-    
-    modelMatrix = glm::mat3(1);
-    modelMatrix *= transform2D::Translate( 900, 300);
-    modelMatrix *= transform2D::Scale(0.25f, 0.25f);
-    //angularStep += 0.5*deltaTimeSeconds;
-    modelMatrix *= transform2D::Rotate(angularStep);
-    RenderMesh2D(meshes["enemyPurple"], shaders["VertexColor"], modelMatrix);
-
-    
-    modelMatrix = glm::mat3(1);
-    modelMatrix *= transform2D::Translate( 1000, 300);
-    modelMatrix *= transform2D::Scale(0.25f, 0.25f);
-    //angularStep += 0.5*deltaTimeSeconds;
-    modelMatrix *= transform2D::Rotate(angularStep);
-    RenderMesh2D(meshes["enemyTurquoise"], shaders["VertexColor"], modelMatrix);
-    
-    
 }
 
 
@@ -231,7 +191,6 @@ void Tema1::OnMouseBtnPress(int mouseX, int mouseY, int button, int mods)
     Tema1::mouseY = mouseY;
     Tema1::buyX = mouseX;
     Tema1::buyY = mouseY;
-    std::cout << mouseX << " " << mouseY << "\n";
     DestroyRhombus(mouseX, mouseY);
     if(!stars.empty())
         CollectStars();
@@ -274,12 +233,13 @@ void Tema1::PlaceRhombus(int x, int y)
         {
             if(x >= life + (i%3 + 0.5) * squareSide + (i%3 + 1) * space && x <= life + (i%3 + 1.5) * squareSide + (i%3 + 1) * space &&
                y >= life + (i/3) * squareSide + (i/3) * space && y <= life + (i/3 + 1) * squareSide + (i/3) * space &&
-               get<0>(board[i]) == 0)
+               get<0>(board[i]) == 0 && price <= score)
             {
                 get<0>(board[i]) = currentColor;
                 get<1>(board[i]) = 1;
                 score -= price;
                 holdingRhombus = false;
+                price = 0;
             }
         }
     }
@@ -303,7 +263,7 @@ void Tema1::ShootStars(float deltaTime)
     for(int i = 0; i < 9; ++i)
     {
         // ma plimb prin board
-        if(get<0>(board[i]) == 0)
+        if(get<0>(board[i]) == 0 || get<2>(board[i]) == true)
         {
             continue;
         }
@@ -313,30 +273,10 @@ void Tema1::ShootStars(float deltaTime)
             get<3>(board[i]) += 0.5;
             if(checkEnemysRow(i/3, get<0>(board[i]), enemies))
             {
-                std::cout << "Checked enemy row\n";
                 projectiles.push_back(std::make_tuple(life + (i%3 + 0.5)*(squareSide+space) + 0.5*squareSide,
-                    life + (i/3)*(squareSide+space) + 0.5*squareSide, get<0>(board[i]), 0));
+                    life + (i/3)*(squareSide+space) + 0.5*squareSide, get<0>(board[i]), 0, true));
             }
-            /*if(get<0>(board[i]) == 1) // Pink
-            {
-                projectiles.push_back(std::make_tuple(life + (i%3 + 0.5)*(squareSide+space) + 0.5*squareSide,
-                    life + (i/3)*(squareSide+space) + 0.5*squareSide, 1, 0));
-            }
-            if(get<0>(board[i]) == 2) // Yellow
-            {
-                projectiles.push_back(std::make_tuple(life + (i%3 + 0.5)*(squareSide+space) + 0.5*squareSide,
-                    life + (i/3)*(squareSide+space) + 0.5*squareSide, 2, 0));
-            }
-            if(get<0>(board[i]) == 3) // Purple
-            {
-                projectiles.push_back(std::make_tuple(life + (i%3 + 0.5)*(squareSide+space) + 0.5*squareSide,
-                    life + (i/3)*(squareSide+space) + 0.5*squareSide, 3, 0));
-            }
-            if(get<0>(board[i]) == 4) // Turquoise
-            {
-                projectiles.push_back(std::make_tuple(life + (i%3 + 0.5)*(squareSide+space) + 0.5*squareSide,
-                    life + (i/3)*(squareSide+space) + 0.5*squareSide, 4, 0));
-            }*/
+            
         }
     }
 }
@@ -344,7 +284,7 @@ void Tema1::ShootStars(float deltaTime)
  * @param color - the color of the rhombus that is being checked
  * @param enemies - the vector of enemies that is being checked
  */
-bool Tema1::checkEnemysRow(int row, int color, std::vector<std::tuple<float, float, int, int>> enemies)
+bool Tema1::checkEnemysRow(int row, int color, std::vector<std::tuple<float, float, int, int, float, bool>> enemies)
 {
     for(auto enemy : enemies)
     {
@@ -365,20 +305,57 @@ void Tema1::SpawnEnemies(float deltaTime)
         timeElapsed2 += 1;
         int line = rand() % 3;
         int color = rand() % 4 + 1;
-        int hp = 3;
+        int hp = 6;
         enemies.push_back(std::make_tuple(window->GetResolution().x,
-            life + line*squareSide + line*space + 0.5*squareSide, color, hp));
+            life + line*squareSide + line*space + 0.5*squareSide, color, hp, 0.25, false));
     }
 }
+
+void Tema1::DetectCollision()
+{
+    for(int i = 0; i < enemies.size(); ++i)
+    {
+        for(int j = 0; j < projectiles.size(); ++j)
+        {
+            if(!get<4>(projectiles[j])) continue;
+            if(get<0>(projectiles[j]) >= get<0>(enemies[i]) - 0.5*squareSide && get<0>(projectiles[j]) <= get<0>(enemies[i]) + 0.5*squareSide &&
+                (int)get<1>(projectiles[j]) == (int)get<1>(enemies[i]) &&
+               get<2>(projectiles[j]) == get<2>(enemies[i]) && get<4>(projectiles[j]) == true && !get<5>(enemies[i]))
+            {
+                --get<3>(enemies[i]);
+                get<4>(projectiles[j]) = false;
+            }
+        }
+        DestroyProjectiles();
+        for(int j = 0; j < 9; ++j)
+        {
+            if(get<0>(board[j]) == 0) continue;
+            if(get<0>(enemies[i]) - rhombusSide/2 <= life + (j%3 + 0.5)*(squareSide + space) + 1.1*squareSide &&
+               (int)get<1>(enemies[i]) == (int)(life + (j/3)*(squareSide + space) + 0.5*squareSide) &&
+               !get<5>(enemies[i]))
+            {
+                get<2>(board[j]) = true;
+            }
+        }
+    }
+}
+
+
 
 void Tema1::DestroyEnemies()
 {
     if(enemies.empty() == false)
         for(int i = 0; i < enemies.size(); ++i)
         {
-            if(get<0>(enemies[i]) <= life + squareSide/4)
+            if(get<5>(enemies[i])) continue;
+            if(get<0>(enemies[i]) <= life + 0.25*squareSide)
             {
-                enemies.erase(enemies.begin() + i);
+                get<5>(enemies[i]) = true;
+                --noLives;
+            }
+            if(get<3>(enemies[i]) <= 0)
+            {
+                get<5>(enemies[i]) = true;
             }
         }
 }
@@ -389,7 +366,7 @@ void Tema1::DestroyProjectiles()
     if(projectiles.empty() == false)
         for(int i = 0; i < projectiles.size(); ++i)
         {
-            if(get<0>(projectiles[i]) >= window->GetResolution().x)
+            if(get<0>(projectiles[i]) >= window->GetResolution().x || get<4>(projectiles[i]) == false)
             {
                 projectiles.erase(projectiles.begin() + i);
             }
@@ -436,8 +413,7 @@ void Tema1::RenderHoldingRhombus(int x, int y, int buyX, int buyY)
     {
         // Pink rhombus
         if(buyX >= outlinePosx && buyX <= outlinePosx + outlineSide &&
-           buyY >= outlinePosy && buyY <= outlinePosy + outlineSide &&
-           score >= 1)
+           buyY >= outlinePosy && buyY <= outlinePosy + outlineSide)
         {
             modelMatrix = glm::mat3(1);
             modelMatrix *= transform2D::Translate(x - 2*rhombusSide/3, y);
@@ -446,7 +422,7 @@ void Tema1::RenderHoldingRhombus(int x, int y, int buyX, int buyY)
             currentColor = 1;
             price = 1;
         } else if(buyX >= outlinePosx + outlineSide + space && buyX <= outlinePosx + 2*outlineSide + space &&
-           buyY >= outlinePosy && buyY <= outlinePosy + outlineSide && score >= 2) // Turquoise rhombus
+           buyY >= outlinePosy && buyY <= outlinePosy + outlineSide) // Turquoise rhombus
         {
             modelMatrix = glm::mat3(1);
             modelMatrix *= transform2D::Translate(x - 2*rhombusSide/3, y);
@@ -455,7 +431,7 @@ void Tema1::RenderHoldingRhombus(int x, int y, int buyX, int buyY)
             currentColor = 2;
             price = 2;
         }  else if(buyX >= outlinePosx + 2*outlineSide + 2*space && buyX <= outlinePosx + 3*outlineSide + 2*space &&
-           buyY >= outlinePosy && buyY <= outlinePosy + outlineSide && score >= 2)  // Yellow rhombus
+           buyY >= outlinePosy && buyY <= outlinePosy + outlineSide)  // Yellow rhombus
         {
             modelMatrix = glm::mat3(1);
             modelMatrix *= transform2D::Translate(x - 2*rhombusSide/3, y);
@@ -464,7 +440,7 @@ void Tema1::RenderHoldingRhombus(int x, int y, int buyX, int buyY)
             currentColor = 3;
             price = 2;
         } else if(buyX >= outlinePosx + 3*outlineSide + 3*space && buyX <= outlinePosx + 4*outlineSide + 3*space &&
-           buyY >= outlinePosy && buyY <= outlinePosy + outlineSide && score >= 3)  // Purple rhombus
+           buyY >= outlinePosy && buyY <= outlinePosy + outlineSide)  // Purple rhombus
         {
             modelMatrix = glm::mat3(1);
             modelMatrix *= transform2D::Translate(x - 2*rhombusSide/3, y);
@@ -490,30 +466,17 @@ void Tema1::RenderScene(float deltaTime)
             modelMatrix = glm::mat3(1);
             modelMatrix *= transform2D::Translate(get<0>(stars[i]), get<1>(stars[i]));
             modelMatrix *= transform2D::Rotate(glm::pi<float>()/10);
-            RenderMesh2D(meshes["priceStar"], shaders["VertexColor"], modelMatrix);
+            RenderMesh2D(meshes["collectStars"], shaders["VertexColor"], modelMatrix);
         }
     }
 
-    // Render enemies
-    if(enemies.empty() == false)
-    {
-        for(int i = 0; i < enemies.size(); ++i)
-        {
-            modelMatrix = glm::mat3(1);
-            get<0>(enemies[i]) -= 100*deltaTime;
-            modelMatrix *= transform2D::Translate(get<0>(enemies[i]), get<1>(enemies[i]));
-            modelMatrix *= transform2D::Scale(0.25, 0.25);
-            RenderMesh2D(meshes["enemy" + std::to_string(get<2>(enemies[i]))], shaders["VertexColor"], modelMatrix);
-        }
-    }
-    
     // Render projectiles
     if(projectiles.empty() == false)
     {
         for(int i = 0; i < projectiles.size(); ++i)
         {
             modelMatrix = glm::mat3(1);
-            get<0>(projectiles[i]) += 100*deltaTime;
+            get<0>(projectiles[i]) += 200*deltaTime;
             modelMatrix *= transform2D::Translate(get<0>(projectiles[i]), get<1>(projectiles[i]));
             get<3>(projectiles[i]) += -1*deltaTime;
             modelMatrix *= transform2D::Rotate(get<3>(projectiles[i]));
@@ -522,6 +485,36 @@ void Tema1::RenderScene(float deltaTime)
             // projectiles.erase(projectiles.begin() + i);
         }
     }
+
+    
+    // Render enemies
+    if(enemies.empty() == false)
+    {
+        for(int i = 0; i < enemies.size(); ++i)
+        {
+            if(!get<5>(enemies[i]))
+            {
+                modelMatrix = glm::mat3(1);
+                get<0>(enemies[i]) -= 100*deltaTime;
+                modelMatrix *= transform2D::Translate(get<0>(enemies[i]), get<1>(enemies[i]));
+                modelMatrix *= transform2D::Scale(0.25, 0.25);
+                RenderMesh2D(meshes["enemy" + std::to_string(get<2>(enemies[i]))], shaders["VertexColor"], modelMatrix);
+            } else
+            {
+                modelMatrix = glm::mat3(1);
+                modelMatrix *= transform2D::Translate(get<0>(enemies[i]), get<1>(enemies[i]));
+                get<4>(enemies[i]) -= 0.3*deltaTime;
+                modelMatrix *= transform2D::Scale(get<4>(enemies[i]), get<4>(enemies[i]));
+                RenderMesh2D(meshes["enemy" + std::to_string(get<2>(enemies[i]))], shaders["VertexColor"], modelMatrix);
+                if(get<4>(enemies[i]) <= 0)
+                {
+                    enemies.erase(enemies.begin() + i);
+                }
+            }
+        }
+    }
+    
+
     
     // Render the "Base" line
     modelMatrix = glm::mat3(1);
@@ -565,7 +558,7 @@ void Tema1::RenderScene(float deltaTime)
         RenderMesh2D(meshes["outlineSquare"], shaders["VertexColor"], modelMatrix);
     }
 
-    // Render rombus shop
+    // Render rhombus shop
     modelMatrix = glm::mat3(1);
     modelMatrix *= transform2D::Translate(outlinePosx + 2*rhombusSide/3, outlinePosy + 1.35*rhombusSide);
     RenderMesh2D(meshes["rhombus1"], shaders["VertexColor"], modelMatrix);
@@ -643,4 +636,15 @@ void Tema1::RenderScene(float deltaTime)
     modelMatrix *= transform2D::Rotate(glm::pi<float>()/10);
     modelMatrix *= transform2D::Scale(0.5, 0.5);
     RenderMesh2D(meshes["priceStar"], shaders["VertexColor"], modelMatrix);
+
+    // Render points
+    for(int i = 0; i < score; ++i)
+    {
+        modelMatrix = glm::mat3(1);
+        modelMatrix *= transform2D::Translate(get<0>(starPos) + i*starSize/2, get<1>(starPos));
+        modelMatrix *= transform2D::Scale(0.5, 0.5);
+        modelMatrix *= transform2D::Rotate(glm::pi<float>()/10);
+        RenderMesh2D(meshes["priceStar"], shaders["VertexColor"], modelMatrix);
+        
+    }
 }

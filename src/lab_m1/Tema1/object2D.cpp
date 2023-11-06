@@ -118,7 +118,6 @@ Mesh* object2D::CreateStar(
         8, 9, 0,
         9, 10, 0,
         10, 1, 0
-
     };
 
     if (!fill) {
@@ -148,29 +147,30 @@ Mesh* object2D::CreateHexagon(
     std::vector<VertexFormat> vertices =
     {
         VertexFormat(middle, color), // Middle 0
-        VertexFormat(middle + glm::vec3(length, 0, 0), color), // Right 1
-        VertexFormat(middle + glm::vec3(length/2, h, 0), color), // Top right 2
-        VertexFormat(middle + glm::vec3(-length/2, h, 0), color), // Top left 3
-        VertexFormat(middle + glm::vec3(-length, 0, 0), color), // Left 4
-        VertexFormat(middle + glm::vec3(-length/2, -h, 0), color), // Bottom left 5
-        VertexFormat(middle + glm::vec3(length/2, -h, 0), color), // Bottom right 6
-        VertexFormat(middle + glm::vec3(1.5*length, 0, 0), glm::vec3(0,0,1)), // Outline right 7
-        VertexFormat(middle + glm::vec3(1.5*length/2, 1.5*h, 0), glm::vec3(0,0,1)), // Outline top right 8
-        VertexFormat(middle + glm::vec3(-1.5*length/2, 1.5*h, 0), glm::vec3(0,0,1)), // Outline top left 9
-        VertexFormat(middle + glm::vec3(-1.5*length, 0, 0), glm::vec3(0,0,1)), // Outline left 10
-        VertexFormat(middle + glm::vec3(-1.5*length/2, -1.5*h, 0), glm::vec3(0,0,1)), // Outline bottom left 11
-        VertexFormat(middle + glm::vec3(1.5*length/2, -1.5*h, 0), glm::vec3(0,0,1)) // Outline bottom right 12
+        VertexFormat(middle + glm::vec3(length, 0, 1), glm::vec3(128.0/255,128.0/255,128.0/255)), // Right 1
+        VertexFormat(middle + glm::vec3(length/2, h, 1), glm::vec3(128.0/255,128.0/255,128.0/255)), // Top right 2
+        VertexFormat(middle + glm::vec3(-length/2, h, 1), glm::vec3(128.0/255,128.0/255,128.0/255)), // Top left 3
+        VertexFormat(middle + glm::vec3(-length, 0, 1), glm::vec3(128.0/255,128.0/255,128.0/255)), // Left 4
+        VertexFormat(middle + glm::vec3(-length/2, -h, 1), glm::vec3(128.0/255,128.0/255,128.0/255)), // Bottom left 5
+        VertexFormat(middle + glm::vec3(length/2, -h, 1), glm::vec3(128.0/255,128.0/255,128.0/255)), // Bottom right 6
+        VertexFormat(middle + glm::vec3(1.5*length, 0, 0), color), // Outline right 7
+        VertexFormat(middle + glm::vec3(1.5*length/2, 1.5*h, 0), color), // Outline top right 8
+        VertexFormat(middle + glm::vec3(-1.5*length/2, 1.5*h, 0), color), // Outline top left 9
+        VertexFormat(middle + glm::vec3(-1.5*length, 0, 0), color), // Outline left 10
+        VertexFormat(middle + glm::vec3(-1.5*length/2, -1.5*h, 0), color), // Outline bottom left 11
+        VertexFormat(middle + glm::vec3(1.5*length/2, -1.5*h, 0), color), // Outline bottom right 12
+        VertexFormat(middle + glm::vec3(0, 0, 1), glm::vec3(128.0/255,128.0/255,128.0/255)) // Top 13
         
     };
 
     Mesh* hexa = new Mesh(name);
     std::vector<unsigned int> indices = {
-        0, 2, 1,
-        0, 3, 2,
-        0, 4, 3,
-        0, 5, 4,
-        0, 6, 5,
-        0, 1, 6,
+        13, 2, 1,
+        13, 3, 2,
+        13, 4, 3,
+        13, 5, 4,
+        13, 6, 5,
+        13, 1, 6,
         0, 8, 7,
         0, 9, 8,
         0, 10, 9,
