@@ -340,7 +340,10 @@ void Tema1::ShootStars(float deltaTime)
         }
     }
 }
-
+/* @param row - the row of the board that is being checked
+ * @param color - the color of the rhombus that is being checked
+ * @param enemies - the vector of enemies that is being checked
+ */
 bool Tema1::checkEnemysRow(int row, int color, std::vector<std::tuple<float, float, int, int>> enemies)
 {
     for(auto enemy : enemies)
