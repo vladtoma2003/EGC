@@ -202,7 +202,10 @@ void Tema1::OnMouseBtnPress(int mouseX, int mouseY, int button, int mods)
     Tema1::mouseY = mouseY;
     Tema1::buyX = mouseX;
     Tema1::buyY = mouseY;
-    DestroyRhombus(mouseX, mouseY);
+    if(button == 2)
+    {
+        DestroyRhombus(mouseX, mouseY);
+    }
     if(!stars.empty())
         CollectStars();
     
@@ -342,6 +345,7 @@ void Tema1::DetectCollision()
         {
             if(get<0>(board[j]) == 0) continue;
             if(get<0>(enemies[i]) - rhombusSide/2 <= life + (j%3 + 0.5)*(squareSide + space) + 1.1*squareSide &&
+                get<0>(enemies[i]) - rhombusSide/2 >= life + (j%3 - 0.5)*(squareSide + space) + 1.1*squareSide &&
                (int)get<1>(enemies[i]) == (int)(life + (j/3)*(squareSide + space) + 0.5*squareSide) &&
                !get<5>(enemies[i]))
             {
