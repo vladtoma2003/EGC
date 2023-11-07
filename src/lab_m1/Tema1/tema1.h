@@ -67,8 +67,8 @@ namespace m1
         const std::tuple <float, float> starPos = std::make_tuple(lifeX, lifeY - starSize/2);
 
         int allies[3][3] = {0};
-        float noLives = 100;
-        int score = 500;
+        float noLives = 3;
+        int score = 5;
         bool holdingMouse = false;
         int mouseX, mouseY;
         int buyX, buyY;
