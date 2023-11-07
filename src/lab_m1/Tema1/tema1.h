@@ -43,6 +43,7 @@ namespace m1
         void DestroyEnemies();
         bool checkEnemysRow(int row, int color, std::vector<std::tuple<float, float, int, int, float, bool>> enemies);
         void DetectCollision();
+        void CheckGameOver();
 
         
      protected:

@@ -107,6 +107,15 @@ void Tema1::Init()
     
 }
 
+void Tema1::CheckGameOver()
+{
+    if(noLives == 0)
+    {
+        exit(0);
+    }
+}
+
+
 void Tema1::FrameStart()
 {
     // Clears the color buffer (using the previously set color) and depth buffer
@@ -121,6 +130,8 @@ void Tema1::FrameStart()
 
 void Tema1::Update(float deltaTimeSeconds)
 {
+    CheckGameOver();
+    
     DetectCollision();
     
     buyRhombus(Tema1::mouseX, Tema1::mouseY, Tema1::buyX, Tema1::buyY);
@@ -268,7 +279,7 @@ void Tema1::ShootStars(float deltaTime)
             continue;
         }
         get<3>(board[i]) += deltaTime;
-        if((int)get<3>(board[i]) % 5 == 0)
+        if((int)get<3>(board[i]) % 3 == 0)
         {
             get<3>(board[i]) += 0.5;
             if(checkEnemysRow(i/3, get<0>(board[i]), enemies))
