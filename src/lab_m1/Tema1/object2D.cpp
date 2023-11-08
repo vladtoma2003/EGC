@@ -79,7 +79,11 @@ Mesh* object2D::CreateRhombus(
     rhombus->InitFromData(vertices, indices);
     return rhombus;
 }
-
+/* @brief Creates a star. The star is made out of 3 triangles. The points are on a big circle and a small circle.
+ * The radius of the small circle is 0.4 times the radius of the big circle. The only point on the small circle is 2.
+ * The 0 is in center. The points are equally distanced by dividing the circle in 10 equal parts(10 because a 5 pointed
+ * star has 10 points including the ones inside).
+*/
 Mesh* object2D::CreateStar(
     const std::string &name,
     glm::vec3 center,
@@ -87,37 +91,25 @@ Mesh* object2D::CreateStar(
     glm::vec3 color,
     bool fill)
 {
-    float angle = 2*glm::pi<float>()/10;
-    float outerRadius = 25.0f;
-    float innerRadius = 10.0f;
+    constexpr float angle = 2*glm::pi<float>()/10;
+    constexpr float outerRadius = 25.0f;
     
-    std::vector<VertexFormat> vertices =
+    const std::vector<VertexFormat> vertices =
     {  
         VertexFormat(center, color), // Center 0
-        VertexFormat(center + glm::vec3(outerRadius, 0, 0), color), // 1
-        VertexFormat(center + glm::vec3(innerRadius*cos(angle), innerRadius*sin(angle), 0), color), // 2
-        VertexFormat(center + glm::vec3(outerRadius*cos(angle*2), outerRadius*sin(angle*2), 0), color), // 3
-        VertexFormat(center + glm::vec3(innerRadius*cos(angle*3), innerRadius*sin(angle*3), 0), color), // 4
-        VertexFormat(center + glm::vec3(outerRadius*cos(angle*4), outerRadius*sin(angle*4), 0), color), // 5
-        VertexFormat(center + glm::vec3(innerRadius*cos(angle*5), innerRadius*sin(angle*5), 0), color), // 6
-        VertexFormat(center + glm::vec3(outerRadius*cos(angle*6), outerRadius*sin(angle*6), 0), color), // 7
-        VertexFormat(center + glm::vec3(innerRadius*cos(angle*7), innerRadius*sin(angle*7), 0), color), // 8
-        VertexFormat(center + glm::vec3(outerRadius*cos(angle*8), outerRadius*sin(angle*8), 0), color), // 9
-        VertexFormat(center + glm::vec3(innerRadius*cos(angle*9), innerRadius*sin(angle*9), 0), color) // 10
+        VertexFormat(center + glm::vec3(outerRadius, 0, 2), color), // 1
+        VertexFormat(center + glm::vec3(0.4*outerRadius*cos(angle), 0.4*outerRadius*sin(angle), 2), color), // 2
+        VertexFormat(center + glm::vec3(outerRadius*cos(angle*2), outerRadius*sin(angle*2), 2), color), // 3
+        VertexFormat(center + glm::vec3(outerRadius*cos(angle*4), outerRadius*sin(angle*4), 2), color), // 4
+        VertexFormat(center + glm::vec3(outerRadius*cos(angle*6), outerRadius*sin(angle*6), 2), color), // 5
+        VertexFormat(center + glm::vec3(outerRadius*cos(angle*8), outerRadius*sin(angle*8), 2), color), // 6
     };
 
     Mesh* star = new Mesh(name);
     std::vector<unsigned int> indices = {
-        1, 2, 0,
-        2, 3, 0,
-        3, 4, 0,
-        4, 5, 0,
-        5, 6, 0,
-        6, 7, 0,
-        7, 8, 0,
-        8, 9, 0,
-        9, 10, 0,
-        10, 1, 0
+        5, 1, 2,
+        6, 4, 2,
+        3, 5, 2
     };
 
     if (!fill) {
@@ -140,7 +132,7 @@ Mesh* object2D::CreateHexagon(
     bool fill)
 {
     glm::vec3 middle = leftCorner;
-    float h = sqrt(3)*length/2;
+    double h = sqrt(3)*length/2;
     
     float outline = length/3;
 
@@ -165,18 +157,26 @@ Mesh* object2D::CreateHexagon(
 
     Mesh* hexa = new Mesh(name);
     std::vector<unsigned int> indices = {
-        13, 2, 1,
-        13, 3, 2,
-        13, 4, 3,
-        13, 5, 4,
-        13, 6, 5,
-        13, 1, 6,
-        0, 8, 7,
-        0, 9, 8,
-        0, 10, 9,
-        0, 11, 10,
-        0, 12, 11,
-        0, 7, 12
+        // 13, 2, 1,
+        // 13, 3, 2,
+        // 13, 4, 3,
+        // 13, 5, 4,
+        // 13, 6, 5,
+        // 13, 1, 6,
+        // 0, 8, 7,
+        // 0, 9, 8,
+        // 0, 10, 9,
+        // 0, 11, 10,
+        // 0, 12, 11,
+        // 0, 7, 12
+        1, 6, 5,
+        1, 5, 2,
+        2, 5, 3,
+        3, 5, 4,
+        7, 12, 11,
+        7, 11, 8,
+        8, 11, 9,
+        9, 11, 10
     };
 
     if (!fill) {

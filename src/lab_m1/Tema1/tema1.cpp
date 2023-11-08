@@ -1,7 +1,6 @@
 #include "lab_m1/Tema1/tema1.h"
 
 #include <complex>
-#include <corecrt_wctype.h>
 #include <vector>
 #include <iostream>
 
@@ -18,14 +17,9 @@ using namespace m1;
  */
 
 
-Tema1::Tema1()
-{
-}
+Tema1::Tema1() = default;
 
-
-Tema1::~Tema1()
-{
-}
+Tema1::~Tema1() = default;
 
 
 void Tema1::Init()
@@ -38,22 +32,9 @@ void Tema1::Init()
     camera->Update();
     GetCameraInput()->SetActive(false);
 
-    glm::vec3 corner = glm::vec3(0, 0, 0);
-    
-    cx = corner.x + squareSide / 2;
-    cy = corner.y + squareSide / 2;
+    constexpr glm::vec3 corner = glm::vec3(0, 0, 0);
 
-    // Initialize tx and ty (the translation steps)
-    translateX = 0;
-    translateY = 0;
-
-    // Initialize sx and sy (the scale factors)
-    scaleX = 1;
-    scaleY = 1;
-
-    // Initialize angularStep
-    angularStep = 0;
-
+    // Initialize Meshes
     Mesh* redSquare = object2D::CreateSquare("redSquare", corner, squareSide, glm::vec3(1, 0, 0), true);
     AddMeshToList(redSquare);
 
@@ -75,8 +56,8 @@ void Tema1::Init()
     Mesh* priceStar = object2D::CreateStar("priceStar", corner, starSize, glm::vec3(1, 1, 0), true);
     AddMeshToList(priceStar);
 
-    Mesh* grass = object2D::CreateSquare("grass", corner, squareSide, glm::vec3(72.0f/255, 254.0f/255, 109.0f/255), true);
-    AddMeshToList(grass);
+    Mesh* weed = object2D::CreateSquare("weed", corner, squareSide, glm::vec3(72.0f/255, 254.0f/255, 109.0f/255), true);
+    AddMeshToList(weed);
 
     Mesh* enemyPink = object2D::CreateHexagon("enemy1", corner, squareSide, glm::vec3(227.0/255, 115.0/255, 131.0/255), true);
     AddMeshToList(enemyPink);
@@ -141,7 +122,6 @@ void Tema1::Update(float deltaTimeSeconds)
     SpawnStars(deltaTimeSeconds);
 
     moveStars(deltaTimeSeconds);
-
 
     DestroyEnemies();
     
@@ -344,27 +324,28 @@ void Tema1::SpawnEnemies(float deltaTime)
 
 void Tema1::DetectCollision()
 {
-    for(int i = 0; i < enemies.size(); ++i)
+    for (auto& enemy : enemies)
     {
-        for(int j = 0; j < projectiles.size(); ++j)
+        for (auto& projectile : projectiles)
         {
-            if(!get<4>(projectiles[j])) continue;
-            if(get<0>(projectiles[j]) >= get<0>(enemies[i]) - 0.5*squareSide && get<0>(projectiles[j]) <= get<0>(enemies[i]) + 0.5*squareSide &&
-                (int)get<1>(projectiles[j]) == (int)get<1>(enemies[i]) &&
-               get<2>(projectiles[j]) == get<2>(enemies[i]) && get<4>(projectiles[j]) == true && !get<5>(enemies[i]))
+            if(!get<4>(projectile)) continue;
+            if(get<0>(projectile) >= get<0>(enemy) - 0.5*squareSide && get<0>(projectile) <= get<0>(enemy) + 0.5*squareSide &&
+                static_cast<int>(get<1>(projectile)) == static_cast<int>(get<1>(enemy)) &&
+               get<2>(projectile) == get<2>(enemy) && get<4>(projectile) == true && !get<5>(enemy))
             {
-                --get<3>(enemies[i]);
-                get<4>(projectiles[j]) = false;
+                --get<3>(enemy);
+                get<4>(projectile) = false;
             }
         }
         DestroyProjectiles();
         for(int j = 0; j < 9; ++j)
         {
             if(get<0>(board[j]) == 0) continue;
-            if(get<0>(enemies[i]) - rhombusSide/2 <= life + (j%3 + 0.5)*(squareSide + space) + 1.1*squareSide &&
-                get<0>(enemies[i]) - rhombusSide/2 >= life + (j%3 - 0.5)*(squareSide + space) + 1.1*squareSide &&
-               (int)get<1>(enemies[i]) == (int)(life + (j/3)*(squareSide + space) + 0.5*squareSide) &&
-               !get<5>(enemies[i]))
+            if(get<0>(enemy) - rhombusSide/2 <= life + (j%3 + 0.5)*(squareSide + space) + 1.1*squareSide &&
+                get<0>(enemy) - rhombusSide/2 >= life + (j%3 - 0.5)*(squareSide + space) + 1.1*squareSide &&
+               static_cast<int>(get<1>(enemy)) ==
+                                            static_cast<int>(life + j/3 * (squareSide + space) + 0.5 * squareSide) &&
+               !get<5>(enemy))
             {
                 get<2>(board[j]) = true;
             }
@@ -377,17 +358,17 @@ void Tema1::DetectCollision()
 void Tema1::DestroyEnemies()
 {
     if(enemies.empty() == false)
-        for(int i = 0; i < enemies.size(); ++i)
+        for (auto& enemy : enemies)
         {
-            if(get<5>(enemies[i])) continue;
-            if(get<0>(enemies[i]) <= life + 0.25*squareSide)
+            if(get<5>(enemy)) continue;
+            if(get<0>(enemy) <= life + 0.25*squareSide)
             {
-                get<5>(enemies[i]) = true;
+                get<5>(enemy) = true;
                 --noLives;
             }
-            if(get<3>(enemies[i]) <= 0)
+            if(get<3>(enemy) <= 0)
             {
-                get<5>(enemies[i]) = true;
+                get<5>(enemy) = true;
             }
         }
 }
@@ -409,14 +390,14 @@ void Tema1::DestroyProjectiles()
 void Tema1::SpawnStars(float time)
 {
     timeElapsed += time;
-    if(((int)timeElapsed % 5 == 0 || timeElapsed < 2*time) && stars.size() < 10)
+    if((static_cast<int>(timeElapsed) % 5 == 0 || timeElapsed < 2*time) && stars.size() < 10)
     {
         timeElapsed += 0.5;
-        int noOfStars = rand() % 3 + 1;
+        const int noOfStars = rand() % 3 + 1;
         for(int i = 0; i < noOfStars; ++i)
         {
-            int x = rand() % (int)(window->GetResolution().x - 4*squareSide + 3*space - starSize);
-            int y = rand() % (int)(window->GetResolution().y - starSize - 2*squareSide - 2*space);
+            int x = rand() % static_cast<int>(window->GetResolution().x - 4 * squareSide + 3 * space - starSize);
+            int y = rand() % static_cast<int>(window->GetResolution().y - starSize - 2 * squareSide - 2 * space);
 
             x = x + 4*squareSide + 3*space - 2*starSize;
             y = window->GetResolution().y - y - starSize - 2*squareSide;
@@ -424,33 +405,34 @@ void Tema1::SpawnStars(float time)
             int spawnX = (rand()%2 == 0)? (x+window->GetResolution().x/2):(x-window->GetResolution().x);
             int spawnY = y + window->GetResolution().y;
             
-            stars.push_back(std::make_tuple(x, y, spawnX, spawnY));
+            stars.emplace_back(x, y, spawnX, spawnY);
         }
     }
 }
 
 void Tema1::moveStars(float deltaTime)
 {
-    // std::cout << "move\n";
-    for(int i = 0; i < stars.size(); ++i)
+    for (auto& star : stars)
     {
-        if(abs(get<0>(stars[i]) - get<2>(stars[i])) > 0.1 && get<1>(stars[i]) < get<3>(stars[i]))
-        {
-            get<3>(stars[i]) -= 100.0f*deltaTime;
-            get<2>(stars[i]) = (get<2>(stars[i]) > get<0>(stars[i]))?
-                get<2>(stars[i]) - 100.0f*deltaTime : get<2>(stars[i]) + 100.0f*deltaTime;
-        } else if (abs(get<0>(stars[i]) - get<2>(stars[i])) > 0.1)
-        {
-            get<2>(stars[i]) = (get<2>(stars[i]) > get<0>(stars[i]))?
-                get<2>(stars[i]) - 100.0f*deltaTime : get<2>(stars[i]) + 100.0f*deltaTime;
-        } else if (get<1>(stars[i]) < get<3>(stars[i]))
-        {
-            get<3>(stars[i]) -= 100.0f*deltaTime;
-        } else
-        {
-            get<3>(stars[i]) = get<1>(stars[i]);
-            get<2>(stars[i]) = get<0>(stars[i]);
-        }
+        // if(abs(get<0>(star) - get<2>(star)) > 0.1 && get<1>(star) < get<3>(star))
+        // {
+        //     get<3>(star) -= 100.0f*deltaTime;
+        //     get<2>(star) = (get<2>(star) > get<0>(star))?
+        //                        get<2>(star) - 100.0f*deltaTime : get<2>(star) + 100.0f*deltaTime;
+        // } else if (abs(get<0>(star) - get<2>(star)) > 0.1)
+        // {
+        //     get<2>(star) = (get<2>(star) > get<0>(star))?
+        //                        get<2>(star) - 100.0f*deltaTime : get<2>(star) + 100.0f*deltaTime;
+        // } else if (get<1>(star) < get<3>(star))
+        // {
+        //     get<3>(star) -= 100.0f*deltaTime;
+        // } else
+        // {
+        //     get<3>(star) = get<1>(star);
+        //     get<2>(star) = get<0>(star);
+        // }
+        get<3>(star) = get<1>(star);
+        get<2>(star) = get<0>(star);
     }
 }
 
@@ -523,10 +505,10 @@ void Tema1::RenderScene(float deltaTime)
     // Render the stars that can be collected
     if(stars.empty() == false)
     {
-        for(int i = 0; i < stars.size(); ++i)
+        for (auto& star : stars)
         {
             modelMatrix = glm::mat3(1);
-            modelMatrix *= transform2D::Translate(get<2>(stars[i]), get<3>(stars[i]));
+            modelMatrix *= transform2D::Translate(get<2>(star), get<3>(star));
             modelMatrix *= transform2D::Rotate(glm::pi<float>()/10);
             RenderMesh2D(meshes["collectStars"], shaders["VertexColor"], modelMatrix);
         }
@@ -535,19 +517,16 @@ void Tema1::RenderScene(float deltaTime)
     // Render projectiles
     if(projectiles.empty() == false)
     {
-        for(int i = 0; i < projectiles.size(); ++i)
+        for (auto& projectile : projectiles)
         {
             modelMatrix = glm::mat3(1);
-            get<0>(projectiles[i]) += 200*deltaTime;
-            modelMatrix *= transform2D::Translate(get<0>(projectiles[i]), get<1>(projectiles[i]));
-            get<3>(projectiles[i]) += -1*deltaTime;
-            modelMatrix *= transform2D::Rotate(get<3>(projectiles[i]));
-            // modelMatrix *= transform2D::Scale(0.25, 0.25);
-            RenderMesh2D(meshes["star"+std::to_string(get<2>(projectiles[i]))], shaders["VertexColor"], modelMatrix);
-            // projectiles.erase(projectiles.begin() + i);
+            get<0>(projectile) += 200*deltaTime;
+            modelMatrix *= transform2D::Translate(get<0>(projectile), get<1>(projectile));
+            get<3>(projectile) += -1*deltaTime;
+            modelMatrix *= transform2D::Rotate(get<3>(projectile));
+            RenderMesh2D(meshes["star"+std::to_string(get<2>(projectile))], shaders["VertexColor"], modelMatrix);
         }
     }
-
     
     // Render enemies
     if(enemies.empty() == false)
@@ -596,7 +575,7 @@ void Tema1::RenderScene(float deltaTime)
         }
         if(std::get<2>(board[i]))
         {
-            std::get<1>(board[i]) -= 0.75*deltaTime;
+            std::get<1>(board[i]) -= 0.75f*deltaTime;
             if(std::get<1>(board[i]) <= 0)
             {
                 std::get<0>(board[i]) = 0;
@@ -607,7 +586,7 @@ void Tema1::RenderScene(float deltaTime)
         }
         modelMatrix = glm::mat3(1);
         modelMatrix *= transform2D::Translate(life + (i%3+0.5)*squareSide + (i%3+1)*space, life + (i/3)*squareSide + (i/3)*space);
-        RenderMesh2D(meshes["grass"], shaders["VertexColor"], modelMatrix);
+        RenderMesh2D(meshes["weed"], shaders["VertexColor"], modelMatrix);
     }
 
     // Outline of rhombus shop

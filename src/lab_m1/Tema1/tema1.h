@@ -47,11 +47,7 @@ namespace m1
 
         
      protected:
-        float cx, cy;
         glm::mat3 modelMatrix;
-        float translateX, translateY;
-        float scaleX, scaleY;
-        float angularStep;
 
         // constant sizes or positions
         const float life = 25;
