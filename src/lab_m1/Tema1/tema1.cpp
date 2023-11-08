@@ -109,7 +109,7 @@ void Tema1::Init()
 
 void Tema1::CheckGameOver()
 {
-    if(noLives == 0)
+    if(noLives <= 0)
     {
         exit(0);
     }
@@ -142,7 +142,6 @@ void Tema1::Update(float deltaTimeSeconds)
 
     moveStars(deltaTimeSeconds);
 
-    // DestroyProjectiles();
 
     DestroyEnemies();
     
@@ -432,7 +431,7 @@ void Tema1::SpawnStars(float time)
 
 void Tema1::moveStars(float deltaTime)
 {
-    std::cout << "move\n";
+    // std::cout << "move\n";
     for(int i = 0; i < stars.size(); ++i)
     {
         if(abs(get<0>(stars[i]) - get<2>(stars[i])) > 0.1 && get<1>(stars[i]) < get<3>(stars[i]))
