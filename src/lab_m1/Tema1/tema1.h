@@ -30,7 +30,6 @@ namespace m1
         void OnWindowResize(int width, int height) override;
 
         void RenderScene(float deltaTime);
-        void CreateMeshes();
         void buyRhombus(int x, int y, int buyX, int buyY);
         void RenderHoldingRhombus(int x, int y, int buyX, int buyY);
         void PlaceRhombus(int x, int y);

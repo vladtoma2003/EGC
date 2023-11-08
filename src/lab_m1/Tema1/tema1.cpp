@@ -436,16 +436,16 @@ void Tema1::moveStars(float deltaTime)
     {
         if(abs(get<0>(stars[i]) - get<2>(stars[i])) > 0.1 && get<1>(stars[i]) < get<3>(stars[i]))
         {
-            get<3>(stars[i]) -= 50.0f*deltaTime;
+            get<3>(stars[i]) -= 100.0f*deltaTime;
             get<2>(stars[i]) = (get<2>(stars[i]) > get<0>(stars[i]))?
-                get<2>(stars[i]) - 50.0f*deltaTime : get<2>(stars[i]) + 50.0f*deltaTime;
+                get<2>(stars[i]) - 100.0f*deltaTime : get<2>(stars[i]) + 100.0f*deltaTime;
         } else if (abs(get<0>(stars[i]) - get<2>(stars[i])) > 0.1)
         {
             get<2>(stars[i]) = (get<2>(stars[i]) > get<0>(stars[i]))?
-                get<2>(stars[i]) - 50.0f*deltaTime : get<2>(stars[i]) + 50.0f*deltaTime;
+                get<2>(stars[i]) - 100.0f*deltaTime : get<2>(stars[i]) + 100.0f*deltaTime;
         } else if (get<1>(stars[i]) < get<3>(stars[i]))
         {
-            get<3>(stars[i]) -= 50.0f*deltaTime;
+            get<3>(stars[i]) -= 100.0f*deltaTime;
         } else
         {
             get<3>(stars[i]) = get<1>(stars[i]);
@@ -565,7 +565,7 @@ void Tema1::RenderScene(float deltaTime)
             {
                 modelMatrix = glm::mat3(1);
                 modelMatrix *= transform2D::Translate(get<0>(enemies[i]), get<1>(enemies[i]));
-                get<4>(enemies[i]) -= 0.3*deltaTime;
+                get<4>(enemies[i]) -= 0.3f*deltaTime;
                 modelMatrix *= transform2D::Scale(get<4>(enemies[i]), get<4>(enemies[i]));
                 RenderMesh2D(meshes["enemy" + std::to_string(get<2>(enemies[i]))], shaders["VertexColor"], modelMatrix);
                 if(get<4>(enemies[i]) <= 0)
