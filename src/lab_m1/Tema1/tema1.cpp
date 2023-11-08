@@ -140,6 +140,8 @@ void Tema1::Update(float deltaTimeSeconds)
     
     SpawnStars(deltaTimeSeconds);
 
+    moveStars(deltaTimeSeconds);
+
     // DestroyProjectiles();
 
     DestroyEnemies();
@@ -169,6 +171,14 @@ void Tema1::OnInputUpdate(float deltaTime, int mods)
 void Tema1::OnKeyPress(int key, int mods)
 {
     // Add key press event
+    if(key == GLFW_KEY_L)
+    {
+        noLives = 500;
+    }
+    if(key == GLFW_KEY_P)
+    {
+        score = 500;
+    }
 }
 
 
@@ -186,6 +196,7 @@ void Tema1::OnMouseMove(int mouseX, int mouseY, int deltaX, int deltaY)
         mouseX = mouseX;
         mouseY = window->GetResolution().y - mouseY;
 
+        
         Tema1::mouseX = mouseX;
         Tema1::mouseY = mouseY;
     }
@@ -202,6 +213,9 @@ void Tema1::OnMouseBtnPress(int mouseX, int mouseY, int button, int mods)
     Tema1::mouseY = mouseY;
     Tema1::buyX = mouseX;
     Tema1::buyY = mouseY;
+    std::cout << mouseX << " " << mouseY << "\n";
+    std::cout << "RESOLUTION" << endl;
+    std::cout << window->GetResolution().x << " " << window->GetResolution().y << "\n";
     if(button == 2)
     {
         DestroyRhombus(mouseX, mouseY);
@@ -314,14 +328,18 @@ bool Tema1::checkEnemysRow(int row, int color, std::vector<std::tuple<float, flo
 void Tema1::SpawnEnemies(float deltaTime)
 {
     timeElapsed2 += deltaTime;
-    if((int)timeElapsed2 % 5 == 0)
+    if((int)timeElapsed2 % 9 == 0 || enemies.empty())
     {
+        int noEnemies = rand()%3 + 1;
         timeElapsed2 += 1;
-        int line = rand() % 3;
-        int color = rand() % 4 + 1;
-        int hp = 6;
-        enemies.push_back(std::make_tuple(window->GetResolution().x,
-            life + line*squareSide + line*space + 0.5*squareSide, color, hp, 0.25, false));
+        for(int i = 0; i < noEnemies; ++i)
+        {
+            int line = rand() % 3;
+            int color = rand() % 4 + 1;
+            int hp = 6;
+            enemies.push_back(std::make_tuple(window->GetResolution().x + i*squareSide + i*space,
+                life + line*squareSide + line*space + 0.5*squareSide, color, hp, 0.25, false));
+        }
     }
 }
 
@@ -392,21 +410,51 @@ void Tema1::DestroyProjectiles()
 void Tema1::SpawnStars(float time)
 {
     timeElapsed += time;
-    if((int)timeElapsed % 5 == 0 && stars.size() < 10)
+    if(((int)timeElapsed % 5 == 0 || timeElapsed < 2*time) && stars.size() < 10)
     {
         timeElapsed += 0.5;
         int noOfStars = rand() % 3 + 1;
         for(int i = 0; i < noOfStars; ++i)
         {
             int x = rand() % (int)(window->GetResolution().x - 4*squareSide + 3*space - starSize);
-            int y = rand() % (int)(window->GetResolution().y - starSize);
-            x = x + 4*squareSide + 3*space - starSize;
+            int y = rand() % (int)(window->GetResolution().y - starSize - 2*squareSide - 2*space);
+
+            x = x + 4*squareSide + 3*space - 2*starSize;
+            y = window->GetResolution().y - y - starSize - 2*squareSide;
+
+            int spawnX = (rand()%2 == 0)? (x+window->GetResolution().x/2):(x-window->GetResolution().x);
+            int spawnY = y + window->GetResolution().y;
             
-            y = window->GetResolution().y - y;
-            stars.push_back(std::make_tuple(x, y));
+            stars.push_back(std::make_tuple(x, y, spawnX, spawnY));
         }
     }
 }
+
+void Tema1::moveStars(float deltaTime)
+{
+    std::cout << "move\n";
+    for(int i = 0; i < stars.size(); ++i)
+    {
+        if(abs(get<0>(stars[i]) - get<2>(stars[i])) > 0.1 && get<1>(stars[i]) < get<3>(stars[i]))
+        {
+            get<3>(stars[i]) -= 50.0f*deltaTime;
+            get<2>(stars[i]) = (get<2>(stars[i]) > get<0>(stars[i]))?
+                get<2>(stars[i]) - 50.0f*deltaTime : get<2>(stars[i]) + 50.0f*deltaTime;
+        } else if (abs(get<0>(stars[i]) - get<2>(stars[i])) > 0.1)
+        {
+            get<2>(stars[i]) = (get<2>(stars[i]) > get<0>(stars[i]))?
+                get<2>(stars[i]) - 50.0f*deltaTime : get<2>(stars[i]) + 50.0f*deltaTime;
+        } else if (get<1>(stars[i]) < get<3>(stars[i]))
+        {
+            get<3>(stars[i]) -= 50.0f*deltaTime;
+        } else
+        {
+            get<3>(stars[i]) = get<1>(stars[i]);
+            get<2>(stars[i]) = get<0>(stars[i]);
+        }
+    }
+}
+
 
 void Tema1::CollectStars()
 {
@@ -479,7 +527,7 @@ void Tema1::RenderScene(float deltaTime)
         for(int i = 0; i < stars.size(); ++i)
         {
             modelMatrix = glm::mat3(1);
-            modelMatrix *= transform2D::Translate(get<0>(stars[i]), get<1>(stars[i]));
+            modelMatrix *= transform2D::Translate(get<2>(stars[i]), get<3>(stars[i]));
             modelMatrix *= transform2D::Rotate(glm::pi<float>()/10);
             RenderMesh2D(meshes["collectStars"], shaders["VertexColor"], modelMatrix);
         }
@@ -528,8 +576,6 @@ void Tema1::RenderScene(float deltaTime)
             }
         }
     }
-    
-
     
     // Render the "Base" line
     modelMatrix = glm::mat3(1);
@@ -656,7 +702,8 @@ void Tema1::RenderScene(float deltaTime)
     for(int i = 0; i < score; ++i)
     {
         modelMatrix = glm::mat3(1);
-        modelMatrix *= transform2D::Translate(get<0>(starPos) + i*starSize/2, get<1>(starPos));
+        modelMatrix *= transform2D::Translate(get<0>(starPos) + (i%22)*starSize/2,
+            get<1>(starPos) - (i/22)*(0.5*starSize));
         modelMatrix *= transform2D::Scale(0.5, 0.5);
         modelMatrix *= transform2D::Rotate(glm::pi<float>()/10);
         RenderMesh2D(meshes["priceStar"], shaders["VertexColor"], modelMatrix);
