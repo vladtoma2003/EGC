@@ -306,16 +306,19 @@ bool Tema1::checkEnemysRow(int row, int color, std::vector<std::tuple<float, flo
 
 void Tema1::SpawnEnemies(float deltaTime)
 {
-    timeElapsed2 += deltaTime;
-    if((int)timeElapsed2 % 9 == 0 || enemies.empty())
+    randomEnemyTime += deltaTime;
+    if((int)randomEnemyTime - randomMod >= 0)
     {
-        int noEnemies = rand()%3 + 1;
-        timeElapsed2 += 1;
+        randomMod = (rand()%5+2) + ((timeElapsed/60 < 2.0f)?((int)(10 - timeElapsed/60)):3)-deltaTime;
+        std::cout << "random Time = " << randomMod << "\n" << (timeElapsed/60 < 2.0f) << "\n";
+        int noEnemies = (randomEnemyTime/60 < 2)?(rand()%2 + 1):(rand()%3 + 2);
+        std::cout << "noEnemies = " << noEnemies << "\n";
+        randomEnemyTime = 0;
         for(int i = 0; i < noEnemies; ++i)
         {
             int line = rand() % 3;
             int color = rand() % 4 + 1;
-            int hp = 6;
+            int hp = 6; // i*squareSide + i*space
             enemies.push_back(std::make_tuple(window->GetResolution().x + i*squareSide + i*space,
                 life + line*squareSide + line*space + 0.5*squareSide, color, hp, 0.25, false));
         }

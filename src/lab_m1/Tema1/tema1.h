@@ -73,7 +73,8 @@ namespace m1
         int currentColor = 0; // 0 - Empty, 1 - Pink, 2 - Turquoise, 3 - Yellow, 4 - Purple
         int price = 0;
         float timeElapsed = 0;
-        float timeElapsed2 = 0;
+        float randomEnemyTime = 0;
+        int randomMod = 1;
 
         std::vector<std::tuple<float, float, int, int, float ,bool>> enemies; // x, y, color, hitpoints, size, destroy
         std::vector<std::tuple<float, float, int, float, bool>> projectiles; // x, y, color, angularStep, canHit
