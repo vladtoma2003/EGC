@@ -601,21 +601,13 @@ void Tema1::RenderScene(float deltaTime)
     }
 
     // Render rhombus shop
-    modelMatrix = glm::mat3(1);
-    modelMatrix *= transform2D::Translate(outlinePosx + 2*rhombusSide/3, outlinePosy + 1.35*rhombusSide);
-    RenderMesh2D(meshes["rhombus1"], shaders["VertexColor"], modelMatrix);
-
-    modelMatrix = glm::mat3(1);
-    modelMatrix *= transform2D::Translate(outlinePosx + 2*rhombusSide/3 + outlineSide + space, outlinePosy + 1.35*rhombusSide);
-    RenderMesh2D(meshes["rhombus2"], shaders["VertexColor"], modelMatrix);
-
-    modelMatrix = glm::mat3(1);
-    modelMatrix *= transform2D::Translate(outlinePosx + 2*rhombusSide/3 + 2*outlineSide + 2*space, outlinePosy + 1.35*rhombusSide);
-    RenderMesh2D(meshes["rhombus3"], shaders["VertexColor"], modelMatrix);
-
-    modelMatrix = glm::mat3(1);
-    modelMatrix *= transform2D::Translate(outlinePosx + 2*rhombusSide/3 + 3*outlineSide + 3*space, outlinePosy + 1.35*rhombusSide);
-    RenderMesh2D(meshes["rhombus4"], shaders["VertexColor"], modelMatrix);
+    for(int i = 0; i < 4; ++i)
+    {
+        modelMatrix = glm::mat3(1);
+        modelMatrix *= transform2D::Translate(outlinePosx + 2*rhombusSide/3 + i*(outlineSide + space),
+            outlinePosy + 1.35*rhombusSide);
+        RenderMesh2D(meshes["rhombus" + std::to_string(i+1)], shaders["VertexColor"], modelMatrix);
+    }
     
     // Render the lives - posibil sa le schimb sa arate ca niste inimi
     for(int i = 0; i < noLives; ++i) // render the no of lives

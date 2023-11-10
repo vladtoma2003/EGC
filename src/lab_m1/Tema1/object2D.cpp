@@ -157,18 +157,6 @@ Mesh* object2D::CreateHexagon(
 
     Mesh* hexa = new Mesh(name);
     std::vector<unsigned int> indices = {
-        // 13, 2, 1,
-        // 13, 3, 2,
-        // 13, 4, 3,
-        // 13, 5, 4,
-        // 13, 6, 5,
-        // 13, 1, 6,
-        // 0, 8, 7,
-        // 0, 9, 8,
-        // 0, 10, 9,
-        // 0, 11, 10,
-        // 0, 12, 11,
-        // 0, 7, 12
         1, 6, 5,
         1, 5, 2,
         2, 5, 3,
@@ -192,3 +180,33 @@ Mesh* object2D::CreateHexagon(
 }
 
 
+Mesh* object2D::CreateHeart(
+    const std::string &name,
+    glm::vec3 leftCorner,
+    float length,
+    glm::vec3 color,
+    bool fill)
+{
+    glm::vec3 middle = leftCorner;
+    
+    std::vector<VertexFormat> vertices =
+    {
+        VertexFormat(middle, glm::vec3(0,0,0)), // Middle point of the heart 0
+        VertexFormat(middle + glm::vec3(-length, 0, 0), glm::vec3(0,0,0)), 
+        
+    };
+    Mesh* hexa = new Mesh(name);
+    std::vector<unsigned int> indices = {
+    };
+
+    if (!fill) {
+        hexa->SetDrawMode(GL_LINE_LOOP);
+    } else {
+        // Draw 2 triangles. Add the remaining 2 indices
+        indices.push_back(0);
+        indices.push_back(2);
+    }
+
+    hexa->InitFromData(vertices, indices);
+    return hexa;
+}

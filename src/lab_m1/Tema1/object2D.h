@@ -14,4 +14,6 @@ namespace object2D
     Mesh* CreateRhombus(const std::string &name, glm::vec3 leftBottomCorner, float length, glm::vec3 color, bool fill = false);
     Mesh* CreateStar(const std::string &name, glm::vec3 leftBottomCorner, float length, glm::vec3 color, bool fill = false);
     Mesh* CreateHexagon(const std::string &name, glm::vec3 leftBottomCorner, float length, glm::vec3 color, bool fill = false);
+    Mesh* CreateHeart(const std::string &name, glm::vec3 leftBottomCorner, float length, glm::vec3 color, bool fill = false);
+
 }
