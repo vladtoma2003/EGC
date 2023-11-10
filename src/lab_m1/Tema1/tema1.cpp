@@ -10,17 +10,14 @@
 using namespace std;
 using namespace m1;
 
-
 /*
  *  To find out more about `FrameStart`, `Update`, `FrameEnd`
  *  and the order in which they are called, see `world.cpp`.
  */
 
-
 Tema1::Tema1() = default;
 
 Tema1::~Tema1() = default;
-
 
 void Tema1::Init()
 {
@@ -96,7 +93,6 @@ void Tema1::CheckGameOver()
     }
 }
 
-
 void Tema1::FrameStart()
 {
     // Clears the color buffer (using the previously set color) and depth buffer
@@ -107,7 +103,6 @@ void Tema1::FrameStart()
     // Sets the screen area where to draw
     glViewport(0, 0, resolution.x, resolution.y);
 }
-
 
 void Tema1::Update(float deltaTimeSeconds)
 {
@@ -130,22 +125,18 @@ void Tema1::Update(float deltaTimeSeconds)
     SpawnEnemies(deltaTimeSeconds);
 }
 
-
 void Tema1::FrameEnd()
 {
 }
-
 
 /*
  *  These are callback functions. To find more about callbacks and
  *  how they behave, see `input_controller.h`.
  */
 
-
 void Tema1::OnInputUpdate(float deltaTime, int mods)
 {
 }
-
 
 void Tema1::OnKeyPress(int key, int mods)
 {
@@ -160,12 +151,10 @@ void Tema1::OnKeyPress(int key, int mods)
     }
 }
 
-
 void Tema1::OnKeyRelease(int key, int mods)
 {
     // Add key release event
 }
-
 
 void Tema1::OnMouseMove(int mouseX, int mouseY, int deltaX, int deltaY)
 {
@@ -180,7 +169,6 @@ void Tema1::OnMouseMove(int mouseX, int mouseY, int deltaX, int deltaY)
         Tema1::mouseY = mouseY;
     }
 }
-
 
 void Tema1::OnMouseBtnPress(int mouseX, int mouseY, int button, int mods)
 {
@@ -204,7 +192,6 @@ void Tema1::OnMouseBtnPress(int mouseX, int mouseY, int button, int mods)
     
 }
 
-
 void Tema1::OnMouseBtnRelease(int mouseX, int mouseY, int button, int mods)
 {
     // Add mouse button release event
@@ -217,11 +204,9 @@ void Tema1::OnMouseBtnRelease(int mouseX, int mouseY, int button, int mods)
 
 }
 
-
 void Tema1::OnMouseScroll(int mouseX, int mouseY, int offsetX, int offsetY)
 {
 }
-
 
 void Tema1::OnWindowResize(int width, int height)
 {
@@ -238,7 +223,7 @@ void Tema1::PlaceRhombus(int x, int y)
     { // life + (j+0.5)*squareSide + (j+1)*space, life + i*squareSide + i*space
         for(int i = 0; i < 9; ++i)
         {
-            if(x >= life + (i%3 + 0.5) * squareSide + (i%3 + 1) * space && x <= life + (i%3 + 1.5) * squareSide + (i%3 + 1) * space &&
+            if(x >= life + (i%3 + 0.5) * squareSide + (i%3 + 1) * space && x <= life + (i%3 + 1.5) * (squareSide + space) &&
                y >= life + (i/3) * squareSide + (i/3) * space && y <= life + (i/3 + 1) * squareSide + (i/3) * space &&
                get<0>(board[i]) == 0 && price <= score)
             {
@@ -303,7 +288,6 @@ bool Tema1::checkEnemysRow(int row, int color, std::vector<std::tuple<float, flo
     return false;
 }
 
-
 void Tema1::SpawnEnemies(float deltaTime)
 {
     randomEnemyTime += deltaTime;
@@ -356,8 +340,6 @@ void Tema1::DetectCollision()
     }
 }
 
-
-
 void Tema1::DestroyEnemies()
 {
     if(enemies.empty() == false)
@@ -376,7 +358,6 @@ void Tema1::DestroyEnemies()
         }
 }
 
-
 void Tema1::DestroyProjectiles()
 {
     if(projectiles.empty() == false)
@@ -388,7 +369,6 @@ void Tema1::DestroyProjectiles()
             }
         }
 }
-
 
 void Tema1::SpawnStars(float time)
 {
@@ -417,28 +397,11 @@ void Tema1::moveStars(float deltaTime)
 {
     for (auto& star : stars)
     {
-        // if(abs(get<0>(star) - get<2>(star)) > 0.1 && get<1>(star) < get<3>(star))
-        // {
-        //     get<3>(star) -= 100.0f*deltaTime;
-        //     get<2>(star) = (get<2>(star) > get<0>(star))?
-        //                        get<2>(star) - 100.0f*deltaTime : get<2>(star) + 100.0f*deltaTime;
-        // } else if (abs(get<0>(star) - get<2>(star)) > 0.1)
-        // {
-        //     get<2>(star) = (get<2>(star) > get<0>(star))?
-        //                        get<2>(star) - 100.0f*deltaTime : get<2>(star) + 100.0f*deltaTime;
-        // } else if (get<1>(star) < get<3>(star))
-        // {
-        //     get<3>(star) -= 100.0f*deltaTime;
-        // } else
-        // {
-        //     get<3>(star) = get<1>(star);
-        //     get<2>(star) = get<0>(star);
-        // }
+        // calculate the line equation so it goes diagonally
         get<3>(star) = get<1>(star);
         get<2>(star) = get<0>(star);
     }
 }
-
 
 void Tema1::CollectStars()
 {
@@ -632,7 +595,7 @@ void Tema1::RenderScene(float deltaTime)
     modelMatrix *= transform2D::Rotate(glm::pi<float>()/10);
     modelMatrix *= transform2D::Scale(0.5, 0.5);
     RenderMesh2D(meshes["priceStar"], shaders["VertexColor"], modelMatrix);
-
+    
     modelMatrix = glm::mat3(1);
     modelMatrix *= transform2D::Translate(outlinePosx + space + 1.5f*outlineSide + 0.3f*starSize, outlinePosy-starSize/3);
     modelMatrix *= transform2D::Rotate(glm::pi<float>()/10);
