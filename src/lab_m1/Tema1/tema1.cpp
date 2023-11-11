@@ -180,9 +180,6 @@ void Tema1::OnMouseBtnPress(int mouseX, int mouseY, int button, int mods)
     Tema1::mouseY = mouseY;
     Tema1::buyX = mouseX;
     Tema1::buyY = mouseY;
-    std::cout << mouseX << " " << mouseY << "\n";
-    std::cout << "RESOLUTION" << endl;
-    std::cout << window->GetResolution().x << " " << window->GetResolution().y << "\n";
     if(button == 2)
     {
         DestroyRhombus(mouseX, mouseY);
@@ -399,7 +396,7 @@ void Tema1::SpawnStars(float time)
             float spawnY = 2*window->GetResolution().y + 2*starSize;
             double spawnX = (spawnY - 1000.0f)/a;
             
-            stars.emplace_back(x, y, spawnX, spawnY);
+            stars.emplace_back(x, y, spawnX, spawnY, 0);
         }
     }
 }
@@ -415,6 +412,8 @@ void Tema1::moveStars(float deltaTime)
             float a = (get<1>(star)-1000.0f)/get<0>(star);
             get<2>(star) -= 1000.0f/a * deltaTime;
             get<3>(star) -= 1000*deltaTime;
+            get<4>(star) -= 25*deltaTime;
+            std::cout << "rotate: " << get<4>(star) << "\n";
         } else
         {
             // Final point reached, reset the star
@@ -496,7 +495,7 @@ void Tema1::RenderScene(float deltaTime)
         {
             modelMatrix = glm::mat3(1);
             modelMatrix *= transform2D::Translate(get<2>(star), get<3>(star));
-            modelMatrix *= transform2D::Rotate(glm::pi<float>()/10);
+            modelMatrix *= transform2D::Rotate(get<4>(star));
             RenderMesh2D(meshes["collectStars"], shaders["VertexColor"], modelMatrix);
         }
     }

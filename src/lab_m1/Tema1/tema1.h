@@ -78,7 +78,7 @@ namespace m1
 
         std::vector<std::tuple<float, float, int, int, float ,bool, float>> enemies; // x, y, color, hitpoints, size, destroy, rotation angle
         std::vector<std::tuple<float, float, int, float, bool>> projectiles; // x, y, color, angularStep, canHit
-        std::vector<std::tuple<float, float, float, float>> stars; // final x, final y, initial x, initial y
+        std::vector<std::tuple<float, float, float, float, float>> stars; // final x, final y, initial x, initial y, rotation angle
         std::vector<std::tuple<int, float, bool, float>> board = { // color, size, destroy, time since last shoot
             std::make_tuple(0, 0, false, 0), std::make_tuple(0, 0, false, 0), std::make_tuple(0, 0, false, 0),
             std::make_tuple(0, 0, false, 0), std::make_tuple(0, 0, false, 0), std::make_tuple(0, 0, false, 0),
