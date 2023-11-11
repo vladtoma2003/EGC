@@ -40,7 +40,7 @@ namespace m1
         void DestroyProjectiles();
         void SpawnEnemies(float deltaTime);
         void DestroyEnemies();
-        bool checkEnemysRow(int row, int color, std::vector<std::tuple<float, float, int, int, float, bool>> enemies);
+        bool checkEnemysRow(int row, int color, std::vector<std::tuple<float, float, int, int, float, bool, float>> enemies);
         void DetectCollision();
         void CheckGameOver();
         void moveStars(float deltaTime);
@@ -56,6 +56,7 @@ namespace m1
         const float outlinePosx = life + space;
         const float outlinePosy = 4*squareSide + 2*space;
         const float outlineSide = 140;
+        const int initialResolutiony = 720;
         const float lifeX = outlinePosx + 4*outlineSide + 5*space;
         const float lifeY = outlinePosy + 0.25*squareSide/2;
         const float rhombusSide = 50;
@@ -68,7 +69,6 @@ namespace m1
         bool holdingMouse = false;
         int mouseX, mouseY;
         int buyX, buyY;
-        int releaseX, releaseY;
         bool holdingRhombus = false;
         int currentColor = 0; // 0 - Empty, 1 - Pink, 2 - Turquoise, 3 - Yellow, 4 - Purple
         int price = 0;
@@ -76,7 +76,7 @@ namespace m1
         float randomEnemyTime = 0;
         int randomMod = 1;
 
-        std::vector<std::tuple<float, float, int, int, float ,bool>> enemies; // x, y, color, hitpoints, size, destroy
+        std::vector<std::tuple<float, float, int, int, float ,bool, float>> enemies; // x, y, color, hitpoints, size, destroy, rotation angle
         std::vector<std::tuple<float, float, int, float, bool>> projectiles; // x, y, color, angularStep, canHit
         std::vector<std::tuple<float, float, float, float>> stars; // final x, final y, initial x, initial y
         std::vector<std::tuple<int, float, bool, float>> board = { // color, size, destroy, time since last shoot

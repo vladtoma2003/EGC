@@ -161,9 +161,8 @@ void Tema1::OnMouseMove(int mouseX, int mouseY, int deltaX, int deltaY)
     // Add mouse move event
     if(holdingMouse)
     {
-        mouseX = mouseX;
-        mouseY = window->GetResolution().y - mouseY;
-
+        mouseX = mouseX * 1280 / window->GetResolution().x;
+        mouseY = initialResolutiony - mouseY * 720 / window->GetResolution().y;
         
         Tema1::mouseX = mouseX;
         Tema1::mouseY = mouseY;
@@ -174,8 +173,9 @@ void Tema1::OnMouseBtnPress(int mouseX, int mouseY, int button, int mods)
 {
     // Add mouse button press event
     holdingMouse = true;
-    mouseX = mouseX;
-    mouseY = window->GetResolution().y - mouseY;
+    // calculez mouseX si mouseY relativ la dimensiunea initiala a ferestrei
+    mouseX = mouseX * 1280 / window->GetResolution().x;
+    mouseY = initialResolutiony - mouseY * 720 / window->GetResolution().y;
     Tema1::mouseX = mouseX;
     Tema1::mouseY = mouseY;
     Tema1::buyX = mouseX;
@@ -198,9 +198,6 @@ void Tema1::OnMouseBtnRelease(int mouseX, int mouseY, int button, int mods)
     holdingMouse = false;
     Tema1::buyX = 0;
     Tema1::buyY = 0;
-    Tema1::releaseX = mouseX;
-    Tema1::releaseY = mouseY;
-    // holdingRhombus = false;
 
 }
 
@@ -213,20 +210,20 @@ void Tema1::OnWindowResize(int width, int height)
 }
 
 void Tema1::buyRhombus(int x, int y, int buyX, int buyY){
-    RenderHoldingRhombus(x, y, buyX, buyY);
+    RenderHoldingRhombus(mouseX, mouseY, buyX, buyY);
     PlaceRhombus(mouseX, mouseY);
 }
 
 void Tema1::PlaceRhombus(int x, int y)
 {
     if(!holdingMouse && holdingRhombus)
-    { // life + (j+0.5)*squareSide + (j+1)*space, life + i*squareSide + i*space
+    { // Check if there was a rhombus being held and if the mouse was released
         for(int i = 0; i < 9; ++i)
         {
             if(x >= life + (i%3 + 0.5) * squareSide + (i%3 + 1) * space && x <= life + (i%3 + 1.5) * (squareSide + space) &&
                y >= life + (i/3) * squareSide + (i/3) * space && y <= life + (i/3 + 1) * squareSide + (i/3) * space &&
                get<0>(board[i]) == 0 && price <= score)
-            {
+            { // places it in the box if it is empty and the player has enough points
                 get<0>(board[i]) = currentColor;
                 get<1>(board[i]) = 1;
                 score -= price;
@@ -241,6 +238,7 @@ void Tema1::DestroyRhombus(int x, int y)
 {
     for(int i = 0; i < 9; ++i)
     {
+        // Destroy the rhombus if the click was inside the square that has it
         if(x >= life + (i%3 + 0.5)*(squareSide + space) && x <= life + (i%3 + 1.5)*(squareSide + space) &&
            y >= life + (i/3)*(squareSide + space) && y <= life + (i/3 + 1)*(squareSide + space) &&
            get<0>(board[i]) != 0)
@@ -254,14 +252,14 @@ void Tema1::ShootStars(float deltaTime)
 {
     for(int i = 0; i < 9; ++i)
     {
-        // ma plimb prin board
+        // Check if the current board square is empty to skip
         if(get<0>(board[i]) == 0 || get<2>(board[i]) == true)
         {
             continue;
         }
         get<3>(board[i]) += deltaTime;
         if((int)get<3>(board[i]) % 3 == 0)
-        {
+        { // shoot every approximately 3 seconds
             get<3>(board[i]) += 0.5;
             if(checkEnemysRow(i/3, get<0>(board[i]), enemies))
             {
@@ -276,11 +274,13 @@ void Tema1::ShootStars(float deltaTime)
  * @param color - the color of the rhombus that is being checked
  * @param enemies - the vector of enemies that is being checked
  */
-bool Tema1::checkEnemysRow(int row, int color, std::vector<std::tuple<float, float, int, int, float, bool>> enemies)
+bool Tema1::checkEnemysRow(int row, int color, std::vector<std::tuple<float, float, int, int, float, bool, float>> enemies)
 {
     for(auto enemy : enemies)
     {
-        if((int) get<1>(enemy) == (int)(life + row*squareSide + row*space + 0.5*squareSide) && get<2>(enemy) == color)
+        // Check if the enemy is in the same row as the rhombus and if it has the same color
+        if((int) get<1>(enemy) == (int)(life + row*squareSide + row*space + 0.5*squareSide) && get<2>(enemy) == color
+            && !get<5>(enemy))
         {
             return true;
         }
@@ -292,19 +292,23 @@ void Tema1::SpawnEnemies(float deltaTime)
 {
     randomEnemyTime += deltaTime;
     if((int)randomEnemyTime - randomMod >= 0)
-    {
+    { // Spawn enemies every randomMod seconds
+        // randomMod is the time between enemy spawns. If the time of the game is less than 2 minutes, the spawn time
+        // will be higher. The minimum time between spawns is 5 seconds when the game is going for more than 2 minutes
         randomMod = (rand()%5+2) + ((timeElapsed/60 < 2.0f)?((int)(10 - timeElapsed/60)):3)-deltaTime;
-        std::cout << "random Time = " << randomMod << "\n" << (timeElapsed/60 < 2.0f) << "\n";
+
+        // randomly picks the number of enemies to spawn based on how long the game has been going: 1 or 2 for less than
+        // 2 minutes and 2 or 3 for more than 2 minutes
         int noEnemies = (randomEnemyTime/60 < 2)?(rand()%2 + 1):(rand()%3 + 2);
-        std::cout << "noEnemies = " << noEnemies << "\n";
-        randomEnemyTime = 0;
+        randomEnemyTime = 0; // reset the timer
         for(int i = 0; i < noEnemies; ++i)
         {
+            // Randomly choose the line and the color of the enemy
             int line = rand() % 3;
             int color = rand() % 4 + 1;
             int hp = 6; // i*squareSide + i*space
             enemies.push_back(std::make_tuple(window->GetResolution().x + i*squareSide + i*space,
-                life + line*squareSide + line*space + 0.5*squareSide, color, hp, 0.25, false));
+                life + line*squareSide + line*space + 0.5*squareSide, color, hp, 0.25, false, 0));
         }
     }
 }
@@ -315,25 +319,24 @@ void Tema1::DetectCollision()
     {
         for (auto& projectile : projectiles)
         {
-            if(!get<4>(projectile)) continue;
+            if(!get<4>(projectile)) continue; // if the projectile already hit an enemy, skip it
             if(get<0>(projectile) >= get<0>(enemy) - 0.5*squareSide && get<0>(projectile) <= get<0>(enemy) + 0.5*squareSide &&
                 static_cast<int>(get<1>(projectile)) == static_cast<int>(get<1>(enemy)) &&
                get<2>(projectile) == get<2>(enemy) && get<4>(projectile) == true && !get<5>(enemy))
-            {
+            { // if the projectile collided with the enemy, the hp decreases and it marks the projectile as "hit"
                 --get<3>(enemy);
                 get<4>(projectile) = false;
             }
         }
         DestroyProjectiles();
         for(int j = 0; j < 9; ++j)
-        {
+        { // check if the enemy is in the range of the rhombus
             if(get<0>(board[j]) == 0) continue;
             if(get<0>(enemy) - rhombusSide/2 <= life + (j%3 + 0.5)*(squareSide + space) + 1.1*squareSide &&
                 get<0>(enemy) - rhombusSide/2 >= life + (j%3 - 0.5)*(squareSide + space) + 1.1*squareSide &&
                static_cast<int>(get<1>(enemy)) ==
-                                            static_cast<int>(life + j/3 * (squareSide + space) + 0.5 * squareSide) &&
-               !get<5>(enemy))
-            {
+                        static_cast<int>(life + j/3 * (squareSide + space) + 0.5 * squareSide) && !get<5>(enemy))
+            { // check for rhombus collision with enemy
                 get<2>(board[j]) = true;
             }
         }
@@ -342,6 +345,7 @@ void Tema1::DetectCollision()
 
 void Tema1::DestroyEnemies()
 {
+    // Erase the enemy from the vector if it doesn't have any hp left or if it reached the end of the screen
     if(enemies.empty() == false)
         for (auto& enemy : enemies)
         {
@@ -360,6 +364,7 @@ void Tema1::DestroyEnemies()
 
 void Tema1::DestroyProjectiles()
 {
+    // Erase the projectile from the vector if it already hit an enemy
     if(projectiles.empty() == false)
         for(int i = 0; i < projectiles.size(); ++i)
         {
@@ -374,19 +379,25 @@ void Tema1::SpawnStars(float time)
 {
     timeElapsed += time;
     if((static_cast<int>(timeElapsed) % 5 == 0 || timeElapsed < 2*time) && stars.size() < 10)
-    {
+    { // Randomly spawn stars every 4.5 seconds, if there are less than 10 stars on the screen
         timeElapsed += 0.5;
-        const int noOfStars = rand() % 3 + 1;
+        const int noOfStars = rand() % 3 + 1; // randomly choose how many stars to spawn, between 1 and 3
         for(int i = 0; i < noOfStars; ++i)
         {
+            // choose a random position for the star
             int x = rand() % static_cast<int>(window->GetResolution().x - 4 * squareSide + 3 * space - starSize);
             int y = rand() % static_cast<int>(window->GetResolution().y - starSize - 2 * squareSide - 2 * space);
-
+            
             x = x + 4*squareSide + 3*space - 2*starSize;
             y = window->GetResolution().y - y - starSize - 2*squareSide;
 
-            int spawnX = (rand()%2 == 0)? (x+window->GetResolution().x/2):(x-window->GetResolution().x);
-            int spawnY = y + window->GetResolution().y;
+            // calculate the equation of the line that goes through the star and the top of the screen
+            // f(x) = a*x + 1000
+            float a = (y - 1000.0) / x;
+
+            // calculate the (x,y) coordinates of the point where the line intersects the bottom of the screen
+            float spawnY = 2*window->GetResolution().y + 2*starSize;
+            double spawnX = (spawnY - 1000.0f)/a;
             
             stars.emplace_back(x, y, spawnX, spawnY);
         }
@@ -397,9 +408,19 @@ void Tema1::moveStars(float deltaTime)
 {
     for (auto& star : stars)
     {
-        // calculate the line equation so it goes diagonally
-        get<3>(star) = get<1>(star);
-        get<2>(star) = get<0>(star);
+        
+        if(get<3>(star) > get<1>(star))
+        {
+            // f(x) = a*x + 1000. The star moves on the line that goes through the top of the screen and the bottom
+            float a = (get<1>(star)-1000.0f)/get<0>(star);
+            get<2>(star) -= 1000.0f/a * deltaTime;
+            get<3>(star) -= 1000*deltaTime;
+        } else
+        {
+            // Final point reached, reset the star
+            get<3>(star) = get<1>(star);
+            get<2>(star) = get<0>(star);
+        }
     }
 }
 
@@ -409,7 +430,7 @@ void Tema1::CollectStars()
     {
         if(Tema1::mouseX >= get<0>(stars[i]) - starSize/2 && Tema1::mouseX <= get<0>(stars[i]) + starSize/2 &&
            Tema1::mouseY >= get<1>(stars[i]) - starSize/2 && Tema1::mouseY <= get<1>(stars[i]) + starSize/2)
-        {
+        { // Check if the click was inside one of the stars
             stars.erase(stars.begin() + i);
             Tema1::score += 1;
         }
@@ -458,7 +479,7 @@ void Tema1::RenderHoldingRhombus(int x, int y, int buyX, int buyY)
             holdingRhombus = true;
             currentColor = 4;
             price = 3;
-        } else
+        } else // Did not press on any of the shop squares
         {
             holdingRhombus = false;
         }
@@ -468,7 +489,7 @@ void Tema1::RenderHoldingRhombus(int x, int y, int buyX, int buyY)
 void Tema1::RenderScene(float deltaTime)
 {
 
-    // Render the stars that can be collected
+    // Render collectible stars
     if(stars.empty() == false)
     {
         for (auto& star : stars)
@@ -501,6 +522,7 @@ void Tema1::RenderScene(float deltaTime)
         {
             if(!get<5>(enemies[i]))
             {
+                // render the enemy normally
                 modelMatrix = glm::mat3(1);
                 get<0>(enemies[i]) -= 100*deltaTime;
                 modelMatrix *= transform2D::Translate(get<0>(enemies[i]), get<1>(enemies[i]));
@@ -508,10 +530,13 @@ void Tema1::RenderScene(float deltaTime)
                 RenderMesh2D(meshes["enemy" + std::to_string(get<2>(enemies[i]))], shaders["VertexColor"], modelMatrix);
             } else
             {
+                // enemy destroy animation
                 modelMatrix = glm::mat3(1);
                 modelMatrix *= transform2D::Translate(get<0>(enemies[i]), get<1>(enemies[i]));
                 get<4>(enemies[i]) -= 0.3f*deltaTime;
                 modelMatrix *= transform2D::Scale(get<4>(enemies[i]), get<4>(enemies[i]));
+                get<6>(enemies[i]) += deltaTime + 0.25f-get<4>(enemies[i]);
+                modelMatrix *= transform2D::Rotate(get<6>(enemies[i]));
                 RenderMesh2D(meshes["enemy" + std::to_string(get<2>(enemies[i]))], shaders["VertexColor"], modelMatrix);
                 if(get<4>(enemies[i]) <= 0)
                 {
