@@ -508,7 +508,7 @@ void Tema1::RenderScene(float deltaTime)
             modelMatrix = glm::mat3(1);
             get<0>(projectile) += 200*deltaTime;
             modelMatrix *= transform2D::Translate(get<0>(projectile), get<1>(projectile));
-            get<3>(projectile) += -1*deltaTime;
+            get<3>(projectile) += -5*deltaTime;
             modelMatrix *= transform2D::Rotate(get<3>(projectile));
             RenderMesh2D(meshes["star"+std::to_string(get<2>(projectile))], shaders["VertexColor"], modelMatrix);
         }
@@ -667,6 +667,5 @@ void Tema1::RenderScene(float deltaTime)
         modelMatrix *= transform2D::Scale(0.5, 0.5);
         modelMatrix *= transform2D::Rotate(glm::pi<float>()/10);
         RenderMesh2D(meshes["priceStar"], shaders["VertexColor"], modelMatrix);
-        
     }
 }
