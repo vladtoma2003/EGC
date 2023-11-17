@@ -249,15 +249,15 @@ void Tema1::ShootStars(float deltaTime)
 {
     for(int i = 0; i < 9; ++i)
     {
-        // Check if the current board square is empty to skip
+        // Check if the current board square is empty to skip 
         if(get<0>(board[i]) == 0 || get<2>(board[i]) == true)
         {
             continue;
         }
         get<3>(board[i]) += deltaTime;
-        if((int)get<3>(board[i]) % 3 == 0)
+        if((int)get<3>(board[i]) % 4 == 0)
         { // shoot every approximately 3 seconds
-            get<3>(board[i]) += 0.5;
+            get<3>(board[i]) += 1;
             if(checkEnemysRow(i/3, get<0>(board[i]), enemies))
             {
                 projectiles.push_back(std::make_tuple(life + (i%3 + 0.5)*(squareSide+space) + 0.5*squareSide,
@@ -303,7 +303,7 @@ void Tema1::SpawnEnemies(float deltaTime)
             // Randomly choose the line and the color of the enemy
             int line = rand() % 3;
             int color = rand() % 4 + 1;
-            int hp = 6; // i*squareSide + i*space
+            int hp = 3; // i*squareSide + i*space
             enemies.push_back(std::make_tuple(window->GetResolution().x + i*squareSide + i*space,
                 life + line*squareSide + line*space + 0.5*squareSide, color, hp, 0.25, false, 0));
         }
@@ -413,7 +413,6 @@ void Tema1::moveStars(float deltaTime)
             get<2>(star) -= 1000.0f/a * deltaTime;
             get<3>(star) -= 1000*deltaTime;
             get<4>(star) -= 25*deltaTime;
-            std::cout << "rotate: " << get<4>(star) << "\n";
         } else
         {
             // Final point reached, reset the star
