@@ -172,7 +172,6 @@ void Tema1::OnMouseMove(int mouseX, int mouseY, int deltaX, int deltaY)
 void Tema1::OnMouseBtnPress(int mouseX, int mouseY, int button, int mods)
 {
     // Add mouse button press event
-    holdingMouse = true;
     // calculez mouseX si mouseY relativ la dimensiunea initiala a ferestrei
     mouseX = mouseX * 1280 / window->GetResolution().x;
     mouseY = initialResolutiony - mouseY * 720 / window->GetResolution().y;
@@ -183,6 +182,10 @@ void Tema1::OnMouseBtnPress(int mouseX, int mouseY, int button, int mods)
     if(button == 2)
     {
         DestroyRhombus(mouseX, mouseY);
+    }
+    if(button == 1)
+    {
+        holdingMouse = true;
     }
     if(!stars.empty())
         CollectStars();
