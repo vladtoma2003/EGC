@@ -21,7 +21,7 @@ namespace m1
 
         // Mesh *CreateMesh(const char *name, const std::vector<VertexFormat> &vertices, const std::vector<unsigned int> &indices);
 
-    private:
+        private:
         void FrameStart() override;
         void Update(float deltaTimeSeconds) override;
         void FrameEnd() override;
@@ -53,7 +53,7 @@ namespace m1
         float aspectRatio;
         float zNear = 0.01f;
         float zFar = 200.0f;
-        // bool isPerspective = true;
+        bool isPerspective = true;
     };
     
 }   // namespace m1

@@ -11,4 +11,4 @@
 #include "lab_m1/lab8/lab8.h"
 #include "lab_m1/lab9/lab9.h"
 #include "lab_m1/Tema1/tema1.h"
-#include "lab_m1/Tema2/tema2.h"
+#include "lab_m1/Tema2/Tema2.h"

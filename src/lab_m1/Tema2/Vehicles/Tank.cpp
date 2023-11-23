@@ -1,6 +1,6 @@
 ﻿#include "Tank.h"
 
-#include "lab_m1/Tema2/Tema2.h"
+#include "..\Tema2.h"
 #include "lab_m1/Tema2/Meshes/Meshes.h"
 using namespace m1;
 
