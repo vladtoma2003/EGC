@@ -3,21 +3,22 @@
 
 namespace m1
 {
-    class Body : public gfxc::SimpleScene
+    class Tracks : public gfxc::SimpleScene
     {
     private:
         glm::vec3 position;
-        glm::vec3 size = glm::vec3(4, 1, 8);
+        glm::vec3 size = glm::vec3(1, 1, 8);
+        // Mesh *tracks = new Mesh("tracks");
     public:
-        explicit Body(const float x, const float y, const float z)
+        explicit Tracks(const float x, const float y, const float z)
         {
             position = glm::vec3(x, y, z);
         }
-        glm::vec3 getBodyPosition() const
+        glm::vec3 getTracksPosition() const
         {
             return position;
         }
-        glm::vec3 getBodySize() const
+        glm::vec3 getTracksSize() const
         {
             return size;
         }

@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include <vector>
 #include "components/simple_scene.h"
+#include "../camera.h"
 
 namespace m1
 {
@@ -8,6 +9,8 @@ namespace m1
     {
     public:
         static Mesh *CreateMesh(const char *name, std::string path);
-        // static void RenderSimpleMesh(Mesh *mesh, Shader *shader, const glm::mat4 & modelMatrix, glm::vec3 newColor); 
+        static void Meshes::RenderSimpleMesh(Mesh *mesh, Shader *shader, const glm::mat4 & modelMatrix, glm::vec3 newColor, implemented::CameraTema 
+        *camera,
+            float time, glm::mat4 projectionMatrix);
     };
 };

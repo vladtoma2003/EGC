@@ -4,6 +4,10 @@
 #include <string>
 #include <iostream>
 
+#include "Vehicles/Cannon.h"
+#include "Vehicles/Tracks.h"
+#include "Vehicles/Turret.h"
+
 using namespace std;
 using namespace m1;
 
@@ -31,6 +35,8 @@ void Tema2::Init()
     camera = new implemented::CameraTema();
     camera->Set(glm::vec3(0, 2, 3.5f), glm::vec3(0, 1, 0), glm::vec3(0, 1, 0));
 
+    tank = new Tank();
+    tank->createTank(0, 0.5, 0);
     {
         Shader *shader = new Shader("LabShader");
         shader->AddShader(PATH_JOIN(window->props.selfDir, SOURCE_PATH::M1, "Tema2", "shaders", "VertexShader.glsl"), GL_VERTEX_SHADER);
@@ -38,33 +44,6 @@ void Tema2::Init()
         shader->CreateAndLink();
         shaders[shader->GetName()] = shader;
     }
-
-    {
-        Mesh* mesh = new Mesh("body");
-        mesh->LoadMesh(MODELS_PATH, "body/body.obj");
-        meshes[mesh->GetMeshID()] = mesh;
-    }
-    {
-        Mesh *mesh = new Mesh("track");
-        mesh->LoadMesh(MODELS_PATH, "track/track.obj");
-        meshes[mesh->GetMeshID()] = mesh;
-    }
-    {
-        Mesh* mesh = new Mesh("turret");
-        mesh->LoadMesh(MODELS_PATH, "turret/turret.obj");
-        meshes[mesh->GetMeshID()] = mesh;
-    }
-    {
-        Mesh* mesh = new Mesh("pipe");
-        mesh->LoadMesh(MODELS_PATH, "pipe/pipe.obj");
-        meshes[mesh->GetMeshID()] = mesh;
-    }
-    {
-        Mesh* mesh = new Mesh("sphere");
-        mesh->LoadMesh(PATH_JOIN(window->props.selfDir, RESOURCE_PATH::MODELS, "primitives"), "sphere.obj");
-        meshes[mesh->GetMeshID()] = mesh;
-    }
-
     // TODO(student): After you implement the changing of the projection
     // parameters, remove hardcodings of these parameters
     aspectRatio = window->props.aspectRatio;
@@ -93,49 +72,43 @@ void Tema2::Update(float deltaTimeSeconds)
     { // Body
         glm::mat4 modelMatrix = glm::mat4(1);
         // modelMatrix = glm::translate(modelMatrix, glm::vec3(10.f, -20.f, 10.f));
-        modelMatrix = glm::translate(modelMatrix, glm::vec3(0.f, 0.5f, 0.f));    
-        modelMatrix = glm::scale(modelMatrix, glm::vec3(0.5f));
-        RenderSimpleMesh(meshes["body"], shaders["LabShader"], modelMatrix, glm::vec3(15.f/255, 39.f/255, 10.f/255));
+        modelMatrix = glm::translate(modelMatrix, tank->getBody()->getBodyPosition());    
+        modelMatrix = glm::scale(modelMatrix, glm::vec3(tank->getScale()));
+        Meshes::RenderSimpleMesh(tank->getComponent("body"), shaders["LabShader"], modelMatrix, glm::vec3(15.f/255, 39.f/255, 10.f/255), camera, time, 
+        projectionMatrix);
     }
     { // Track Left
         glm::mat4 modelMatrix = glm::mat4(1);
-        modelMatrix = glm::translate(modelMatrix, glm::vec3(-1.f, 0.25f, 0.f));
-        modelMatrix = glm::scale(modelMatrix, glm::vec3(0.5f, 0.75f, 0.5f));
-        RenderSimpleMesh(meshes["track"], shaders["LabShader"], modelMatrix, glm::vec3(50.f/255, 50.f/255, 50.f/255));
+        modelMatrix = glm::translate(modelMatrix, tank->getTracks()[0]->getTracksPosition());
+        modelMatrix = glm::scale(modelMatrix, glm::vec3(tank->getScale()));
+        Meshes::RenderSimpleMesh(tank->getComponent("track"), shaders["LabShader"], modelMatrix, glm::vec3(50.f/255, 50.f/255, 50.f/255), camera, time, projectionMatrix);
     }
     { // Track Right
         glm::mat4 modelMatrix = glm::mat4(1);
-        modelMatrix = glm::translate(modelMatrix, glm::vec3(1.f, 0.25f, 0.f));
-        modelMatrix = glm::scale(modelMatrix, glm::vec3(0.5f, 0.75f, 0.5f));
-        RenderSimpleMesh(meshes["track"], shaders["LabShader"], modelMatrix, glm::vec3(50.f/255, 50.f/255, 50.f/255));
+        modelMatrix = glm::translate(modelMatrix, tank->getTracks()[1]->getTracksPosition());
+        modelMatrix = glm::scale(modelMatrix, glm::vec3(tank->getScale()));
+        Meshes::RenderSimpleMesh(tank->getComponent("track"), shaders["LabShader"], modelMatrix, glm::vec3(50.f/255, 50.f/255, 50.f/255), camera, time, projectionMatrix);
     }
     { // Turret
-    glm::mat4 modelMatrix = glm::mat4(1);
-    modelMatrix = glm::translate(modelMatrix, glm::vec3(0.f, 1.f, -0.5f));
-    modelMatrix = glm::scale(modelMatrix, glm::vec3(0.5f, 0.75f, 0.5f));
-    RenderSimpleMesh(meshes["turret"], shaders["LabShader"], modelMatrix, glm::vec3(30.f/255, 49.f/255, 30.f/255));
-    }
-    { // Pipe
         glm::mat4 modelMatrix = glm::mat4(1);
-        modelMatrix = glm::translate(modelMatrix, glm::vec3(0.f, 1.f, 1.25f));
-        modelMatrix = glm::scale(modelMatrix, glm::vec3(0.5f, 0.75f, 0.5f));
-        RenderSimpleMesh(meshes["pipe"], shaders["LabShader"], modelMatrix, glm::vec3(50.f/255, 50.f/255, 50.f/255));
+        modelMatrix = glm::translate(modelMatrix, tank->getTurret()->getTurretPosition());
+        modelMatrix = glm::scale(modelMatrix, glm::vec3(tank->getScale()));
+        Meshes::RenderSimpleMesh(tank->getComponent("turret"), shaders["LabShader"], modelMatrix, glm::vec3(30.f/255, 49.f/255, 30.f/255), camera, time, projectionMatrix);
     }
-    // Render the gay ball
-    // if (renderCameraTarget)
-    // {
-    //     glm::mat4 modelMatrix = glm::mat4(1);
-    //     modelMatrix = glm::translate(modelMatrix, camera->GetTargetPosition());
-    //     modelMatrix = glm::scale(modelMatrix, glm::vec3(0.1f));
-    //     RenderMesh(meshes["sphere"], shaders["VertexNormal"], modelMatrix);
-    // }
+    { // Cannon
+        glm::mat4 modelMatrix = glm::mat4(1);
+        modelMatrix = glm::translate(modelMatrix, tank->getCannon()->getCannonPosition());
+        modelMatrix = glm::scale(modelMatrix, glm::vec3(tank->getScale()));
+        Meshes::RenderSimpleMesh(tank->getComponent("cannon"), shaders["LabShader"], modelMatrix, glm::vec3(50.f/255, 50.f/255, 50.f/255), camera, 
+        time, projectionMatrix);
+    }
 
     if (renderCameraTarget)
     {
         glm::mat4 modelMatrix = glm::mat4(1);
         modelMatrix = glm::translate(modelMatrix, camera->GetTargetPosition());
         modelMatrix = glm::scale(modelMatrix, glm::vec3(0.1f));
-        RenderSimpleMesh(meshes["sphere"], shaders["VertexNormal"], modelMatrix, glm::vec3(1, 0, 0));
+         Meshes::RenderSimpleMesh(meshes["sphere"], shaders["VertexNormal"], modelMatrix, glm::vec3(1, 0, 0), camera, time, projectionMatrix);
     }
 }
 
@@ -144,63 +117,6 @@ void Tema2::FrameEnd()
 {
     DrawCoordinateSystem(camera->GetViewMatrix(), projectionMatrix);
 }
-void Tema2::RenderSimpleMesh(Mesh *mesh, Shader *shader, const glm::mat4 & modelMatrix, glm::vec3 newColor)
-{
-    if (!mesh || !shader || !shader->GetProgramID())
-        return;
-
-    // Render an object using the specified shader and the specified position
-    glUseProgram(shader->program);
-
-    // TODO(student): Get shader location for uniform mat4 "Model"
-    int model = glGetUniformLocation(shader->program, "Model");
-
-    // TODO(student): Set shader uniform "Model" to modelMatrix
-    glUniformMatrix4fv(model, 1, GL_FALSE, glm::value_ptr(modelMatrix));
-
-    // TODO(student): Get shader location for uniform mat4 "View"
-    int view = glGetUniformLocation(shader->program, "View");
-    
-
-    // TODO(student): Set shader uniform "View" to viewMatrix
-    // glm::mat4 viewMatrix = GetSceneCamera()->GetViewMatrix();
-    glm::mat4 viewMatrix = camera->GetViewMatrix();
-    glUniformMatrix4fv(view, 1, GL_FALSE, glm::value_ptr(viewMatrix));
-
-    // TODO(student): Get shader location for uniform mat4 "Projection"
-    int projection = glGetUniformLocation(shader->program, "Projection");
-
-    // TODO(student): Set shader uniform "Projection" to projectionMatrix
-    // glm::mat4 projectionMatrix = GetSceneCamera()->GetProjectionMatrix();
-    glUniformMatrix4fv(projection, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
-
-    int timeLocation = glGetUniformLocation(shader->program, "Time");
-    glUniform1f(timeLocation, 2*abs(sinf(time)));
-
-    // glm::vec3 newColor = glm::vec3(15.f/2555, 39.f/255, 10.f/255);
-    int colorLocation = glGetUniformLocation(shader->program, "ObjectColor");
-    glUniform3fv(colorLocation, 1, glm::value_ptr(newColor));
-    
-    // Draw the object
-    glBindVertexArray(mesh->GetBuffers()->m_VAO);
-    glDrawElements(mesh->GetDrawMode(), static_cast<int>(mesh->indices.size()), GL_UNSIGNED_INT, 0);
-}
-
-// void Tema2::RenderMesh(Mesh * mesh, Shader * shader, const glm::mat4 & modelMatrix)
-// {
-//     if (!mesh || !shader || !shader->program)
-//         return;
-//
-//     // Render an object using the specified shader and the specified position
-//     shader->Use();
-//     glUniformMatrix4fv(shader->loc_view_matrix, 1, GL_FALSE, glm::value_ptr(camera->GetViewMatrix()));
-//     glUniformMatrix4fv(shader->loc_projection_matrix, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
-//     glUniformMatrix4fv(shader->loc_model_matrix, 1, GL_FALSE, glm::value_ptr(modelMatrix));
-//
-//     mesh->Render();
-// }
-
-
 /*
  *  These are callback functions. To find more about callbacks and
  *  how they behave, see `input_controller.h`.
@@ -332,14 +248,14 @@ void Tema2::OnMouseMove(int mouseX, int mouseY, int deltaX, int deltaY)
 
         }
 
-        if (window->GetSpecialKeyState() & GLFW_MOD_CONTROL) {
+        // if (window->GetSpecialKeyState() & GLFW_MOD_CONTROL) {
             renderCameraTarget = true;
             // TODO(student): Rotate the camera in third-person mode around
             // OX and OY using `deltaX` and `deltaY`. Use the sensitivity
             // variables for setting up the rotation speed.
             camera->RotateThirdPerson_OX(-sensivityOX*deltaY);
             camera->RotateThirdPerson_OY(-sensivityOY*deltaX);
-        }
+        // }
     }
 }
 

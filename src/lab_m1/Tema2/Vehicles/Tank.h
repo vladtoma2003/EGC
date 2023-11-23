@@ -3,6 +3,10 @@
 #include "lab_m1/Tema2/Vehicles/Body.h"
 namespace m1
 {
+    class Cannon;
+    class Turret;
+    class Tracks;
+
     class Tank : public gfxc::SimpleScene{
     
     private:
@@ -18,9 +22,15 @@ namespace m1
         float sizeZ = 4*scale;
         // Mesh *body;
         Body *body;
+        Tracks **tracks;
+        Turret *turret;
+        Cannon *cannon;
         std::unordered_map<std::string, Mesh *> components;
 
         Body* createBody(float x, float y, float z);
+        Tracks** createTracks(float x, float y, float z);
+        Turret *createTurret(float x, float y, float z);
+        Cannon *createCannon(float x, float y, float z);
 
     public:
 
@@ -60,6 +70,11 @@ namespace m1
             return z;
         }
 
+        float getScale() const
+        {
+            return scale;
+        }
+
         std::unordered_map<std::string, Mesh*> getComponents() const
         {
             return components;
@@ -69,6 +84,23 @@ namespace m1
         {
             return components[name];
         };
+
+        Body *getBody() const
+        {
+            return body;
+        }
+        Tracks **getTracks() const
+        {
+            return tracks;
+        }
+        Turret *getTurret() const
+        {
+            return turret;
+        }
+        Cannon *getCannon() const
+        {
+            return cannon;
+        }
     };
 
    

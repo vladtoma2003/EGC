@@ -1,50 +1,57 @@
 ﻿#include "Tank.h"
 
+#include <iostream>
+
+#include "Cannon.h"
+#include "Tracks.h"
+#include "Turret.h"
 #include "..\Tema2.h"
 #include "lab_m1/Tema2/Meshes/Meshes.h"
 using namespace m1;
 
+Cannon *Tank::createCannon(float x, float y, float z)
+{
+    components["cannon"] = Meshes::CreateMesh("cannon", "src/lab_m1/Tema2/Models/cannon/");
+    const float distanceY = scale * body->getBodySize().y;
+    const float distanceZ = scale * turret->getTurretSize().z;
+    return new Cannon(x, y + distanceY, z + distanceZ);
+}
+
+Turret *Tank::createTurret(float x, float y, float z)
+{
+    components["turret"] = Meshes::CreateMesh("turret", "src/lab_m1/Tema2/Models/turret/");
+    const float distanceY = scale * body->getBodySize().y;
+    const float distanceZ = scale * body->getBodySize().z/8;
+    return new Turret(x, y + distanceY, z - distanceZ);
+}
+
 Body* Tank::createBody(float x, float y, float z)
 {
-    // glm::vec3 center = glm::vec3(x, y, z);
-    // std::vector<VertexFormat> vertices
-    // {
-    //     VertexFormat(center, glm::vec3(15.f/2555, 39.f/255, 10.f/255), glm::vec3(0.2, 0.8, 0.2)),
-    //     VertexFormat(center + glm::vec3(-1, -1,  1), glm::vec3(15.f/2555, 39.f/255, 10.f/255), glm::vec3(0.2, 0.8, 0.2)),
-    //     VertexFormat(center + glm::vec3( 1, -1,  1), glm::vec3(15.f/2555, 39.f/255, 10.f/255), glm::vec3(0.9, 0.4, 0.2)),
-    //     VertexFormat(center + glm::vec3(-1,  1,  1), glm::vec3(15.f/2555, 39.f/255, 10.f/255), glm::vec3(0.7, 0.7, 0.1)),
-    //     VertexFormat(center + glm::vec3( 1,  1,  1), glm::vec3(15.f/2555, 39.f/255, 10.f/255), glm::vec3(0.7, 0.3, 0.7)),
-    //     VertexFormat(center + glm::vec3(-1, -1, -1), glm::vec3(15.f/2555, 39.f/255, 10.f/255), glm::vec3(0.3, 0.5, 0.4)),
-    //     VertexFormat(center + glm::vec3( 1, -1, -1), glm::vec3(15.f/2555, 39.f/255, 10.f/255), glm::vec3(0.5, 0.2, 0.9)),
-    //     VertexFormat(center + glm::vec3(-1,  1, -1), glm::vec3(15.f/2555, 39.f/255, 10.f/255), glm::vec3(0.7, 0.0, 0.7)),
-    //     VertexFormat(center + glm::vec3( 1,  1, -1), glm::vec3(15.f/2555, 39.f/255, 10.f/255), glm::vec3(0.1, 0.5, 0.8)),
-    // };
-    //
-    // std::vector<unsigned int> indices =
-    // {
-    //     1, 2, 3,       2, 4, 3,
-    //     3, 4, 8,       3, 8, 7,
-    //     2, 8, 4,       2, 6, 8,
-    //     7, 8, 5,       8, 6, 5,
-    //     1, 5, 2,       2, 5, 6,
-    //     3, 7, 5,       1, 3, 5,
-    //     // 0, 1, 2,        1, 3, 2,
-    //     // 2, 3, 7,        2, 7, 6,
-    //     // 1, 7, 3,        1, 5, 7,
-    //     // 6, 7, 4,        7, 5, 4,
-    //     // 0, 4, 1,        1, 4, 5,
-    //     // 2, 6, 4,        0, 2, 4,
-    // };
-    //
-    components["body"] = Meshes::CreateMesh("body", "src/lab_m1/Tema2/Models/body.obj");
-    
+    components["body"] = Meshes::CreateMesh("body", "src/lab_m1/Tema2/Models/body/");
     return new Body(x, y, z);
 }
 
-void Tank::createTank(float x, float y, float z)
+Tracks **Tank::createTracks(float x, float y, float z)
 {
+    Mesh *mesh = Meshes::CreateMesh("track", "src/lab_m1/Tema2/Models/track/");
+    components[mesh->GetMeshID()] = mesh;
+    Tracks **tracks = new Tracks*[2];
+    const float distanceX = scale * body->getBodySize().x / 2;
+    const float distanceY = scale * body->getBodySize().y / 2;
+    std::cout << "distanceX: " << distanceX << "\n" << "distanceY: " << distanceY << "\n";
+    tracks[0] = new Tracks(x + distanceX, y - distanceY, z);
+    tracks[1] = new Tracks(x - distanceX, y - distanceY, z);
+    return tracks;
+}
+
+
+void Tank::createTank(const float x, const float y, const float z)
+{
+    std::cout << "Tank created\n";
     this->body = createBody(x, y, z);
-    
+    this->tracks = createTracks(x, y, z);
+    this->turret = createTurret(x, y, z);
+    this->cannon = createCannon(x, y, z);
 }
 
 Tank::Tank()
