@@ -27,8 +27,10 @@ Tema2::~Tema2()
 void Tema2::Init()
 {
     {
-        tank->createBody()
-        
+        tank->createTank(0, 0, 0);
+        renderCameraTarget = false;
+        camera = new implemented::CameraTema();
+        camera->Set(glm::vec3(0, 2, 3.5f), glm::vec3(0, 1, 0), glm::vec3(0, 1, 0));
     }
     // {
     //     Mesh* mesh = new Mesh("box");
@@ -71,6 +73,28 @@ void Tema2::Init()
         shader->CreateAndLink();
         shaders[shader->GetName()] = shader;
     }
+
+    {
+        Mesh* mesh = new Mesh("body");
+        mesh->LoadMesh(MODELS_PATH, "body/body.obj");
+        meshes[mesh->GetMeshID()] = mesh;
+    }
+    {
+        Mesh *mesh = new Mesh("track");
+        mesh->LoadMesh(MODELS_PATH, "track/track.obj");
+        meshes[mesh->GetMeshID()] = mesh;
+    }
+    {
+        Mesh* mesh = new Mesh("turret");
+        mesh->LoadMesh(MODELS_PATH, "turret/turret.obj");
+        meshes[mesh->GetMeshID()] = mesh;
+    }
+    {
+        Mesh* mesh = new Mesh("pipe");
+        mesh->LoadMesh(MODELS_PATH, "pipe/pipe.obj");
+        meshes[mesh->GetMeshID()] = mesh;
+    }
+
 }
 
 
@@ -148,7 +172,7 @@ void Tema2::Init()
 void Tema2::FrameStart()
 {
     // Clears the color buffer (using the previously set color) and depth buffer
-    glClearColor(0, 0, 0, 1);
+    glClearColor(89.0f/255, 192.0f/255, 235.0f/255, 1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glm::ivec2 resolution = window->GetResolution();
@@ -182,22 +206,58 @@ void Tema2::Update(float deltaTimeSeconds)
     //     modelMatrix = glm::scale(modelMatrix, glm::vec3(0.5f));
     //     RenderSimpleMesh(meshes["cube"], shaders["LabShader"], modelMatrix);
     // }
+    { // Body
+        glm::mat4 modelMatrix = glm::mat4(1);
+        // modelMatrix = glm::translate(modelMatrix, glm::vec3(10.f, -20.f, 10.f));
+        modelMatrix = glm::translate(modelMatrix, glm::vec3(0.f, 0.5f, 0.f));    
+        modelMatrix = glm::scale(modelMatrix, glm::vec3(0.5f));
+        RenderSimpleMesh(meshes["body"], shaders["LabShader"], modelMatrix, glm::vec3(15.f/255, 39.f/255, 10.f/255));
+    }
+    { // Track Left
+        glm::mat4 modelMatrix = glm::mat4(1);
+        modelMatrix = glm::translate(modelMatrix, glm::vec3(-1.f, 0.25f, 0.f));
+        modelMatrix = glm::scale(modelMatrix, glm::vec3(0.5f, 0.75f, 0.5f));
+        RenderSimpleMesh(meshes["track"], shaders["LabShader"], modelMatrix, glm::vec3(50.f/255, 50.f/255, 50.f/255));
+    }
+    { // Track Right
+        glm::mat4 modelMatrix = glm::mat4(1);
+        modelMatrix = glm::translate(modelMatrix, glm::vec3(1.f, 0.25f, 0.f));
+        modelMatrix = glm::scale(modelMatrix, glm::vec3(0.5f, 0.75f, 0.5f));
+        RenderSimpleMesh(meshes["track"], shaders["LabShader"], modelMatrix, glm::vec3(50.f/255, 50.f/255, 50.f/255));
+    }
+    { // Turret
+    glm::mat4 modelMatrix = glm::mat4(1);
+    modelMatrix = glm::translate(modelMatrix, glm::vec3(0.f, 1.f, -0.5f));
+    modelMatrix = glm::scale(modelMatrix, glm::vec3(0.5f, 0.75f, 0.5f));
+    RenderSimpleMesh(meshes["turret"], shaders["LabShader"], modelMatrix, glm::vec3(30.f/255, 49.f/255, 30.f/255));
+    }
+    { // Pipe
+        glm::mat4 modelMatrix = glm::mat4(1);
+        modelMatrix = glm::translate(modelMatrix, glm::vec3(0.f, 1.f, 1.25f));
+        modelMatrix = glm::scale(modelMatrix, glm::vec3(0.5f, 0.75f, 0.5f));
+        RenderSimpleMesh(meshes["pipe"], shaders["LabShader"], modelMatrix, glm::vec3(50.f/255, 50.f/255, 50.f/255));
+    }
+    // Render the gay ball
+    if (renderCameraTarget)
     {
         glm::mat4 modelMatrix = glm::mat4(1);
-        modelMatrix = glm::translate(modelMatrix, glm::vec3(0, 0.5f, 0));
-        RenderSimpleMesh(tank->getComponent("body"), shaders["LabShader"], modelMatrix);
-        // RenderMesh(tank->getComponent("body"), glm::vec3(0,0,0), glm::vec3(1,1,1));
+        modelMatrix = glm::translate(modelMatrix, camera->GetTargetPosition());
+        modelMatrix = glm::scale(modelMatrix, glm::vec3(0.1f));
+        RenderMesh(meshes["sphere"], shaders["VertexNormal"], modelMatrix);
     }
+
 }
 
 
 void Tema2::FrameEnd()
 {
-    DrawCoordinateSystem();
+    // DrawCoordinateSystem();
+    DrawCoordinateSystem(camera->GetViewMatrix(), projectionMatrix);
+
 }
 
 
-void Tema2::RenderSimpleMesh(Mesh *mesh, Shader *shader, const glm::mat4 & modelMatrix)
+void Tema2::RenderSimpleMesh(Mesh *mesh, Shader *shader, const glm::mat4 & modelMatrix, glm::vec3 newColor)
 {
     if (!mesh || !shader || !shader->GetProgramID())
         return;
@@ -228,6 +288,10 @@ void Tema2::RenderSimpleMesh(Mesh *mesh, Shader *shader, const glm::mat4 & model
 
     int timeLocation = glGetUniformLocation(shader->program, "Time");
     glUniform1f(timeLocation, 2*abs(sinf(time)));
+
+    // glm::vec3 newColor = glm::vec3(15.f/2555, 39.f/255, 10.f/255);
+    int colorLocation = glGetUniformLocation(shader->program, "ObjectColor");
+    glUniform3fv(colorLocation, 1, glm::value_ptr(newColor));
     
     // Draw the object
     glBindVertexArray(mesh->GetBuffers()->m_VAO);
@@ -244,12 +308,28 @@ void Tema2::RenderSimpleMesh(Mesh *mesh, Shader *shader, const glm::mat4 & model
 void Tema2::OnInputUpdate(float deltaTime, int mods)
 {
     // Add key press event
+
 }
 
 
 void Tema2::OnKeyPress(int key, int mods)
 {
     // Add key press event
+    if (key == GLFW_KEY_T)
+    {
+        renderCameraTarget = !renderCameraTarget;
+    }
+    // // TODO(student): Switch projections
+    // if(key == GLFW_KEY_O)
+    // {
+    //     orthoLeft = -8.0f;
+    //     orthoRight = 8.0f;
+    //     orthoUp = 4.5f;
+    //     orthoDown = -4.5f;
+    //     // isPerspective = false;
+    //     projectionMatrix = glm::ortho(orthoLeft, orthoRight, orthoDown, orthoUp, zNear, zFar);
+    // }
+
 }
 
 
@@ -262,6 +342,30 @@ void Tema2::OnKeyRelease(int key, int mods)
 void Tema2::OnMouseMove(int mouseX, int mouseY, int deltaX, int deltaY)
 {
     // Add mouse move event
+    if (window->MouseHold(GLFW_MOUSE_BUTTON_RIGHT))
+    {
+        float sensivityOX = 0.001f;
+        float sensivityOY = 0.001f;
+
+        if (window->GetSpecialKeyState() == 0) {
+            renderCameraTarget = false;
+            // TODO(student): Rotate the camera in first-person mode around
+            // OX and OY using `deltaX` and `deltaY`. Use the sensitivity
+            // variables for setting up the rotation speed.
+            camera->RotateFirstPerson_OX(-sensivityOX*deltaY);
+            camera->RotateFirstPerson_OY(-sensivityOY*deltaX);
+
+        }
+
+        if (window->GetSpecialKeyState() & GLFW_MOD_CONTROL) {
+            renderCameraTarget = true;
+            // TODO(student): Rotate the camera in third-person mode around
+            // OX and OY using `deltaX` and `deltaY`. Use the sensitivity
+            // variables for setting up the rotation speed.
+            camera->RotateThirdPerson_OX(-sensivityOX*deltaY);
+            camera->RotateThirdPerson_OY(-sensivityOY*deltaX);
+        }
+    }
 }
 
 

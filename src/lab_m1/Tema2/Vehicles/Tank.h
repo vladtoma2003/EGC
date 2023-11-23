@@ -1,37 +1,8 @@
 ﻿#pragma once
 #include "components/simple_scene.h"
-
+#include "lab_m1/Tema2/Vehicles/Body.h"
 namespace m1
 {
-
-    class Body : public gfxc::SimpleScene
-    {
-    private:
-        float x;
-        float y;
-        float z;
-        Mesh *body = new Mesh("body");
-    public:
-        explicit Body(float x, float y, float z)
-        {
-            this.x = x;
-            this.y = y;
-            this.z = z;
-        }
-        float getBodyX() const
-        {
-            return x;
-        }
-        float getBodyY() const
-        {
-            return y;
-        }
-        float getBodyZ() const
-        {
-            return z;
-        }
-    };
-    
     class Tank : public gfxc::SimpleScene{
     
     private:
@@ -41,6 +12,10 @@ namespace m1
         float x = 0;
         float y = 0;
         float z = 0;
+        float scale = 0.5f;
+        float sizeX = 8*scale;
+        float sizeY = 1*scale;
+        float sizeZ = 4*scale;
         // Mesh *body;
         Body *body;
         std::unordered_map<std::string, Mesh *> components;
@@ -49,7 +24,7 @@ namespace m1
 
     public:
 
-        void createTank(Body *body);
+        void createTank(float x, float y, float z);
 
         // void Init();
         Tank();

@@ -7,6 +7,7 @@ namespace m1
     class Meshes : public gfxc::SimpleScene
     {
     public:
-        static Mesh *CreateMesh(const char *name, const std::vector<VertexFormat> &vertices, const std::vector<unsigned int> &indices);
+        static Mesh *CreateMesh(const char *name, std::string path);
+        // static void RenderSimpleMesh(Mesh *mesh, Shader *shader, const glm::mat4 & modelMatrix, glm::vec3 newColor); 
     };
 };

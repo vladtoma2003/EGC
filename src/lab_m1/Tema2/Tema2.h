@@ -2,9 +2,12 @@
 
 #include <vector>
 
+#include "camera.h"
 #include "components/simple_scene.h"
-#include "lab_m1/Tema2/Tank.h"
-#include "lab_m1/Tema2/Meshes/Meshes.h"
+#include "Vehicles/Tank.h"
+#include "Meshes/Meshes.h"
+
+#define MODELS_PATH "src/lab_m1/Tema2/Models/"
 
 namespace m1
 {
@@ -14,7 +17,7 @@ namespace m1
         Tema2();
         ~Tema2();
 
-        void Init() override
+        void Init() override;
 
         // Mesh *CreateMesh(const char *name, const std::vector<VertexFormat> &vertices, const std::vector<unsigned int> &indices);
 
@@ -23,7 +26,7 @@ namespace m1
         void Update(float deltaTimeSeconds) override;
         void FrameEnd() override;
 
-        void RenderSimpleMesh(Mesh *mesh, Shader *shader, const glm::mat4 &modelMatrix);
+        void RenderSimpleMesh(Mesh *mesh, Shader *shader, const glm::mat4 &modelMatrix, const glm::vec3 newColor);
 
         void OnInputUpdate(float deltaTime, int mods) override;
         void OnKeyPress(int key, int mods) override;
@@ -35,5 +38,22 @@ namespace m1
         void OnWindowResize(int width, int height) override;
         float time;
         Tank *tank = new Tank();
+
+    protected:
+        implemented::CameraTema *camera;
+        glm::mat4 projectionMatrix;
+        bool renderCameraTarget;
+
+        // TODO(student): If you need any other class variables, define them here.
+        float orthoLeft = 0;
+        float orthoRight = 1280;
+        float orthoDown = 0;
+        float orthoUp = 720;
+        float fov = RADIANS(60);
+        float aspectRatio;
+        float zNear = 0.01f;
+        float zFar = 200.0f;
+        // bool isPerspective = true;
     };
+    
 }   // namespace m1
