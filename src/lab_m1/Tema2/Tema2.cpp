@@ -36,13 +36,18 @@ void Tema2::Init()
     camera->Set(glm::vec3(0, 2, 3.5f), glm::vec3(0, 1, 0), glm::vec3(0, 1, 0));
 
     tank = new Tank();
-    tank->createTank(0, 0.5, 0);
+    tank->createTank(camera->GetTargetPosition().x, camera->GetTargetPosition().y, camera->GetTargetPosition().z);
     {
         Shader *shader = new Shader("LabShader");
         shader->AddShader(PATH_JOIN(window->props.selfDir, SOURCE_PATH::M1, "Tema2", "shaders", "VertexShader.glsl"), GL_VERTEX_SHADER);
         shader->AddShader(PATH_JOIN(window->props.selfDir, SOURCE_PATH::M1, "Tema2", "shaders", "FragmentShader.glsl"), GL_FRAGMENT_SHADER);
         shader->CreateAndLink();
         shaders[shader->GetName()] = shader;
+    }
+    {
+        Mesh* mesh = new Mesh("sphere");
+        mesh->LoadMesh(PATH_JOIN(window->props.selfDir, RESOURCE_PATH::MODELS, "primitives"), "sphere.obj");
+        meshes[mesh->GetMeshID()] = mesh;
     }
     // TODO(student): After you implement the changing of the projection
     // parameters, remove hardcodings of these parameters
@@ -69,40 +74,7 @@ void Tema2::Update(float deltaTimeSeconds)
     // Render the camera target. This is useful for understanding where
     // the rotation point is, when moving in third-person camera mode.
     // (gay ball)
-    { // Body
-        glm::mat4 modelMatrix = glm::mat4(1);
-        // modelMatrix = glm::translate(modelMatrix, glm::vec3(10.f, -20.f, 10.f));
-        modelMatrix = glm::translate(modelMatrix, tank->getBody()->getBodyPosition());    
-        modelMatrix = glm::scale(modelMatrix, glm::vec3(tank->getScale()));
-        Meshes::RenderSimpleMesh(tank->getComponent("body"), shaders["LabShader"], modelMatrix, glm::vec3(15.f/255, 39.f/255, 10.f/255), camera, time, 
-        projectionMatrix);
-    }
-    { // Track Left
-        glm::mat4 modelMatrix = glm::mat4(1);
-        modelMatrix = glm::translate(modelMatrix, tank->getTracks()[0]->getTracksPosition());
-        modelMatrix = glm::scale(modelMatrix, glm::vec3(tank->getScale()));
-        Meshes::RenderSimpleMesh(tank->getComponent("track"), shaders["LabShader"], modelMatrix, glm::vec3(50.f/255, 50.f/255, 50.f/255), camera, time, projectionMatrix);
-    }
-    { // Track Right
-        glm::mat4 modelMatrix = glm::mat4(1);
-        modelMatrix = glm::translate(modelMatrix, tank->getTracks()[1]->getTracksPosition());
-        modelMatrix = glm::scale(modelMatrix, glm::vec3(tank->getScale()));
-        Meshes::RenderSimpleMesh(tank->getComponent("track"), shaders["LabShader"], modelMatrix, glm::vec3(50.f/255, 50.f/255, 50.f/255), camera, time, projectionMatrix);
-    }
-    { // Turret
-        glm::mat4 modelMatrix = glm::mat4(1);
-        modelMatrix = glm::translate(modelMatrix, tank->getTurret()->getTurretPosition());
-        modelMatrix = glm::scale(modelMatrix, glm::vec3(tank->getScale()));
-        Meshes::RenderSimpleMesh(tank->getComponent("turret"), shaders["LabShader"], modelMatrix, glm::vec3(30.f/255, 49.f/255, 30.f/255), camera, time, projectionMatrix);
-    }
-    { // Cannon
-        glm::mat4 modelMatrix = glm::mat4(1);
-        modelMatrix = glm::translate(modelMatrix, tank->getCannon()->getCannonPosition());
-        modelMatrix = glm::scale(modelMatrix, glm::vec3(tank->getScale()));
-        Meshes::RenderSimpleMesh(tank->getComponent("cannon"), shaders["LabShader"], modelMatrix, glm::vec3(50.f/255, 50.f/255, 50.f/255), camera, 
-        time, projectionMatrix);
-    }
-
+    tank->renderTank(camera, projectionMatrix, shaders, time);
     if (renderCameraTarget)
     {
         glm::mat4 modelMatrix = glm::mat4(1);
@@ -110,7 +82,12 @@ void Tema2::Update(float deltaTimeSeconds)
         modelMatrix = glm::scale(modelMatrix, glm::vec3(0.1f));
          Meshes::RenderSimpleMesh(meshes["sphere"], shaders["VertexNormal"], modelMatrix, glm::vec3(1, 0, 0), camera, time, projectionMatrix);
     }
+    
+    // Set Tank position to camera
+    tank->updatePosition(camera->GetTargetPosition().x, camera->GetTargetPosition().y, camera->GetTargetPosition().z);
+    
 }
+
 
 
 void Tema2::FrameEnd()
@@ -133,22 +110,25 @@ void Tema2::OnInputUpdate(float deltaTime, int mods)
         if (window->KeyHold(GLFW_KEY_W)) {
             // TODO(student): Translate the camera forward
             camera->TranslateForward(deltaTime*cameraSpeed);
-
+            // tank->moveTank(deltaTime*cameraSpeed, 0, 0);
         }
 
         if (window->KeyHold(GLFW_KEY_A)) {
             // TODO(student): Translate the camera to the left
             camera->TranslateRight(-deltaTime*cameraSpeed);
+            // tank->moveTank(0, 0, -deltaTime*cameraSpeed);
         }
 
         if (window->KeyHold(GLFW_KEY_S)) {
             // TODO(student): Translate the camera backward
             camera->TranslateForward(-deltaTime*cameraSpeed);
+            // tank->moveTank(-deltaTime*cameraSpeed, 0, 0);
         }
 
         if (window->KeyHold(GLFW_KEY_D)) {
             // TODO(student): Translate the camera to the right
             camera->TranslateRight(deltaTime*cameraSpeed);
+            // tank->moveTank(0, 0, deltaTime*cameraSpeed);
         }
 
         if (window->KeyHold(GLFW_KEY_Q)) {
@@ -238,15 +218,15 @@ void Tema2::OnMouseMove(int mouseX, int mouseY, int deltaX, int deltaY)
         float sensivityOX = 0.001f;
         float sensivityOY = 0.001f;
 
-        if (window->GetSpecialKeyState() == 0) {
-            renderCameraTarget = false;
-            // TODO(student): Rotate the camera in first-person mode around
-            // OX and OY using `deltaX` and `deltaY`. Use the sensitivity
-            // variables for setting up the rotation speed.
-            camera->RotateFirstPerson_OX(-sensivityOX*deltaY);
-            camera->RotateFirstPerson_OY(-sensivityOY*deltaX);
-
-        }
+        // if (window->GetSpecialKeyState() == 0) {
+        //     renderCameraTarget = false;
+        //     // TODO(student): Rotate the camera in first-person mode around
+        //     // OX and OY using `deltaX` and `deltaY`. Use the sensitivity
+        //     // variables for setting up the rotation speed.
+        //     camera->RotateFirstPerson_OX(-sensivityOX*deltaY);
+        //     camera->RotateFirstPerson_OY(-sensivityOY*deltaX);
+        //
+        // }
 
         // if (window->GetSpecialKeyState() & GLFW_MOD_CONTROL) {
             renderCameraTarget = true;

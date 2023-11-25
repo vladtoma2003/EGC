@@ -49,7 +49,7 @@ namespace m1
         float orthoRight = 1280;
         float orthoDown = 0;
         float orthoUp = 720;
-        float fov = RADIANS(60);
+        float fov = RADIANS(70);
         float aspectRatio;
         float zNear = 0.01f;
         float zFar = 200.0f;

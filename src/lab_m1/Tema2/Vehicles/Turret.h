@@ -21,5 +21,17 @@ namespace m1
         {
             return size;
         }
+        void moveTurret(float x, float y, float z)
+        {
+            position.x += x;
+            position.y += y;
+            position.z += z;
+        }
+        void updateTurretPosition(float x, float y, float z)
+        {
+            position.x = x;
+            position.y = y;
+            position.z = z;
+        }
     };
 }

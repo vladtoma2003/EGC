@@ -22,5 +22,17 @@ namespace m1
         {
             return size;
         }
+        void moveTracks(float x, float y, float z)
+        {
+            position.x += x;
+            position.y += y;
+            position.z += z;
+        }
+        void updateTracksPosition(float x, float y, float z)
+        {
+            position.x = x;
+            position.y = y;
+            position.z = z;
+        }
     };
 }

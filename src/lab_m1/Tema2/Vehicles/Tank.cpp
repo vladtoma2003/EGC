@@ -9,20 +9,95 @@
 #include "lab_m1/Tema2/Meshes/Meshes.h"
 using namespace m1;
 
+void Tank::renderTank(implemented::CameraTema *camera, glm::mat4 projectionMatrix, std::unordered_map<std::string, Shader *> shaders,float time)
+{
+    { // Body
+        glm::mat4 modelMatrix = glm::mat4(1);
+        // modelMatrix = glm::translate(modelMatrix, glm::vec3(10.f, -20.f, 10.f));
+        modelMatrix = glm::translate(modelMatrix, getBody()->getBodyPosition());    
+        modelMatrix = glm::scale(modelMatrix, glm::vec3(getScale()));
+        Meshes::RenderSimpleMesh(getComponent("body"), shaders["LabShader"], modelMatrix,
+            glm::vec3(15.f/255, 39.f/255, 10.f/255), camera, time, projectionMatrix);
+    }
+    { // Track Left
+        glm::mat4 modelMatrix = glm::mat4(1);
+        modelMatrix = glm::translate(modelMatrix, getTracks()[0]->getTracksPosition());
+        modelMatrix = glm::scale(modelMatrix, glm::vec3(getScale()));
+        Meshes::RenderSimpleMesh(getComponent("track"), shaders["LabShader"], modelMatrix,
+            glm::vec3(50.f/255, 50.f/255, 50.f/255), camera, time, projectionMatrix);
+    }
+    { // Track Right
+        glm::mat4 modelMatrix = glm::mat4(1);
+        modelMatrix = glm::translate(modelMatrix, getTracks()[1]->getTracksPosition());
+        modelMatrix = glm::scale(modelMatrix, glm::vec3(getScale()));
+        Meshes::RenderSimpleMesh(getComponent("track"), shaders["LabShader"], modelMatrix,
+            glm::vec3(50.f/255, 50.f/255, 50.f/255), camera, time, projectionMatrix);
+    }
+    { // Turret
+        glm::mat4 modelMatrix = glm::mat4(1);
+        modelMatrix = glm::translate(modelMatrix, getTurret()->getTurretPosition());
+        modelMatrix = glm::scale(modelMatrix, glm::vec3(getScale()));
+        Meshes::RenderSimpleMesh(getComponent("turret"), shaders["LabShader"], modelMatrix,
+            glm::vec3(30.f/255, 49.f/255, 30.f/255), camera, time, projectionMatrix);
+    }
+    { // Cannon
+        glm::mat4 modelMatrix = glm::mat4(1);
+        modelMatrix = glm::translate(modelMatrix, getCannon()->getCannonPosition());
+        modelMatrix = glm::scale(modelMatrix, glm::vec3(getScale()));
+        Meshes::RenderSimpleMesh(getComponent("cannon"), shaders["LabShader"], modelMatrix,
+            glm::vec3(50.f/255, 50.f/255, 50.f/255), camera, time, projectionMatrix);
+    }
+}
+
+void Tank::updatePosition(float x, float y, float z)
+{
+    position.x = x;
+    position.y = y;
+    position.z = z;
+    body->updateBodyPosition(x,y,z);
+    
+    const float trackDistanceZ = scale * body->getBodySize().z/4;
+    const float trackDistanceY = scale * body->getBodySize().y/2;
+    tracks[0]->updateTracksPosition(x, y - trackDistanceY, z + trackDistanceZ);
+    tracks[1]->updateTracksPosition(x, y - trackDistanceY, z - trackDistanceZ);
+    
+    const float turretDistanceY = scale * body->getBodySize().y;
+    const float turretDistanceX = scale * body->getBodySize().x/8;
+    turret->updateTurretPosition(x - turretDistanceX, y + turretDistanceY, z);
+
+    const float cannonDistanceY = scale * body->getBodySize().y;
+    const float cannonDistanceX = scale * turret->getTurretSize().x;
+    cannon->updateCannonPosition(x + cannonDistanceX, y + cannonDistanceY, z);
+    
+    
+}
+
+void Tank::moveTank(float x, float y, float z)
+{
+    position.x += x;
+    position.y += y;
+    position.z += z;
+    body->moveBody(x, y, z);
+    tracks[0]->moveTracks(x, y, z);
+    tracks[1]->moveTracks(x, y, z);
+    turret->moveTurret(x, y, z);
+    cannon->moveCannon(x, y, z);
+}
+
 Cannon *Tank::createCannon(float x, float y, float z)
 {
     components["cannon"] = Meshes::CreateMesh("cannon", "src/lab_m1/Tema2/Models/cannon/");
     const float distanceY = scale * body->getBodySize().y;
-    const float distanceZ = scale * turret->getTurretSize().z;
-    return new Cannon(x, y + distanceY, z + distanceZ);
+    const float distanceX = scale * turret->getTurretSize().x;
+    return new Cannon(x + distanceX, y + distanceY, z);
 }
 
 Turret *Tank::createTurret(float x, float y, float z)
 {
     components["turret"] = Meshes::CreateMesh("turret", "src/lab_m1/Tema2/Models/turret/");
     const float distanceY = scale * body->getBodySize().y;
-    const float distanceZ = scale * body->getBodySize().z/8;
-    return new Turret(x, y + distanceY, z - distanceZ);
+    const float distanceX = scale * body->getBodySize().x/8;
+    return new Turret(x - distanceX, y + distanceY, z);
 }
 
 Body* Tank::createBody(float x, float y, float z)
@@ -36,11 +111,10 @@ Tracks **Tank::createTracks(float x, float y, float z)
     Mesh *mesh = Meshes::CreateMesh("track", "src/lab_m1/Tema2/Models/track/");
     components[mesh->GetMeshID()] = mesh;
     Tracks **tracks = new Tracks*[2];
-    const float distanceX = scale * body->getBodySize().x / 2;
+    const float distanceZ = scale * body->getBodySize().z / 4;
     const float distanceY = scale * body->getBodySize().y / 2;
-    std::cout << "distanceX: " << distanceX << "\n" << "distanceY: " << distanceY << "\n";
-    tracks[0] = new Tracks(x + distanceX, y - distanceY, z);
-    tracks[1] = new Tracks(x - distanceX, y - distanceY, z);
+    tracks[0] = new Tracks(x, y - distanceY, z + distanceZ);
+    tracks[1] = new Tracks(x, y - distanceY, z - distanceZ);
     return tracks;
 }
 

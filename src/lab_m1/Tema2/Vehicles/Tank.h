@@ -1,6 +1,12 @@
 ﻿#pragma once
 #include "components/simple_scene.h"
 #include "lab_m1/Tema2/Vehicles/Body.h"
+
+namespace implemented
+{
+    class CameraTema;
+}
+
 namespace m1
 {
     class Cannon;
@@ -13,13 +19,12 @@ namespace m1
         const int speed = 10;
         int hp = 100;
         int damage = 10;
-        float x = 0;
-        float y = 0;
-        float z = 0;
-        float scale = 0.5f;
+        glm::vec3 position = glm::vec3(0, 0, 0);
+        float scale = 0.25f;
         float sizeX = 8*scale;
         float sizeY = 1*scale;
         float sizeZ = 4*scale;
+        float tankAngle = 0;
         // Mesh *body;
         Body *body;
         Tracks **tracks;
@@ -34,7 +39,10 @@ namespace m1
 
     public:
 
+        void renderTank(implemented::CameraTema *camera, glm::mat4 projectionMatrix, std::unordered_map<std::string, Shader *> shaders,float time);
         void createTank(float x, float y, float z);
+        void moveTank(float x, float y, float z);
+        void updatePosition(float x, float y, float z);
 
         // void Init();
         Tank();
@@ -55,19 +63,9 @@ namespace m1
             return damage;
         }
 
-        float getX() const
+        glm::vec3 getPosition() const
         {
-            return x;
-        }
-
-        float getY() const
-        {
-            return y;
-        }
-
-        float getZ() const
-        {
-            return z;
+            return position;
         }
 
         float getScale() const
@@ -100,6 +98,14 @@ namespace m1
         Cannon *getCannon() const
         {
             return cannon;
+        }
+        void setPosition(glm::vec3 position)
+        {
+            this->position = position;
+        }
+        float getAngle () const
+        {
+            return tankAngle;
         }
     };
 

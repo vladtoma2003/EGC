@@ -26,5 +26,17 @@ namespace m1
         {
             return AngleOY;
         }
+        void moveCannon(float x, float y, float z)
+        {
+            position.x += x;
+            position.y += y;
+            position.z += z;
+        }
+        void updateCannonPosition(float x, float y, float z)
+        {
+            position.x = x;
+            position.y = y;
+            position.z = z;
+        }
     };
 }
