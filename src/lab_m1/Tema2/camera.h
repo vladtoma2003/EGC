@@ -34,16 +34,28 @@ namespace implemented
             right       = glm::cross(forward, up);
             this->up    = glm::cross(right, forward);
         }
-
-        void MoveForward(float distance)
+        void Set(const glm::vec3 &center, const glm::vec3 &up)
+        {
+            forward     = glm::normalize(center - position);
+            right       = glm::cross(forward, up);
+            this->up    = glm::cross(right, forward);
+        }
+        
+        void MoveForward(float distance, bool vClip)
         {
             // Translates the camera using the `dir` vector computed from
             // `forward`. Movement will always keep the camera at the same
             // height. For example, if you rotate your head up/down, and then
             // walk forward, then you will still keep the same relative
             // distance (height) to the ground!
-            glm::vec3 dir = glm::normalize(glm::vec3(forward.x, 0, forward.z));
-            position += dir * distance;
+            if(vClip)
+            {
+                glm::vec3 dir = glm::normalize(glm::vec3(forward.x, 0, forward.z));
+                position += dir * distance;
+            } else
+            {
+                position.x += distance;
+            }
         }
 
         void TranslateForward(float distance)

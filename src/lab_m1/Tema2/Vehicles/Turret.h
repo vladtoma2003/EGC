@@ -8,8 +8,16 @@ namespace m1
     private:
         glm::vec3 position;
         glm::vec3 size = glm::vec3(2, 1, 2.5);
+        glm::vec3 distanceFromBody;
+        glm::vec3 center;
         public:
-        explicit Turret(const float x, const float y, const float z)
+        explicit Turret(const float x, const float y, const float z, glm::vec3 distanceFromBody, glm::vec3 bodyPos)
+        {
+            position = glm::vec3(x, y, z);
+            this->distanceFromBody = distanceFromBody;
+            center = bodyPos;
+        }
+        void setTurretPosition(float x, float y, float z)
         {
             position = glm::vec3(x, y, z);
         }
@@ -26,12 +34,23 @@ namespace m1
             position.x += x;
             position.y += y;
             position.z += z;
+            center.x += x;
+            center.y += y;
+            center.z += z;
         }
         void updateTurretPosition(float x, float y, float z)
         {
             position.x = x;
             position.y = y;
             position.z = z;
+            center.x = x;
+            center.y = y;
+            center.z = z;
+        }
+        void rotateTurret(float angle)
+        {
+            position.x = center.x + distanceFromBody.x * cos(angle);
+            position.z = center.z + distanceFromBody.z * sin(angle);
         }
     };
 }

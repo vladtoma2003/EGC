@@ -54,6 +54,7 @@ namespace m1
         float zNear = 0.01f;
         float zFar = 200.0f;
         bool isPerspective = true;
+        bool vClipping = false;
     };
     
 }   // namespace m1

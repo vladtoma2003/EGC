@@ -43,6 +43,7 @@ namespace m1
         void createTank(float x, float y, float z);
         void moveTank(float x, float y, float z);
         void updatePosition(float x, float y, float z);
+        void rotateTank(float angle);
 
         // void Init();
         Tank();
@@ -106,6 +107,10 @@ namespace m1
         float getAngle () const
         {
             return tankAngle;
+        }
+        void setAngle(float angle)
+        {
+            tankAngle = angle;
         }
     };
 

@@ -38,5 +38,10 @@ namespace m1
             position.y = y;
             position.z = z;
         }
+        void rotateCannon(float angle)
+        {
+            position.x = position.x * cos(angle) - position.z * sin(angle);
+            position.z = position.x * sin(angle) + position.z * cos(angle);
+        }
     };
 }

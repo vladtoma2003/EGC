@@ -8,9 +8,18 @@ namespace m1
     private:
         glm::vec3 position;
         glm::vec3 size = glm::vec3(1, 1, 8);
-        // Mesh *tracks = new Mesh("tracks");
+        glm::vec3 distanceFromBody;
+        glm::vec3 center;
+        float angle;
     public:
-        explicit Tracks(const float x, const float y, const float z)
+        explicit Tracks(const float x, const float y, const float z, glm::vec3 distanceFromBody, glm::vec3 bodyPos, float angle)
+        {
+            position = glm::vec3(x, y, z);
+            this->distanceFromBody = distanceFromBody;
+            center = bodyPos;
+            this->angle = angle;
+        }
+        void setTracksPosition(float x, float y, float z)
         {
             position = glm::vec3(x, y, z);
         }
@@ -27,12 +36,24 @@ namespace m1
             position.x += x;
             position.y += y;
             position.z += z;
+            center.x += x;
+            center.y += y;
+            center.z += z;
         }
         void updateTracksPosition(float x, float y, float z)
         {
             position.x = x;
             position.y = y;
             position.z = z;
+            center.x = x;
+            center.y = y;
+            center.z = z;
+        }
+        void rotateTracks(float angle)
+        {
+            this->angle += angle;
+            position.x = center.x + distanceFromBody.x * cos(this->angle);
+            position.z = center.z + distanceFromBody.z * sin(this->angle);
         }
     };
 }

@@ -32,11 +32,15 @@ void Tema2::Init()
 {
     renderCameraTarget = false;
 
-    camera = new implemented::CameraTema();
-    camera->Set(glm::vec3(0, 2, 3.5f), glm::vec3(0, 1, 0), glm::vec3(0, 1, 0));
-
     tank = new Tank();
-    tank->createTank(camera->GetTargetPosition().x, camera->GetTargetPosition().y, camera->GetTargetPosition().z);
+    tank->createTank(0, tank->getScale(), 0);
+    
+    camera = new implemented::CameraTema();
+    // camera->Set(glm::vec3(0, 2, 3.5f), glm::vec3(0, 1, 0), glm::vec3(0, 1, 0));
+    camera->Set(tank->getPosition() + glm::vec3(0, 2, 3.5f), tank->getPosition(), glm::vec3(0, 1, 0));
+
+    // tank = new Tank();
+    // tank->createTank(camera->GetTargetPosition().x, camera->GetTargetPosition().y, camera->GetTargetPosition().z);
     {
         Shader *shader = new Shader("LabShader");
         shader->AddShader(PATH_JOIN(window->props.selfDir, SOURCE_PATH::M1, "Tema2", "shaders", "VertexShader.glsl"), GL_VERTEX_SHADER);
@@ -84,8 +88,11 @@ void Tema2::Update(float deltaTimeSeconds)
     }
     
     // Set Tank position to camera
-    tank->updatePosition(camera->GetTargetPosition().x, camera->GetTargetPosition().y, camera->GetTargetPosition().z);
-    
+    // tank->updatePosition(camera->GetTargetPosition().x, camera->GetTargetPosition().y, camera->GetTargetPosition().z);
+    if(!vClipping)
+    {
+        camera->Set(tank->getPosition(), glm::vec3(0, 1, 0));
+    }
 }
 
 
@@ -108,37 +115,61 @@ void Tema2::OnInputUpdate(float deltaTime, int mods)
         float cameraSpeed = 2.0f;
 
         if (window->KeyHold(GLFW_KEY_W)) {
-            // TODO(student): Translate the camera forward
-            camera->TranslateForward(deltaTime*cameraSpeed);
-            // tank->moveTank(deltaTime*cameraSpeed, 0, 0);
+            if(vClipping)
+            {
+                camera->TranslateForward(deltaTime*cameraSpeed);
+            } else {
+                tank->moveTank(deltaTime*cameraSpeed, 0, 0);
+                camera->position.x += deltaTime*cameraSpeed;
+            }
         }
 
         if (window->KeyHold(GLFW_KEY_A)) {
-            // TODO(student): Translate the camera to the left
-            camera->TranslateRight(-deltaTime*cameraSpeed);
-            // tank->moveTank(0, 0, -deltaTime*cameraSpeed);
+            if(vClipping)
+            {
+                camera->TranslateRight(-deltaTime*cameraSpeed);
+            } else
+            {
+                tank->setAngle(tank->getAngle() + RADIANS(1));
+                tank->rotateTank(tank->getAngle());
+                // tank->rotateTank(tank->getAngle());
+            }
         }
 
         if (window->KeyHold(GLFW_KEY_S)) {
-            // TODO(student): Translate the camera backward
-            camera->TranslateForward(-deltaTime*cameraSpeed);
-            // tank->moveTank(-deltaTime*cameraSpeed, 0, 0);
+            if(vClipping)
+            {
+                camera->TranslateForward(-deltaTime*cameraSpeed);
+            } else {
+                tank->moveTank(-deltaTime*cameraSpeed, 0, 0);
+                camera->position.x -= deltaTime*cameraSpeed;   
+            }
         }
 
         if (window->KeyHold(GLFW_KEY_D)) {
-            // TODO(student): Translate the camera to the right
-            camera->TranslateRight(deltaTime*cameraSpeed);
-            // tank->moveTank(0, 0, deltaTime*cameraSpeed);
+            if(vClipping)
+            {
+                camera->TranslateRight(deltaTime*cameraSpeed);
+            } else
+            {
+                tank->setAngle(tank->getAngle() - RADIANS(1));
+                tank->rotateTank(tank->getAngle());
+            }
         }
 
         if (window->KeyHold(GLFW_KEY_Q)) {
             // TODO(student): Translate the camera downward
-            camera->TranslateUpward(-deltaTime*cameraSpeed);
+            if(vClipping)
+            {
+                camera->TranslateUpward(-deltaTime*cameraSpeed);
+            }
         }
 
         if (window->KeyHold(GLFW_KEY_E)) {
-            // TODO(student): Translate the camera upward
-            camera->TranslateUpward(deltaTime*cameraSpeed);
+            if(vClipping)
+            {
+                camera->TranslateUpward(deltaTime*cameraSpeed);
+            }
         }
     }
 
@@ -198,6 +229,10 @@ void Tema2::OnKeyPress(int key, int mods)
     {
         projectionMatrix = glm::perspective(fov, aspectRatio, zNear, zFar);
         isPerspective = true;
+    }
+    if(key == GLFW_KEY_V)
+    {
+        vClipping = !vClipping;
     }
 
 }
