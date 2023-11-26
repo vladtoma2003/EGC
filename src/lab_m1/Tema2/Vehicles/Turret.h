@@ -47,10 +47,19 @@ namespace m1
             center.y = y;
             center.z = z;
         }
+        void rotateTurret(Tank *tank, float angle)
+        {
+            const float distanceX = tank->getScale() * tank->getBody()->getBodySize().x/8 * cos(-*angle);
+            const float distanceY = tank->getScale() * tank->getBody()->getBodySize().y;
+            const float distanceZ = tank->getScale() * tank->getBody()->getBodySize().z/4 * sin(-angle);
+            position.x = tank->getBody()->getBodyPosition().x + distanceX;
+            position.z = tank->getBody()->getBodyPosition().z + distanceZ;
+            
+        }
         void rotateTurret(float angle)
         {
-            position.x = center.x + distanceFromBody.x * cos(angle);
-            position.z = center.z + distanceFromBody.z * sin(angle);
+            position.x = center.x + distanceFromBody.x * cos(-angle);
+            position.z = center.z + distanceFromBody.z * sin(-angle);
         }
     };
 }

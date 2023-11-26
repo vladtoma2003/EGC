@@ -8,6 +8,7 @@ namespace m1
     private:
         glm::vec3 position;
         glm::vec3 size = glm::vec3(4, 1, 8);
+        float bodyAngle;
     public:
         explicit Body(const float x, const float y, const float z)
         {
@@ -35,8 +36,7 @@ namespace m1
         }
         void rotateBody(float angle)
         {
-            position.x = position.x * cos(angle) - position.z * sin(angle);
-            position.z = position.x * sin(angle) + position.z * cos(angle);
+            bodyAngle += angle;
         }
     };
 }

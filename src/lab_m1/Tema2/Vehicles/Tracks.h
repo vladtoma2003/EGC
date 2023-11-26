@@ -10,14 +10,14 @@ namespace m1
         glm::vec3 size = glm::vec3(1, 1, 8);
         glm::vec3 distanceFromBody;
         glm::vec3 center;
-        float angle;
+        float trackAngle;
     public:
         explicit Tracks(const float x, const float y, const float z, glm::vec3 distanceFromBody, glm::vec3 bodyPos, float angle)
         {
             position = glm::vec3(x, y, z);
             this->distanceFromBody = distanceFromBody;
             center = bodyPos;
-            this->angle = angle;
+            trackAngle = angle;
         }
         void setTracksPosition(float x, float y, float z)
         {
@@ -30,6 +30,10 @@ namespace m1
         glm::vec3 getTracksSize() const
         {
             return size;
+        }
+        float getTrackAngle() const
+        {
+            return trackAngle;
         }
         void moveTracks(float x, float y, float z)
         {
@@ -45,15 +49,21 @@ namespace m1
             position.x = x;
             position.y = y;
             position.z = z;
-            center.x = x;
-            center.y = y;
-            center.z = z;
+            center.x = position.x + distanceFromBody.x;
+            center.y = position.y + distanceFromBody.y;
+            center.z = position.z + distanceFromBody.z;
         }
+
+        void rotateTrack(Tank *tank, float angle)
+        {
+            trackAngle += angle;
+        }
+        
         void rotateTracks(float angle)
         {
-            this->angle += angle;
-            position.x = center.x + distanceFromBody.x * cos(this->angle);
-            position.z = center.z + distanceFromBody.z * sin(this->angle);
+            trackAngle += angle;
+            position.x = center.x + distanceFromBody.x * cos(trackAngle);
+            position.z = center.z + distanceFromBody.z * sin(trackAngle);
         }
     };
 }
