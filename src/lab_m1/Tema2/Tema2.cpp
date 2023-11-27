@@ -246,31 +246,44 @@ void Tema2::OnKeyRelease(int key, int mods)
 void Tema2::OnMouseMove(int mouseX, int mouseY, int deltaX, int deltaY)
 {
     // Add mouse move event
-
-    if (window->MouseHold(GLFW_MOUSE_BUTTON_RIGHT))
+    if(window->MouseHold(GLFW_MOUSE_BUTTON_RIGHT))
     {
         float sensivityOX = 0.001f;
         float sensivityOY = 0.001f;
-
-        // if (window->GetSpecialKeyState() == 0) {
-        //     renderCameraTarget = false;
-        //     // TODO(student): Rotate the camera in first-person mode around
-        //     // OX and OY using `deltaX` and `deltaY`. Use the sensitivity
-        //     // variables for setting up the rotation speed.
-        //     camera->RotateFirstPerson_OX(-sensivityOX*deltaY);
-        //     camera->RotateFirstPerson_OY(-sensivityOY*deltaX);
-        //
-        // }
-
-        // if (window->GetSpecialKeyState() & GLFW_MOD_CONTROL) {
-            renderCameraTarget = true;
-            // TODO(student): Rotate the camera in third-person mode around
-            // OX and OY using `deltaX` and `deltaY`. Use the sensitivity
-            // variables for setting up the rotation speed.
-            camera->RotateThirdPerson_OX(-sensivityOX*deltaY);
-            camera->RotateThirdPerson_OY(-sensivityOY*deltaX);
-        // }
+        camera->RotateThirdPerson_OX(-sensivityOX*deltaY);
+        camera->RotateThirdPerson_OY(-sensivityOY*deltaX);
+        tank->getTurret()->rotateTurret(-sensivityOY*deltaX);
+        tank->getCannon()->rotateCannon(-sensivityOY*deltaX);
+    } else
+    {
+        camera->Set(tank->getPosition() - glm::vec3(0, -2, 3.5f),
+            tank->getPosition(), glm::vec3(0, 1, 0));
     }
+    
+    // if (window->MouseHold(GLFW_MOUSE_BUTTON_RIGHT))
+    // {
+    //     float sensivityOX = 0.001f;
+    //     float sensivityOY = 0.001f;
+    //
+    //     // if (window->GetSpecialKeyState() == 0) {
+    //     //     renderCameraTarget = false;
+    //     //     // TODO(student): Rotate the camera in first-person mode around
+    //     //     // OX and OY using `deltaX` and `deltaY`. Use the sensitivity
+    //     //     // variables for setting up the rotation speed.
+    //     //     camera->RotateFirstPerson_OX(-sensivityOX*deltaY);
+    //     //     camera->RotateFirstPerson_OY(-sensivityOY*deltaX);
+    //     //
+    //     // }
+    //
+    //     // if (window->GetSpecialKeyState() & GLFW_MOD_CONTROL) {
+    //         renderCameraTarget = true;
+    //         // TODO(student): Rotate the camera in third-person mode around
+    //         // OX and OY using `deltaX` and `deltaY`. Use the sensitivity
+    //         // variables for setting up the rotation speed.
+    //         camera->RotateThirdPerson_OX(-sensivityOX*deltaY);
+    //         camera->RotateThirdPerson_OY(-sensivityOY*deltaX);
+    //     // }
+    // }
 }
 
 
