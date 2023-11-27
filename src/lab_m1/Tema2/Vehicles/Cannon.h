@@ -11,6 +11,7 @@ namespace m1
         float AngleOY = 0;
         glm::vec3 distanceFromBody;
         glm::vec3 center;
+        float cannonAngle = 0;
     public:
         explicit Cannon(const float x, const float y, const float z, glm::vec3 distanceFromBody, glm::vec3 bodyPos)
         {
@@ -34,6 +35,10 @@ namespace m1
         {
             return AngleOY;
         }
+        float getCannonAngle() const
+        {
+            return cannonAngle;
+        }
         void moveCannon(float x, float y, float z)
         {
             position.x += x;
@@ -54,8 +59,9 @@ namespace m1
         }
         void rotateCannon(float angle)
         {
-            position.x = position.x + distanceFromBody.x * cos(-angle);
-            position.z = position.z + distanceFromBody.z * sin(-angle);
+            cannonAngle += angle;
+            position.x = position.x + distanceFromBody.x * cos(-cannonAngle);
+            position.z = position.z + distanceFromBody.z * sin(-cannonAngle);
         }
     };
 }

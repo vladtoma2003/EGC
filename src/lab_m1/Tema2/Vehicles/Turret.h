@@ -10,6 +10,7 @@ namespace m1
         glm::vec3 size = glm::vec3(3, 1.5, 3.5);
         glm::vec3 distanceFromBody;
         glm::vec3 center;
+        float turretAngle = 0;
         public:
         explicit Turret(const float x, const float y, const float z, glm::vec3 distanceFromBody, glm::vec3 bodyPos)
         {
@@ -29,6 +30,10 @@ namespace m1
         {
             return size;
         }
+        float getTurretAngle() const
+        {
+            return turretAngle;
+        }
         void moveTurret(float x, float y, float z)
         {
             position.x += x;
@@ -47,16 +52,11 @@ namespace m1
             center.y = y;
             center.z = z;
         }
-        void rotateTurret(Tank *tank, float angle)
-        {
-            position.x = center.x + distanceFromBody.x * cos(angle);
-            position.z = center.z + distanceFromBody.z * sin(angle);
-            
-        }
         void rotateTurret(float angle)
         {
-            position.x = center.x + distanceFromBody.x * cos(-angle);
-            position.z = center.z + distanceFromBody.z * sin(-angle);
+            turretAngle += angle;
+            position.x = center.x + distanceFromBody.x * cos(-turretAngle);
+            position.z = center.z + distanceFromBody.z * sin(-turretAngle);
         }
     };
 }

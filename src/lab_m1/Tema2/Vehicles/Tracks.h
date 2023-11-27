@@ -53,12 +53,6 @@ namespace m1
             center.y = position.y + distanceFromBody.y;
             center.z = position.z + distanceFromBody.z;
         }
-
-        void rotateTrack(Tank *tank, float angle)
-        {
-            trackAngle += angle;
-        }
-        
         void rotateTracks(float angle)
         {
             trackAngle += angle;

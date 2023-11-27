@@ -39,7 +39,7 @@ void Tank::renderTank(implemented::CameraTema *camera, glm::mat4 projectionMatri
         glm::mat4 modelMatrix = glm::mat4(1);
         modelMatrix = glm::translate(modelMatrix, getTurret()->getTurretPosition());
         modelMatrix = glm::scale(modelMatrix, glm::vec3(getScale()));
-        modelMatrix = glm::rotate(modelMatrix, getAngle(), glm::vec3(0, 1, 0));
+        modelMatrix = glm::rotate(modelMatrix, turret->getTurretAngle(), glm::vec3(0, 1, 0));
         Meshes::RenderSimpleMesh(getComponent("turret"), shaders["LabShader"], modelMatrix,
             glm::vec3(30.f/255, 49.f/255, 30.f/255), camera, time, projectionMatrix);
     }
@@ -47,7 +47,7 @@ void Tank::renderTank(implemented::CameraTema *camera, glm::mat4 projectionMatri
         glm::mat4 modelMatrix = glm::mat4(1);
         modelMatrix = glm::translate(modelMatrix, getCannon()->getCannonPosition());
         modelMatrix = glm::scale(modelMatrix, glm::vec3(getScale()));
-        modelMatrix = glm::rotate(modelMatrix, getAngle(), glm::vec3(0, 1, 0));
+        modelMatrix = glm::rotate(modelMatrix, cannon->getCannonAngle(), glm::vec3(0, 1, 0));
         Meshes::RenderSimpleMesh(getComponent("cannon"), shaders["LabShader"], modelMatrix,
             glm::vec3(50.f/255, 50.f/255, 50.f/255), camera, time, projectionMatrix);
     }
@@ -80,8 +80,8 @@ void Tank::rotateTank(float angle)
     body->rotateBody(tankAngle);
     tracks[0]->rotateTracks(angle);
     tracks[1]->rotateTracks(angle);
-    turret->rotateTurret(this, tankAngle);
-    cannon->rotateCannon(tankAngle);
+    turret->rotateTurret(angle);
+    cannon->rotateCannon(angle);
 }
 
 void Tank::moveTank(float x, float y, float z)
