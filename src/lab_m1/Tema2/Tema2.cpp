@@ -122,7 +122,9 @@ void Tema2::OnInputUpdate(float deltaTime, int mods)
         } else
         {
             tank->rotateTank(RADIANS(1));
-            camera->RotateThirdPerson_OY(1.975f*RADIANS(1));
+            camera->TranslateForward(2);
+            camera->RotateThirdPerson_OY(RADIANS(1));
+            camera->TranslateForward(-2);
         }
     }
 
@@ -143,7 +145,9 @@ void Tema2::OnInputUpdate(float deltaTime, int mods)
         } else
         {
             tank->rotateTank(-RADIANS(1));
-            camera->RotateThirdPerson_OY(-1.975f*RADIANS(1));
+            camera->TranslateForward(2);
+            camera->RotateThirdPerson_OY(-RADIANS(1));
+            camera->TranslateForward(-2);
         }
     }
 
