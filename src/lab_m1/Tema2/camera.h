@@ -54,7 +54,7 @@ namespace implemented
             this->position = pos;
         }
         
-        void MoveForward(float distance, glm::vec3 tankForward)
+        void MoveForward(float distance)
         {
             // Translates the camera using the `dir` vector computed from
             // `forward`. Movement will always keep the camera at the same

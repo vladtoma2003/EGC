@@ -111,7 +111,7 @@ void Tema2::OnInputUpdate(float deltaTime, int mods)
             camera->TranslateForward(deltaTime*cameraSpeed);
         } else {
             tank->moveTank(deltaTime*cameraSpeed);
-            camera->MoveForward(deltaTime*cameraSpeed, tank->getTankForward());
+            camera->MoveForward(deltaTime*cameraSpeed);
         }
     }
 
@@ -134,7 +134,7 @@ void Tema2::OnInputUpdate(float deltaTime, int mods)
             camera->TranslateForward(-deltaTime*cameraSpeed);
         } else {
             tank->moveTank(-deltaTime*cameraSpeed);
-            camera->MoveForward(-deltaTime*cameraSpeed, tank->getTankForward());
+            camera->MoveForward(-deltaTime*cameraSpeed);
         }
     }
 
