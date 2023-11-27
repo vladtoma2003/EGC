@@ -130,8 +130,7 @@ void Tema2::OnInputUpdate(float deltaTime, int mods)
                 camera->TranslateRight(-deltaTime*cameraSpeed);
             } else
             {
-                tank->setAngle(tank->getAngle() + RADIANS(1));
-                tank->rotateTank(tank->getAngle());
+                tank->rotateTank(RADIANS(1));
                 // tank->rotateTank(tank->getAngle());
             }
         }
@@ -152,8 +151,8 @@ void Tema2::OnInputUpdate(float deltaTime, int mods)
                 camera->TranslateRight(deltaTime*cameraSpeed);
             } else
             {
-                tank->setAngle(tank->getAngle() - RADIANS(1));
-                tank->rotateTank(tank->getAngle());
+                // tank->setAngle(tank->getAngle() - RADIANS(1));
+                tank->rotateTank(-RADIANS(1));
             }
         }
 

@@ -62,8 +62,8 @@ namespace m1
         void rotateTracks(float angle)
         {
             trackAngle += angle;
-            position.x = center.x + distanceFromBody.x * cos(trackAngle);
-            position.z = center.z + distanceFromBody.z * sin(trackAngle);
+            position.x = center.x + distanceFromBody.z * sin(trackAngle);
+            position.z = center.z + distanceFromBody.z * cos(trackAngle);
         }
     };
 }

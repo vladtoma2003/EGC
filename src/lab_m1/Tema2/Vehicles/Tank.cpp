@@ -23,30 +23,23 @@ void Tank::renderTank(implemented::CameraTema *camera, glm::mat4 projectionMatri
         glm::mat4 modelMatrix = glm::mat4(1);
         modelMatrix = glm::translate(modelMatrix, getTracks()[0]->getTracksPosition());
         modelMatrix = glm::scale(modelMatrix, glm::vec3(getScale()));
-        // modelMatrix = glm::rotate(modelMatrix, tracks[0]->getTrackAngle(), glm::vec3(0, 1, 0));
-        // modelMatrix = glm::translate(modelMatrix, glm::vec3(0, 0, getTracks()[0]->getTracksSize().z));
+        modelMatrix = glm::rotate(modelMatrix, tracks[0]->getTrackAngle(), glm::vec3(0, 1, 0));
         Meshes::RenderSimpleMesh(getComponent("track"), shaders["LabShader"], modelMatrix,
             glm::vec3(50.f/255, 50.f/255, 50.f/255), camera, time, projectionMatrix);
-        std::cout << "TRACK LEFT\n";
-        std::cout << getTracks()[0]->getTracksPosition().x << " " << getTracks()[0]->getTracksPosition().y << " " << getTracks()[0]->getTracksPosition().z << "\n";
     }
     { // Track Right
         glm::mat4 modelMatrix = glm::mat4(1);
         modelMatrix = glm::translate(modelMatrix, getTracks()[1]->getTracksPosition());
         modelMatrix = glm::scale(modelMatrix, glm::vec3(getScale()));
-        // modelMatrix = glm::translate(modelMatrix, glm::vec3(-getPosition().x, 0, -getPosition().z));
         modelMatrix = glm::rotate(modelMatrix, tracks[1]->getTrackAngle(), glm::vec3(0, 1, 0));
-        // modelMatrix = glm::translate(modelMatrix, glm::vec3(getPosition().x, 0, getPosition().z));
         Meshes::RenderSimpleMesh(getComponent("track"), shaders["LabShader"], modelMatrix,
             glm::vec3(50.f/255, 50.f/255, 50.f/255), camera, time, projectionMatrix);
-        std::cout << "TRACK RIGHT\n";
-        std::cout << getTracks()[1]->getTracksPosition().x << " " << getTracks()[1]->getTracksPosition().y << " " << getTracks()[1]->getTracksPosition().z << "\n";
     }
     { // Turret
         glm::mat4 modelMatrix = glm::mat4(1);
         modelMatrix = glm::translate(modelMatrix, getTurret()->getTurretPosition());
         modelMatrix = glm::scale(modelMatrix, glm::vec3(getScale()));
-        // modelMatrix = glm::rotate(modelMatrix, getAngle(), glm::vec3(0, 1, 0));
+        modelMatrix = glm::rotate(modelMatrix, getAngle(), glm::vec3(0, 1, 0));
         Meshes::RenderSimpleMesh(getComponent("turret"), shaders["LabShader"], modelMatrix,
             glm::vec3(30.f/255, 49.f/255, 30.f/255), camera, time, projectionMatrix);
     }
@@ -54,7 +47,7 @@ void Tank::renderTank(implemented::CameraTema *camera, glm::mat4 projectionMatri
         glm::mat4 modelMatrix = glm::mat4(1);
         modelMatrix = glm::translate(modelMatrix, getCannon()->getCannonPosition());
         modelMatrix = glm::scale(modelMatrix, glm::vec3(getScale()));
-        // modelMatrix = glm::rotate(modelMatrix, getAngle(), glm::vec3(0, 1, 0));
+        modelMatrix = glm::rotate(modelMatrix, getAngle(), glm::vec3(0, 1, 0));
         Meshes::RenderSimpleMesh(getComponent("cannon"), shaders["LabShader"], modelMatrix,
             glm::vec3(50.f/255, 50.f/255, 50.f/255), camera, time, projectionMatrix);
     }
@@ -83,11 +76,12 @@ void Tank::updatePosition(float x, float y, float z)
 
 void Tank::rotateTank(float angle)
 {
-    body->rotateBody(angle);
+    tankAngle += angle;
+    body->rotateBody(tankAngle);
     tracks[0]->rotateTracks(angle);
     tracks[1]->rotateTracks(angle);
-    turret->rotateTurret(this, angle);
-    cannon->rotateCannon(angle);
+    turret->rotateTurret(this, tankAngle);
+    cannon->rotateCannon(tankAngle);
 }
 
 void Tank::moveTank(float x, float y, float z)
@@ -106,17 +100,16 @@ Cannon *Tank::createCannon(float x, float y, float z)
 {
     components["cannon"] = Meshes::CreateMesh("cannon", "src/lab_m1/Tema2/Models/cannon/");
     const float distanceY = scale * body->getBodySize().y;
-    const float distanceX = scale * turret->getTurretSize().x;
-    return new Cannon(x + distanceX, y + distanceY, z);
+    return new Cannon(x, y + distanceY, z, glm::vec3(0, distanceY, 0), turret->getTurretPosition());
 }
 
 Turret *Tank::createTurret(float x, float y, float z)
 {
     components["turret"] = Meshes::CreateMesh("turret", "src/lab_m1/Tema2/Models/turret/");
-    const float distanceX = scale * body->getBodySize().x/8;
+    // const float distanceX = scale * body->getBodySize().x/8;
     const float distanceY = scale * body->getBodySize().y;
-    const float distanceZ = scale * body->getBodySize().z/4;
-    return new Turret(x - distanceX, y + distanceY, z, glm::vec3(distanceX, distanceY, distanceZ), body->getBodyPosition());
+    // const float distanceZ = scale * body->getBodySize().z/4;
+    return new Turret(x, y + distanceY, z, glm::vec3(0, distanceY, 0), body->getBodyPosition());
 }
 
 Body* Tank::createBody(float x, float y, float z)
@@ -130,18 +123,17 @@ Tracks **Tank::createTracks(float x, float y, float z)
     Mesh *mesh = Meshes::CreateMesh("track", "src/lab_m1/Tema2/Models/track/");
     components[mesh->GetMeshID()] = mesh;
     Tracks **tracks = new Tracks*[2];
-    const float distanceX = scale * body->getBodySize().x;
+    const float distanceX = scale * body->getBodySize().x / 4;
     const float distanceY = scale * body->getBodySize().y / 2;
     const float distanceZ = scale * body->getBodySize().z / 4;
-    tracks[0] = new Tracks(x, y - distanceY, z + distanceZ, glm::vec3(distanceX, -distanceY, distanceZ), body->getBodyPosition(), 0);
-    tracks[1] = new Tracks(x, y - distanceY, z - distanceZ, glm::vec3(distanceX, -distanceY, distanceZ), body->getBodyPosition(), RADIANS(180));
+    tracks[0] = new Tracks(x, y - distanceY, z + distanceZ, glm::vec3(0, -distanceY, distanceZ), body->getBodyPosition(), 0);
+    tracks[1] = new Tracks(x, y - distanceY, z - distanceZ, glm::vec3(0, -distanceY, distanceZ), body->getBodyPosition(), RADIANS(180));
     return tracks;
 }
 
 
 void Tank::createTank(const float x, const float y, const float z)
 {
-    std::cout << "Tank created\n";
     this->body = createBody(x, y, z);
     this->tracks = createTracks(x, y, z);
     this->turret = createTurret(x, y, z);

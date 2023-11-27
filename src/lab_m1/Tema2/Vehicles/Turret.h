@@ -7,7 +7,7 @@ namespace m1
     {
     private:
         glm::vec3 position;
-        glm::vec3 size = glm::vec3(2, 1, 2.5);
+        glm::vec3 size = glm::vec3(3, 1.5, 3.5);
         glm::vec3 distanceFromBody;
         glm::vec3 center;
         public:
@@ -49,11 +49,8 @@ namespace m1
         }
         void rotateTurret(Tank *tank, float angle)
         {
-            const float distanceX = tank->getScale() * tank->getBody()->getBodySize().x/8 * cos(-*angle);
-            const float distanceY = tank->getScale() * tank->getBody()->getBodySize().y;
-            const float distanceZ = tank->getScale() * tank->getBody()->getBodySize().z/4 * sin(-angle);
-            position.x = tank->getBody()->getBodyPosition().x + distanceX;
-            position.z = tank->getBody()->getBodyPosition().z + distanceZ;
+            position.x = center.x + distanceFromBody.x * cos(angle);
+            position.z = center.z + distanceFromBody.z * sin(angle);
             
         }
         void rotateTurret(float angle)
