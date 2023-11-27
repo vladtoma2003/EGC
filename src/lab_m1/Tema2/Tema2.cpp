@@ -36,11 +36,7 @@ void Tema2::Init()
     tank->createTank(0, tank->getScale(), 0);
     
     camera = new implemented::CameraTema();
-    // camera->Set(glm::vec3(0, 2, 3.5f), glm::vec3(0, 1, 0), glm::vec3(0, 1, 0));
-    camera->Set(tank->getPosition() + glm::vec3(0, 2, 3.5f), tank->getPosition(), glm::vec3(0, 1, 0));
-
-    // tank = new Tank();
-    // tank->createTank(camera->GetTargetPosition().x, camera->GetTargetPosition().y, camera->GetTargetPosition().z);
+    camera->Set(tank->getPosition() + glm::vec3(-3.5f, 2, 0), tank->getPosition(), glm::vec3(0, 1, 0));
     {
         Shader *shader = new Shader("LabShader");
         shader->AddShader(PATH_JOIN(window->props.selfDir, SOURCE_PATH::M1, "Tema2", "shaders", "VertexShader.glsl"), GL_VERTEX_SHADER);
@@ -88,7 +84,6 @@ void Tema2::Update(float deltaTimeSeconds)
     }
     
     // Set Tank position to camera
-    // tank->updatePosition(camera->GetTargetPosition().x, camera->GetTargetPosition().y, camera->GetTargetPosition().z);
     if(!vClipping)
     {
         camera->Set(tank->getPosition(), glm::vec3(0, 1, 0));
@@ -109,73 +104,63 @@ void Tema2::FrameEnd()
 
 void Tema2::OnInputUpdate(float deltaTime, int mods)
 {
-    // move the camera only if MOUSE_RIGHT button is pressed
-    if (window->MouseHold(GLFW_MOUSE_BUTTON_RIGHT))
-    {
-        float cameraSpeed = 2.0f;
-
-        if (window->KeyHold(GLFW_KEY_W)) {
-            if(vClipping)
-            {
-                camera->TranslateForward(deltaTime*cameraSpeed);
-            } else {
-                tank->moveTank(deltaTime*cameraSpeed, 0, 0);
-                camera->position.x += deltaTime*cameraSpeed;
-            }
-        }
-
-        if (window->KeyHold(GLFW_KEY_A)) {
-            if(vClipping)
-            {
-                camera->TranslateRight(-deltaTime*cameraSpeed);
-            } else
-            {
-                tank->rotateTank(RADIANS(1));
-                // tank->rotateTank(tank->getAngle());
-            }
-        }
-
-        if (window->KeyHold(GLFW_KEY_S)) {
-            if(vClipping)
-            {
-                camera->TranslateForward(-deltaTime*cameraSpeed);
-            } else {
-                tank->moveTank(-deltaTime*cameraSpeed, 0, 0);
-                camera->position.x -= deltaTime*cameraSpeed;   
-            }
-        }
-
-        if (window->KeyHold(GLFW_KEY_D)) {
-            if(vClipping)
-            {
-                camera->TranslateRight(deltaTime*cameraSpeed);
-            } else
-            {
-                // tank->setAngle(tank->getAngle() - RADIANS(1));
-                tank->rotateTank(-RADIANS(1));
-            }
-        }
-
-        if (window->KeyHold(GLFW_KEY_Q)) {
-            // TODO(student): Translate the camera downward
-            if(vClipping)
-            {
-                camera->TranslateUpward(-deltaTime*cameraSpeed);
-            }
-        }
-
-        if (window->KeyHold(GLFW_KEY_E)) {
-            if(vClipping)
-            {
-                camera->TranslateUpward(deltaTime*cameraSpeed);
-            }
+    float cameraSpeed = 2.0f;
+    if (window->KeyHold(GLFW_KEY_W)) {
+        if(vClipping)
+        {
+            camera->TranslateForward(deltaTime*cameraSpeed);
+        } else {
+            tank->moveTank(deltaTime*cameraSpeed);
+            camera->MoveForward(deltaTime*cameraSpeed, tank->getTankForward());
         }
     }
 
-    // TODO(student): Change projection parameters. Declare any extra
-    // variables you might need in the class header. Inspect this file
-    // for any hardcoded projection arguments (can you find any?) and
-    // replace them with those extra variables.
+    if (window->KeyHold(GLFW_KEY_A)) {
+        if(vClipping)
+        {
+            camera->TranslateRight(-deltaTime*cameraSpeed);
+        } else
+        {
+            tank->rotateTank(RADIANS(1));
+            camera->RotateThirdPerson_OY(2*RADIANS(1));
+        }
+    }
+
+    if (window->KeyHold(GLFW_KEY_S)) {
+        if(vClipping)
+        {
+            camera->TranslateForward(-deltaTime*cameraSpeed);
+        } else {
+            tank->moveTank(-deltaTime*cameraSpeed);
+            camera->MoveForward(-deltaTime*cameraSpeed, tank->getTankForward());
+        }
+    }
+
+    if (window->KeyHold(GLFW_KEY_D)) {
+        if(vClipping)
+        {
+            camera->TranslateRight(deltaTime*cameraSpeed);
+        } else
+        {
+            tank->rotateTank(-RADIANS(1));
+            camera->RotateThirdPerson_OY(-2*RADIANS(1));
+        }
+    }
+
+    if (window->KeyHold(GLFW_KEY_Q)) {
+        // TODO(student): Translate the camera downward
+        if(vClipping)
+        {
+            camera->TranslateUpward(-deltaTime*cameraSpeed);
+        }
+    }
+    if (window->KeyHold(GLFW_KEY_E)) {
+        if(vClipping)
+        {
+            camera->TranslateUpward(deltaTime*cameraSpeed);
+        }
+    }
+
     
     if(isPerspective && window->KeyHold(GLFW_KEY_F))
     {
@@ -232,8 +217,13 @@ void Tema2::OnKeyPress(int key, int mods)
     if(key == GLFW_KEY_V)
     {
         vClipping = !vClipping;
+        camera->Set(tank->getPosition() + glm::vec3(-3.5f, 2, 0), tank->getPosition(), glm::vec3(0, 1, 0));
     }
 
+    if(key == GLFW_KEY_L)
+    {
+        tank->updatePosition(0,0,0);
+    }
 }
 
 
@@ -245,19 +235,17 @@ void Tema2::OnKeyRelease(int key, int mods)
 
 void Tema2::OnMouseMove(int mouseX, int mouseY, int deltaX, int deltaY)
 {
+    float sensivityOX = 0.001f;
+    float sensivityOY = 0.001f;
     // Add mouse move event
-    if(window->MouseHold(GLFW_MOUSE_BUTTON_RIGHT))
+    if(!window->MouseHold(GLFW_MOUSE_BUTTON_RIGHT))
     {
-        float sensivityOX = 0.001f;
-        float sensivityOY = 0.001f;
-        camera->RotateThirdPerson_OX(-sensivityOX*deltaY);
-        camera->RotateThirdPerson_OY(-sensivityOY*deltaX);
         tank->getTurret()->rotateTurret(-sensivityOY*deltaX);
         tank->getCannon()->rotateCannon(-sensivityOY*deltaX);
     } else
     {
-        camera->Set(tank->getPosition() - glm::vec3(0, -2, 3.5f),
-            tank->getPosition(), glm::vec3(0, 1, 0));
+        camera->RotateThirdPerson_OX(-sensivityOX*deltaY);
+        camera->RotateThirdPerson_OY(-sensivityOY*deltaX);
     }
     
     // if (window->MouseHold(GLFW_MOUSE_BUTTON_RIGHT))

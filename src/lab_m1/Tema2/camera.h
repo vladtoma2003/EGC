@@ -1,5 +1,7 @@
 #pragma once
 
+#include <iostream>
+
 #include "utils/glm_utils.h"
 #include "utils/math_utils.h"
 
@@ -12,9 +14,9 @@ namespace implemented
         CameraTema()
         {
             position    = glm::vec3(0, 2, 5);
-            forward     = glm::vec3(0, 0, -1);
+            forward     = glm::vec3(1, 0, 0);
             up          = glm::vec3(0, 1, 0);
-            right       = glm::vec3(1, 0, 0);
+            right       = glm::vec3(0, 0, 1);
             distanceToTarget = 2;
         }
 
@@ -40,22 +42,27 @@ namespace implemented
             right       = glm::cross(forward, up);
             this->up    = glm::cross(right, forward);
         }
+        void Set(const glm::vec3 &position, const glm::vec3 &forward, const glm::vec3 &up, const glm::vec3 &right)
+        {
+            this->position = position;
+            this->forward = forward;
+            this->up = up;
+            this->right = right;
+        }
+        void Set(const glm::vec3 &pos)
+        {
+            this->position = pos;
+        }
         
-        void MoveForward(float distance, bool vClip)
+        void MoveForward(float distance, glm::vec3 tankForward)
         {
             // Translates the camera using the `dir` vector computed from
             // `forward`. Movement will always keep the camera at the same
             // height. For example, if you rotate your head up/down, and then
             // walk forward, then you will still keep the same relative
             // distance (height) to the ground!
-            if(vClip)
-            {
-                glm::vec3 dir = glm::normalize(glm::vec3(forward.x, 0, forward.z));
-                position += dir * distance;
-            } else
-            {
-                position.x += distance;
-            }
+            glm::vec3 dir = glm::normalize(glm::vec3(forward.x, 0, forward.z));
+            position += dir * distance;
         }
 
         void TranslateForward(float distance)
@@ -94,7 +101,7 @@ namespace implemented
         {
             // TODO(student): Compute the new `forward` and `up` vectors.
             // Don't forget to normalize the vectors! Use `glm::rotate()`.
-            forward = normalize(rotate(glm::mat4(1.f), angle, right) * glm::vec4(forward, 0));
+            forward = normalize(rotate(glm::mat4(1.f), angle, right) * glm::vec4(forward, 1));
             up = normalize(cross(right, forward));
 
         }
@@ -104,8 +111,8 @@ namespace implemented
             // TODO(student): Compute the new `forward`, `up` and `right`
             // vectors. Use `glm::rotate()`. Don't forget to normalize the
             // vectors!
-            forward = normalize(rotate(glm::mat4(1.f), angle, glm::vec3(0, 1, 0)) * glm::vec4(forward, 0));
-            right   = normalize(rotate(glm::mat4(1.f), angle, glm::vec3(0, 1, 0)) * glm::vec4(right, 0));
+            forward = normalize(rotate(glm::mat4(1.f), angle, glm::vec3(0, 1, 0)) * glm::vec4(forward, 1));
+            right   = normalize(rotate(glm::mat4(1.f), angle, glm::vec3(0, 1, 0)) * glm::vec4(right, 1));
             up      = normalize(cross(right, forward));
 
         }
@@ -115,8 +122,8 @@ namespace implemented
             // TODO(student): Compute the new `right` and `up`. This time,
             // `forward` stays the same. Use `glm::rotate()`. Don't forget
             // to normalize the vectors!
-            right = normalize(rotate(glm::mat4(1.f), angle, forward) * glm::vec4(right, 0));
-            up = normalize(rotate(glm::mat4(1.f), angle, forward) * glm::vec4(up, 0));
+            right = normalize(rotate(glm::mat4(1.f), angle, forward) * glm::vec4(right, 1));
+            up = normalize(rotate(glm::mat4(1.f), angle, forward) * glm::vec4(up, 1));
             forward = normalize(cross(up, right));
             
         }

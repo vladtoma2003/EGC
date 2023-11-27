@@ -1,4 +1,6 @@
 ﻿#pragma once
+#include <iostream>
+
 #include "components/simple_scene.h"
 
 namespace m1
@@ -7,8 +9,8 @@ namespace m1
     {
     private:
         glm::vec3 position;
-        glm::vec3 size = glm::vec3(4, 1, 8);
-        float bodyAngle;
+        glm::vec3 size = glm::vec3(8, 1, 4);
+        float bodyAngle = 0;
     public:
         explicit Body(const float x, const float y, const float z)
         {
@@ -22,17 +24,16 @@ namespace m1
         {
             return size;
         }
-        void moveBody(float x, float y, float z)
+        void moveBody(glm::vec3 distance)
         {
-            position.x += x;
-            position.y += y;
-            position.z += z;
+            position += distance;
         }
         void updateBodyPosition(float x, float y, float z)
         {
             position.x = x;
             position.y = y;
             position.z = z;
+            bodyAngle = 0;
         }
         void rotateBody(float angle)
         {

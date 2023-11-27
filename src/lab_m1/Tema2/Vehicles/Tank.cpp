@@ -55,9 +55,10 @@ void Tank::renderTank(implemented::CameraTema *camera, glm::mat4 projectionMatri
 
 void Tank::updatePosition(float x, float y, float z)
 {
-    position.x = x;
-    position.y = y;
-    position.z = z;
+    tankPosition.x = x;
+    tankPosition.y = y;
+    tankPosition.z = z;
+    tankAngle = 0;
     body->updateBodyPosition(x,y,z);
     
     const float trackDistanceZ = scale * body->getBodySize().z/4;
@@ -77,23 +78,23 @@ void Tank::updatePosition(float x, float y, float z)
 void Tank::rotateTank(float angle)
 {
     tankAngle += angle;
-    body->rotateBody(tankAngle);
+    forwardTank = normalize(rotate(glm::mat4(1.f), angle, glm::vec3(0, 1, 0)) * glm::vec4(forwardTank, 0));
+    rightTank   = normalize(rotate(glm::mat4(1.f), angle, glm::vec3(0, 1, 0)) * glm::vec4(rightTank, 0));
+    body->rotateBody(angle);
     tracks[0]->rotateTracks(angle);
     tracks[1]->rotateTracks(angle);
     turret->rotateTurret(angle);
     cannon->rotateCannon(angle);
 }
 
-void Tank::moveTank(float x, float y, float z)
+void Tank::moveTank(float distance) const
 {
-    position.x += x;
-    position.y += y;
-    position.z += z;
-    body->moveBody(x, y, z);
-    tracks[0]->moveTracks(x, y, z);
-    tracks[1]->moveTracks(x, y, z);
-    turret->moveTurret(x, y, z);
-    cannon->moveCannon(x, y, z);
+    const glm::vec3 dir = glm::normalize(glm::vec3(forwardTank.x, 0, forwardTank.z));
+    body->moveBody(dir * distance);
+    tracks[0]->moveTracks(dir*distance);
+    tracks[1]->moveTracks(dir*distance);
+    turret->moveTurret(dir*distance);
+    cannon->moveCannon(dir*distance);
 }
 
 Cannon *Tank::createCannon(float x, float y, float z)
@@ -125,7 +126,7 @@ Tracks **Tank::createTracks(float x, float y, float z)
     Tracks **tracks = new Tracks*[2];
     const float distanceX = scale * body->getBodySize().x / 4;
     const float distanceY = scale * body->getBodySize().y / 2;
-    const float distanceZ = scale * body->getBodySize().z / 4;
+    const float distanceZ = scale * body->getBodySize().z / 2;
     tracks[0] = new Tracks(x, y - distanceY, z + distanceZ, glm::vec3(0, -distanceY, distanceZ), body->getBodyPosition(), 0);
     tracks[1] = new Tracks(x, y - distanceY, z - distanceZ, glm::vec3(0, -distanceY, distanceZ), body->getBodyPosition(), RADIANS(180));
     return tracks;

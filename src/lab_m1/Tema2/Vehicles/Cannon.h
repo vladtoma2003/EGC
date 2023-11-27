@@ -39,14 +39,10 @@ namespace m1
         {
             return cannonAngle;
         }
-        void moveCannon(float x, float y, float z)
+        void moveCannon(glm::vec3 distance)
         {
-            position.x += x;
-            position.y += y;
-            position.z += z;
-            center.x += x;
-            center.y += y;
-            center.z += z;
+            position += distance;
+            center += distance;
         }
         void updateCannonPosition(float x, float y, float z)
         {
@@ -56,6 +52,7 @@ namespace m1
             center.x = position.x + distanceFromBody.x;
             center.y = position.y + distanceFromBody.y;
             center.z = position.z + distanceFromBody.z;
+            cannonAngle = 0;
         }
         void rotateCannon(float angle)
         {

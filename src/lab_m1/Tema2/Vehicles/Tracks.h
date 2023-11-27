@@ -35,20 +35,17 @@ namespace m1
         {
             return trackAngle;
         }
-        void moveTracks(float x, float y, float z)
+        void moveTracks(glm::vec3 distance)
         {
-            position.x += x;
-            position.y += y;
-            position.z += z;
-            center.x += x;
-            center.y += y;
-            center.z += z;
+            position += distance;
+            center += distance;
         }
         void updateTracksPosition(float x, float y, float z)
         {
             position.x = x;
             position.y = y;
             position.z = z;
+            trackAngle = 0;
             center.x = position.x + distanceFromBody.x;
             center.y = position.y + distanceFromBody.y;
             center.z = position.z + distanceFromBody.z;

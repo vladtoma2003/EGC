@@ -34,14 +34,10 @@ namespace m1
         {
             return turretAngle;
         }
-        void moveTurret(float x, float y, float z)
+        void moveTurret(glm::vec3 distance)
         {
-            position.x += x;
-            position.y += y;
-            position.z += z;
-            center.x += x;
-            center.y += y;
-            center.z += z;
+            position += distance;
+            center += distance;
         }
         void updateTurretPosition(float x, float y, float z)
         {
@@ -51,6 +47,7 @@ namespace m1
             center.x = x;
             center.y = y;
             center.z = z;
+            turretAngle = 0;
         }
         void rotateTurret(float angle)
         {
