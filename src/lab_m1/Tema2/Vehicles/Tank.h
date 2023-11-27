@@ -19,12 +19,13 @@ namespace m1
         const int speed = 10;
         int hp = 100;
         int damage = 10;
-        glm::vec3 tankPosition = glm::vec3(0.f, 0.f, 0.f);
+        glm::vec3 tankPosition = glm::vec3(0, 0, 0);
         float scale = 0.25f;
         glm::vec3 size = glm::vec3(8*scale, 1*scale, 4*scale);
         float tankAngle = 0;
-        glm::vec3 forwardTank     = glm::vec3(1, 0, 0);
-        glm::vec3 rightTank       = glm::vec3(0, 0, 1);
+        glm::vec3 forwardTank = glm::vec3(1, 0, 0);
+        glm::vec3 rightTank = glm::vec3(0, 0, 1);
+        
         Body *body;
         Tracks **tracks;
         Turret *turret;
@@ -40,7 +41,7 @@ namespace m1
 
         void renderTank(implemented::CameraTema *camera, glm::mat4 projectionMatrix, std::unordered_map<std::string, Shader *> shaders,float time);
         void createTank(float x, float y, float z);
-        void moveTank(float distance) const;
+        void moveTank(float distance);
         void updatePosition(float x, float y, float z);
         void rotateTank(float angle);
 

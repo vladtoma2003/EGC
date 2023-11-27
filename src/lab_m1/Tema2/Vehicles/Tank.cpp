@@ -87,9 +87,10 @@ void Tank::rotateTank(float angle)
     cannon->rotateCannon(angle);
 }
 
-void Tank::moveTank(float distance) const
+void Tank::moveTank(float distance)
 {
-    const glm::vec3 dir = glm::normalize(glm::vec3(forwardTank.x, 0, forwardTank.z));
+    glm::vec3 dir = glm::normalize(glm::vec3(forwardTank.x, 0, forwardTank.z));
+    tankPosition += dir*distance;
     body->moveBody(dir * distance);
     tracks[0]->moveTracks(dir*distance);
     tracks[1]->moveTracks(dir*distance);
