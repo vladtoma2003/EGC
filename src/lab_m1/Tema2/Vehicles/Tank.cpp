@@ -51,6 +51,17 @@ void Tank::renderTank(implemented::CameraTema *camera, glm::mat4 projectionMatri
         Meshes::RenderSimpleMesh(getComponent("cannon"), shaders["LabShader"], modelMatrix,
             glm::vec3(50.f/255, 50.f/255, 50.f/255), camera, time, projectionMatrix);
     }
+    { // Projectiles
+        for(auto projectile:projectiles)
+        {
+            glm::mat4 modelMatrix = glm::mat4(1);
+            modelMatrix = glm::translate(modelMatrix, projectile->getProjectilePosition());
+            modelMatrix = glm::scale(modelMatrix, glm::vec3(getScale()));
+            modelMatrix = glm::rotate(modelMatrix, projectile->getProjectileAngle(), glm::vec3(0, 1, 0));
+            Meshes::RenderSimpleMesh(getComponent("projectile"), shaders["LabShader"], modelMatrix,
+                glm::vec3(1,1,1), camera, time, projectionMatrix);
+        }
+    }
 }
 
 void Tank::updatePosition(float x, float y, float z)
@@ -98,19 +109,25 @@ void Tank::moveTank(float distance)
     cannon->moveCannon(dir*distance);
 }
 
+Projectile *Tank::createProjectile(float x, float y, float z, glm::vec3 forward, float angle)
+{
+    glm::vec3 dir = glm::normalize(glm::vec3(forward.x, 0, forward.z));
+    x += dir.x * cannon->getCannonSize().x*scale;
+    z += dir.z * cannon->getCannonSize().x*scale;
+    return new Projectile(x, y, z, cannon->getForward(), cannon->getCannonAngle());
+}
+
 Cannon *Tank::createCannon(float x, float y, float z)
 {
     components["cannon"] = Meshes::CreateMesh("cannon", "src/lab_m1/Tema2/Models/cannon/");
     const float distanceY = scale * body->getBodySize().y;
-    return new Cannon(x, y + distanceY, z, glm::vec3(0, distanceY, 0), turret->getTurretPosition());
+    return new Cannon(x, y + distanceY, z, glm::vec3(0, distanceY, 0), turret->getTurretPosition(), getTankForward());
 }
 
 Turret *Tank::createTurret(float x, float y, float z)
 {
     components["turret"] = Meshes::CreateMesh("turret", "src/lab_m1/Tema2/Models/turret/");
-    // const float distanceX = scale * body->getBodySize().x/8;
     const float distanceY = scale * body->getBodySize().y;
-    // const float distanceZ = scale * body->getBodySize().z/4;
     return new Turret(x, y + distanceY, z, glm::vec3(0, distanceY, 0), body->getBodyPosition());
 }
 
@@ -140,7 +157,16 @@ void Tank::createTank(const float x, const float y, const float z)
     this->tracks = createTracks(x, y, z);
     this->turret = createTurret(x, y, z);
     this->cannon = createCannon(x, y, z);
+    this->projectiles = std::vector<Projectile *>();
+    components["projectile"] = Meshes::CreateMesh("projectile", "src/lab_m1/Tema2/Models/projectile/");
 }
+
+void Tank::shoot()
+{
+    projectiles.push_back(createProjectile(cannon->getCannonPosition().x, cannon->getCannonPosition().y,
+        cannon->getCannonPosition().z, cannon->getForward(), cannon->getCannonAngle()));
+}
+
 
 Tank::Tank()
 {

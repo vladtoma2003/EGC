@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "Projectile.h"
 #include "components/simple_scene.h"
 #include "lab_m1/Tema2/Vehicles/Body.h"
 
@@ -31,6 +32,7 @@ namespace m1
         Turret *turret;
         Cannon *cannon;
         std::unordered_map<std::string, Mesh *> components;
+        std::vector<Projectile *> projectiles;
 
         Body* createBody(float x, float y, float z);
         Tracks** createTracks(float x, float y, float z);
@@ -38,12 +40,14 @@ namespace m1
         Cannon *createCannon(float x, float y, float z);
 
     public:
-
+        
+        Projectile *createProjectile(float x, float y, float z, glm::vec3 forward, float angle);
         void renderTank(implemented::CameraTema *camera, glm::mat4 projectionMatrix, std::unordered_map<std::string, Shader *> shaders,float time);
         void createTank(float x, float y, float z);
         void moveTank(float distance);
         void updatePosition(float x, float y, float z);
         void rotateTank(float angle);
+        void shoot();
 
         // void Init();
         Tank();
@@ -121,6 +125,10 @@ namespace m1
         void setAngle(float angle)
         {
             tankAngle = angle;
+        }
+        std::vector<Projectile*> getProjectiles() const
+        {
+            return projectiles;
         }
     };
 

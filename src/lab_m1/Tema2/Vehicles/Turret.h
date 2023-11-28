@@ -11,6 +11,7 @@ namespace m1
         glm::vec3 distanceFromBody;
         glm::vec3 center;
         float turretAngle = 0;
+        float deltaX = 0;
         public:
         explicit Turret(const float x, const float y, const float z, glm::vec3 distanceFromBody, glm::vec3 bodyPos)
         {
@@ -54,6 +55,18 @@ namespace m1
             turretAngle += angle;
             position.x = center.x + distanceFromBody.x * cos(-turretAngle);
             position.z = center.z + distanceFromBody.z * sin(-turretAngle);
+        }
+        float getDeltaX() const
+        {
+            return deltaX;
+        }
+        void setDeltaX(float value)
+        {
+            deltaX = value;
+        }
+        void incDeltaX(float value)
+        {
+            deltaX += value;
         }
     };
 }

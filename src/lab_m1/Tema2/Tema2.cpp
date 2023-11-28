@@ -36,7 +36,7 @@ void Tema2::Init()
     tank->createTank(0, tank->getScale(), 0);
     
     camera = new implemented::CameraTema();
-    camera->Set(tank->getPosition() + glm::vec3(-3.5f, 2, 0), tank->getPosition(), glm::vec3(0, 1, 0));
+    camera->Set(tank->getPosition() + glm::vec3(-3.5f, 1.5, 0), tank->getPosition(), glm::vec3(0, 1, 0));
     {
         Shader *shader = new Shader("LabShader");
         shader->AddShader(PATH_JOIN(window->props.selfDir, SOURCE_PATH::M1, "Tema2", "shaders", "VertexShader.glsl"), GL_VERTEX_SHADER);
@@ -49,8 +49,23 @@ void Tema2::Init()
         mesh->LoadMesh(PATH_JOIN(window->props.selfDir, RESOURCE_PATH::MODELS, "primitives"), "sphere.obj");
         meshes[mesh->GetMeshID()] = mesh;
     }
-    // TODO(student): After you implement the changing of the projection
-    // parameters, remove hardcodings of these parameters
+
+    // Big square for ground
+    {
+        vector<VertexFormat> vertices{
+            VertexFormat (glm::vec3(0, 0, 0), glm::vec3( 55.f/255, 112.f/255, 32.f/255)), // 0
+            VertexFormat (glm::vec3(1, 0, -1), glm::vec3( 55.f/255, 112.f/255, 32.f/255)), // 1
+            VertexFormat (glm::vec3(1, 0, 1), glm::vec3( 55.f/255, 112.f/255, 32.f/255)), // 2
+            VertexFormat (glm::vec3(-1, 0, -1), glm::vec3( 55.f/255, 112.f/255, 32.f/255)), // 3
+            VertexFormat (glm::vec3(-1, 0, 1), glm::vec3( 55.f/255, 112.f/255, 32.f/255)), // 4
+        };
+        vector<unsigned int> indices{
+            1, 2, 3,
+            2, 3, 4,
+        };
+        meshes["ground"] = Meshes::CreateMesh("ground", vertices, indices);
+    }
+    
     aspectRatio = window->props.aspectRatio;
     projectionMatrix = glm::perspective(fov, aspectRatio, zNear, zFar);
     
@@ -60,7 +75,7 @@ void Tema2::Init()
 void Tema2::FrameStart()
 {
     // Clears the color buffer (using the previously set color) and depth buffer
-    glClearColor(0, 0, 0, 1);
+    glClearColor(28.f/255, 84.f/255, 199.f/255, 1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glm::ivec2 resolution = window->GetResolution();
@@ -82,7 +97,17 @@ void Tema2::Update(float deltaTimeSeconds)
         modelMatrix = glm::scale(modelMatrix, glm::vec3(0.1f));
          Meshes::RenderSimpleMesh(meshes["sphere"], shaders["VertexNormal"], modelMatrix, glm::vec3(1, 0, 0), camera, time, projectionMatrix);
     }
-    
+    {
+        glm::mat4 modelMatrix = glm::mat4(1);
+        modelMatrix = glm::translate(modelMatrix, glm::vec3(0, 0.f, 0));
+        modelMatrix = glm::scale(modelMatrix, glm::vec3(100.f));
+        Meshes::RenderSimpleMesh(meshes["ground"], shaders["LabShader"], modelMatrix, glm::vec3(55.f/255, 112.f/255, 32.f/255), camera, time, projectionMatrix);
+    }
+    for(auto projectile:tank->getProjectiles())
+    {
+        projectile->moveProjectile(projectile->getSpeed() * deltaTimeSeconds, deltaTimeSeconds);
+        projectile->checkTimeOut();
+    }
     // Set Tank position to camera
     if(!vClipping)
     {
@@ -108,17 +133,17 @@ void Tema2::OnInputUpdate(float deltaTime, int mods)
     if (window->KeyHold(GLFW_KEY_W)) {
         if(vClipping)
         {
-            camera->TranslateForward(deltaTime*cameraSpeed);
+            camera->TranslateForward(deltaTime*cameraSpeed*10);
         } else {
             tank->moveTank(deltaTime*cameraSpeed);
-            camera->MoveForward(deltaTime*cameraSpeed);
+            camera->MoveForward(deltaTime*cameraSpeed, tank->getTankForward());
         }
     }
 
     if (window->KeyHold(GLFW_KEY_A)) {
         if(vClipping)
         {
-            camera->TranslateRight(-deltaTime*cameraSpeed);
+            camera->TranslateRight(-deltaTime*cameraSpeed*10);
         } else
         {
             tank->rotateTank(RADIANS(1));
@@ -131,17 +156,17 @@ void Tema2::OnInputUpdate(float deltaTime, int mods)
     if (window->KeyHold(GLFW_KEY_S)) {
         if(vClipping)
         {
-            camera->TranslateForward(-deltaTime*cameraSpeed);
+            camera->TranslateForward(-deltaTime*cameraSpeed*10);
         } else {
             tank->moveTank(-deltaTime*cameraSpeed);
-            camera->MoveForward(-deltaTime*cameraSpeed);
+            camera->MoveForward(-deltaTime*cameraSpeed, tank->getTankForward());
         }
     }
 
     if (window->KeyHold(GLFW_KEY_D)) {
         if(vClipping)
         {
-            camera->TranslateRight(deltaTime*cameraSpeed);
+            camera->TranslateRight(deltaTime*cameraSpeed*10);
         } else
         {
             tank->rotateTank(-RADIANS(1));
@@ -155,13 +180,13 @@ void Tema2::OnInputUpdate(float deltaTime, int mods)
         // TODO(student): Translate the camera downward
         if(vClipping)
         {
-            camera->TranslateUpward(-deltaTime*cameraSpeed);
+            camera->TranslateUpward(-deltaTime*cameraSpeed*10);
         }
     }
     if (window->KeyHold(GLFW_KEY_E)) {
         if(vClipping)
         {
-            camera->TranslateUpward(deltaTime*cameraSpeed);
+            camera->TranslateUpward(deltaTime*cameraSpeed*10);
         }
     }
 
@@ -221,7 +246,12 @@ void Tema2::OnKeyPress(int key, int mods)
     if(key == GLFW_KEY_V)
     {
         vClipping = !vClipping;
-        camera->Set(tank->getPosition() + glm::vec3(-3.5f, 2, 0), tank->getPosition(), glm::vec3(0, 1, 0));
+        if(!vClipping) // reset camera
+        {
+            glm::vec3 newPos = glm::normalize(glm::vec3(tank->getTankForward().x, 0, tank->getTankForward().z))*3.5f;
+            newPos += glm::vec3(0, -1.5, 0);
+            camera->Set(tank->getPosition() - newPos , tank->getPosition(), glm::vec3(0, 1, 0));
+        }
     }
 
     if(key == GLFW_KEY_L)
@@ -242,55 +272,56 @@ void Tema2::OnMouseMove(int mouseX, int mouseY, int deltaX, int deltaY)
     float sensivityOX = 0.001f;
     float sensivityOY = 0.001f;
     // Add mouse move event
-    if(window->MouseHold(GLFW_MOUSE_BUTTON_RIGHT))
+    if(!vClipping)
     {
-        camera->RotateThirdPerson_OX(-sensivityOX*deltaY);
-        camera->RotateThirdPerson_OY(-sensivityOY*deltaX);
-    } else
-    {
-        tank->getTurret()->rotateTurret(-sensivityOY*deltaX);
-        tank->getCannon()->rotateCannon(-sensivityOY*deltaX);
+        if(window->MouseHold(GLFW_MOUSE_BUTTON_RIGHT))
+        {
+            camera->RotateThirdPerson_OX(-sensivityOX*deltaY);
+            camera->RotateThirdPerson_OY(-sensivityOY*deltaX);
+        } else
+        {
+            tank->getTurret()->incDeltaX(10*(deltaX>1?1:deltaX< -1?-1:0));
+            tank->getCannon()->incDeltaX(10*(deltaX>1?1:deltaX < -1?-1:0));
+            tank->getTurret()->rotateTurret(-sensivityOY*tank->getTurret()->getDeltaX());
+            tank->getCannon()->rotateCannon(-sensivityOY*tank->getCannon()->getDeltaX());
+            tank->getTurret()->setDeltaX(0);
+            tank->getCannon()->setDeltaX(0);
+            
+        }
     }
-    std::cout << "sensitivityOX: " << sensivityOX << " sensitivityOY: " << sensivityOY << "\n";
-    std:: cout << tank->getTurret()->getTurretAngle() << "\n";
-    std::cout << "deltaX: " << deltaX << " deltaY: " << deltaY << "\n";
-    
-    // if (window->MouseHold(GLFW_MOUSE_BUTTON_RIGHT))
-    // {
-    //     float sensivityOX = 0.001f;
-    //     float sensivityOY = 0.001f;
-    //
-    //     // if (window->GetSpecialKeyState() == 0) {
-    //     //     renderCameraTarget = false;
-    //     //     // TODO(student): Rotate the camera in first-person mode around
-    //     //     // OX and OY using `deltaX` and `deltaY`. Use the sensitivity
-    //     //     // variables for setting up the rotation speed.
-    //     //     camera->RotateFirstPerson_OX(-sensivityOX*deltaY);
-    //     //     camera->RotateFirstPerson_OY(-sensivityOY*deltaX);
-    //     //
-    //     // }
-    //
-    //     // if (window->GetSpecialKeyState() & GLFW_MOD_CONTROL) {
-    //         renderCameraTarget = true;
-    //         // TODO(student): Rotate the camera in third-person mode around
-    //         // OX and OY using `deltaX` and `deltaY`. Use the sensitivity
-    //         // variables for setting up the rotation speed.
-    //         camera->RotateThirdPerson_OX(-sensivityOX*deltaY);
-    //         camera->RotateThirdPerson_OY(-sensivityOY*deltaX);
-    //     // }
-    // }
+    else
+    {
+        if(window->MouseHold(GLFW_MOUSE_BUTTON_RIGHT))
+        {
+            camera->RotateFirstPerson_OX(-sensivityOX*deltaY);
+            camera->RotateFirstPerson_OY(-sensivityOY*deltaX);
+        }
+    }
+    // std::cout << "sensitivityOX: " << sensivityOX << " sensitivityOY: " << sensivityOY << "\n";
+    // std:: cout << tank->getTurret()->getTurretAngle() << "\n";
+    // std::cout << "deltaX: " << deltaX << " deltaY: " << deltaY << "\n";
 }
 
 
 void Tema2::OnMouseBtnPress(int mouseX, int mouseY, int button, int mods)
 {
     // Add mouse button press event
+    if(button == 1)
+    {
+        tank->shoot();
+    }
 }
 
 
 void Tema2::OnMouseBtnRelease(int mouseX, int mouseY, int button, int mods)
 {
     // Add mouse button release event
+    if(button == 2)
+    {
+        glm::vec3 newPos = glm::normalize(glm::vec3(tank->getTankForward().x, 0, tank->getTankForward().z))*3.5f;
+        newPos += glm::vec3(0, -1.5, 0);
+        camera->Set(tank->getPosition() - newPos, tank->getPosition(), glm::vec3(0, 1, 0));
+    }
 }
 
 

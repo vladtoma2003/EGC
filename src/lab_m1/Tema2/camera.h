@@ -65,6 +65,12 @@ namespace implemented
             position += dir * distance;
         }
 
+        void MoveForward(float distance, glm::vec3 forwardy)
+        {
+            glm::vec3 dir = glm::normalize(glm::vec3(forwardy.x, 0, forwardy.z));
+            position += dir * distance;
+        }
+
         void TranslateForward(float distance)
         {
             // TODO(student): Translate the camera using the `forward` vector.
