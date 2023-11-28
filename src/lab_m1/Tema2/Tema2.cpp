@@ -242,15 +242,18 @@ void Tema2::OnMouseMove(int mouseX, int mouseY, int deltaX, int deltaY)
     float sensivityOX = 0.001f;
     float sensivityOY = 0.001f;
     // Add mouse move event
-    if(!window->MouseHold(GLFW_MOUSE_BUTTON_RIGHT))
-    {
-        tank->getTurret()->rotateTurret(-sensivityOY*deltaX);
-        tank->getCannon()->rotateCannon(-sensivityOY*deltaX);
-    } else
+    if(window->MouseHold(GLFW_MOUSE_BUTTON_RIGHT))
     {
         camera->RotateThirdPerson_OX(-sensivityOX*deltaY);
         camera->RotateThirdPerson_OY(-sensivityOY*deltaX);
+    } else
+    {
+        tank->getTurret()->rotateTurret(-sensivityOY*deltaX);
+        tank->getCannon()->rotateCannon(-sensivityOY*deltaX);
     }
+    std::cout << "sensitivityOX: " << sensivityOX << " sensitivityOY: " << sensivityOY << "\n";
+    std:: cout << tank->getTurret()->getTurretAngle() << "\n";
+    std::cout << "deltaX: " << deltaX << " deltaY: " << deltaY << "\n";
     
     // if (window->MouseHold(GLFW_MOUSE_BUTTON_RIGHT))
     // {
