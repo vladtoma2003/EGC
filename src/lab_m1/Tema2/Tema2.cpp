@@ -108,6 +108,8 @@ void Tema2::Update(float deltaTimeSeconds)
         projectile->moveProjectile(projectile->getSpeed() * deltaTimeSeconds, deltaTimeSeconds);
         projectile->checkTimeOut();
     }
+    tank->removeProjectiles();
+    
     // Set Tank position to camera
     if(!vClipping)
     {

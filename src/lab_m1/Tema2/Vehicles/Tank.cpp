@@ -157,15 +157,25 @@ void Tank::createTank(const float x, const float y, const float z)
     this->tracks = createTracks(x, y, z);
     this->turret = createTurret(x, y, z);
     this->cannon = createCannon(x, y, z);
-    this->projectiles = std::vector<Projectile *>();
     components["projectile"] = Meshes::CreateMesh("projectile", "src/lab_m1/Tema2/Models/projectile/");
 }
 
 void Tank::shoot()
 {
-    projectiles.push_back(createProjectile(cannon->getCannonPosition().x, cannon->getCannonPosition().y,
-        cannon->getCannonPosition().z, cannon->getForward(), cannon->getCannonAngle()));
+    projectiles.push_back(createProjectile(cannon->getCannonPosition().x, cannon->getCannonPosition().y, cannon->getCannonPosition().z, cannon->getForward(), cannon->getCannonAngle()));
 }
+
+void Tank::removeProjectiles()
+{
+    for(auto projectile:projectiles)
+    {
+        if(!projectile->isAlive())
+        {
+            projectiles.erase(std::remove(projectiles.begin(), projectiles.end(), projectile), projectiles.end());
+        }
+    }
+}
+
 
 
 Tank::Tank()

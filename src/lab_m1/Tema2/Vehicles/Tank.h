@@ -32,7 +32,7 @@ namespace m1
         Turret *turret;
         Cannon *cannon;
         std::unordered_map<std::string, Mesh *> components;
-        std::vector<Projectile *> projectiles;
+        std::vector<Projectile *> projectiles = std::vector<Projectile *>();
 
         Body* createBody(float x, float y, float z);
         Tracks** createTracks(float x, float y, float z);
@@ -48,6 +48,7 @@ namespace m1
         void updatePosition(float x, float y, float z);
         void rotateTank(float angle);
         void shoot();
+        void removeProjectiles();
 
         // void Init();
         Tank();
