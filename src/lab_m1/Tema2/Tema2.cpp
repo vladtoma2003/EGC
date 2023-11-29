@@ -33,7 +33,7 @@ void Tema2::Init()
     renderCameraTarget = false;
 
     tank = new Tank();
-    tank->createTank(0, tank->getScale(), 0);
+    tank->createTank(0, tank->getScale(), 0, glm::vec3(15.f/255, 39.f/255, 10.f/255));
     
     camera = new implemented::CameraTema();
     camera->Set(tank->getPosition() + glm::vec3(-3.5f, 1.5, 0), tank->getPosition(), glm::vec3(0, 1, 0));
@@ -65,6 +65,8 @@ void Tema2::Init()
         };
         meshes["ground"] = Meshes::CreateMesh("ground", vertices, indices);
     }
+
+    createNTanks(5);
     
     aspectRatio = window->props.aspectRatio;
     projectionMatrix = glm::perspective(fov, aspectRatio, zNear, zFar);
@@ -119,7 +121,7 @@ void Tema2::Update(float deltaTimeSeconds)
         }
         enemyTank->removeProjectiles();
         // tank->checkCollisionWithTank(enemyTank);
-        tankCollision(tank, enemyTank, deltaTimeSeconds);
+        tankCollision(tank, enemyTank);
         for(auto enemyTank2:enemyTanks)
         {
             if(enemyTank != enemyTank2)
@@ -127,7 +129,7 @@ void Tema2::Update(float deltaTimeSeconds)
                 enemyTank->checkCollisionWithTank(enemyTank2);
             }
         }
-        // enemyTank->rotateTurretTowardsPlayer(tank->getPosition());
+        enemyTank->rotateTurretTowardsPlayer(tank->getPosition());
     }
     
     // Set Tank position to camera
@@ -135,20 +137,10 @@ void Tema2::Update(float deltaTimeSeconds)
     {
         camera->Set(tank->getPosition(), glm::vec3(0, 1, 0));
     }
+    tank->reload(deltaTimeSeconds);
 }
-/*
-*float razaTank1 = tank->getScale() * tank->getBody()->getBodySize().x/2;
-    float razaTank2 = getScale() * getBody()->getBodySize().x/2;
-    float distance = glm::distance(tank->getPosition(), getPosition());
-    if(distance < razaTank1 + razaTank2)
-    {
-        glm::vec3 dif = tank->getPosition() - getPosition();
-        glm::vec3 P = glm::normalize(dif) * abs(razaTank1 + razaTank2 - distance);
-        moveTank(-P);
-        tank->moveTank(P);
-    }
- */
-void Tema2::tankCollision(Tank *tank1, Tank *tank2, float deltaTime)
+
+void Tema2::tankCollision(Tank *tank1, Tank *tank2)
 {
     float tank1Scale = tank1->getScale();
     float tank2Scale = tank2->getScale();
@@ -157,7 +149,7 @@ void Tema2::tankCollision(Tank *tank1, Tank *tank2, float deltaTime)
     float distance = glm::distance(tank1->getPosition(), tank2->getPosition());
     if(distance < tank1Radius + tank2Radius)
     {
-        
+        std::cout << "collision\n";
         glm::vec3 dif = tank1->getPosition() - tank2->getPosition();
         if(glm::any(glm::isnan(glm::normalize(dif))))
         { // protection against spawning tanks on top of each other
@@ -166,19 +158,24 @@ void Tema2::tankCollision(Tank *tank1, Tank *tank2, float deltaTime)
         else
         {
             glm::vec3 P = glm::normalize(dif) * abs(tank1Radius + tank2Radius - distance);
+            tank1->moveTank(P);
             tank2->moveTank(-P);
-            tank1->setrCollision(true);
-            float dis = glm::length(P);
-            tank1->setSpeed(dis);
+            camera->MoveForward(P);
+            // tank->setSpeed(0.5f);
         }
-    }
-    else
-    {
-        tank1->setrCollision(false);
-        tank1->setSpeed(2.0f);
     }
 }
 
+void Tema2::createNTanks(int n)
+{
+    for(int i = 0; i < n; i++)
+    {
+        const float x = rand() % 100 - 50;
+        const float z = rand() % 100 - 50;
+        enemyTanks.push_back(new Tank());
+        enemyTanks[enemyTanks.size()-1]->createTank(x, enemyTanks[enemyTanks.size()-1]->getScale(), z, glm::vec3(0.545, 0, 0.123f));
+    }
+}
 
 void Tema2::FrameEnd()
 {
@@ -221,11 +218,8 @@ void Tema2::OnInputUpdate(float deltaTime, int mods)
         {
             camera->TranslateForward(-deltaTime*cameraSpeed*10);
         } else {
-            tank->moveTank(-deltaTime*cameraSpeed);
-            if(!tank->isColliding())
-            {
-                camera->MoveForward(-deltaTime*cameraSpeed, tank->getTankForward());
-            }
+            tank->moveTank(-deltaTime*tank->getSpeed());
+            camera->MoveForward(-deltaTime*tank->getSpeed(), tank->getTankForward());
         }
     }
 
@@ -275,14 +269,6 @@ void Tema2::OnInputUpdate(float deltaTime, int mods)
         orthoDown += 0.5f*deltaTime;
         projectionMatrix = glm::ortho(orthoLeft, orthoRight, orthoDown, orthoUp, 0.00f, 200.0f);
     }
-    if(!isPerspective && window->KeyHold(GLFW_KEY_L))
-    {
-        orthoLeft -= 0.5f*deltaTime;
-        orthoRight += 0.5f*deltaTime;
-        orthoUp += 0.5f*deltaTime;
-        orthoDown -= 0.5f*deltaTime;
-        projectionMatrix = glm::ortho(orthoLeft, orthoRight, orthoDown, orthoUp, 0.00f, 200.0f);
-    }
     
 }
 
@@ -315,14 +301,14 @@ void Tema2::OnKeyPress(int key, int mods)
         }
     }
 
-    if(key == GLFW_KEY_L)
-    {
-        tank->updatePosition(0,0,0);
-    }
+    // if(key == GLFW_KEY_L)
+    // {
+    //     tank->updatePosition(0,0,0);
+    // }
     if(key == GLFW_KEY_P)
     {
         enemyTanks.push_back(new Tank());
-        enemyTanks[enemyTanks.size()-1]->createTank(0, enemyTanks[enemyTanks.size()-1]->getScale(), 0);
+        enemyTanks[enemyTanks.size()-1]->createTank(5, enemyTanks[enemyTanks.size()-1]->getScale(), 5, glm::vec3(0.545, 0, 0.123f));
     }
 }
 

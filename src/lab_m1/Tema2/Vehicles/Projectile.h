@@ -40,7 +40,6 @@ namespace m1
             glm::vec3 dir = glm::normalize(glm::vec3(forward.x, 0, forward.z));
             position += dir*distance;
             this->time += time;
-            std::cout << this->time << std::endl;
         }
         float getSpeed() const
         {

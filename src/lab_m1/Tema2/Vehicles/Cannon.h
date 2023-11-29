@@ -78,5 +78,13 @@ namespace m1
         {
             return forward;
         }
+        void setForward(glm::vec3 value)
+        {
+            forward = value;
+        }
+        void setCannonAngle(float angle)
+        {
+            cannonAngle += angle;
+        }
     };
 }

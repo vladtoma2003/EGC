@@ -17,16 +17,19 @@ namespace m1
     class Tank : public gfxc::SimpleScene{
     
     private:
-        float speed = 2.0f;
+        float speed = 5.0f;
         int hp = 100;
         int damage = 10;
         glm::vec3 tankPosition = glm::vec3(0, 0, 0);
         float scale = 0.25f;
-        glm::vec3 size = glm::vec3(8*scale, 1*scale, 4*scale);
         float tankAngle = 0;
         glm::vec3 forwardTank = glm::vec3(1, 0, 0);
         glm::vec3 rightTank = glm::vec3(0, 0, 1);
-        bool collide = false;
+        const float cooldown = 1.5f;
+        float time = 0;
+        glm::vec3 color = glm::vec3(15.f/255, 39.f/255, 10.f/255);
+        // glm::vec3 color = glm::vec3(0.545, 0, 0.123f);
+        bool canShoot = true;
         
         Body *body;
         Tracks **tracks;
@@ -44,7 +47,7 @@ namespace m1
         
         Projectile *createProjectile(float x, float y, float z, glm::vec3 forward, float angle);
         void renderTank(implemented::CameraTema *camera, glm::mat4 projectionMatrix, std::unordered_map<std::string, Shader *> shaders,float time);
-        void createTank(float x, float y, float z);
+        void createTank(float x, float y, float z, glm::vec3 color);
         void moveTank(float distance);
         void moveTank(glm::vec3 distance);
         void updatePosition(float x, float y, float z);
@@ -53,6 +56,7 @@ namespace m1
         void removeProjectiles();
         void rotateTurretTowardsPlayer(glm::vec3 playerPosition);
         void checkCollisionWithTank(Tank *tank);
+        void reload(float deltaTime);
 
         // void Init();
         Tank();
@@ -139,13 +143,17 @@ namespace m1
         {
             this->speed = speed;
         }
-        bool isColliding() const
+        float getCooldown() const
         {
-            return collide;
+            return cooldown;
         }
-        void setrCollision(bool collide)
+        float getTime() const
         {
-            this->collide = collide;
+            return time;
+        }
+        void setTime(float time)
+        {
+            this->time += time;
         }
     };
 

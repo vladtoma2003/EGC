@@ -1,7 +1,5 @@
 ﻿#include "Tank.h"
 
-#include <iostream>
-
 #include "Cannon.h"
 #include "Tracks.h"
 #include "Turret.h"
@@ -17,7 +15,7 @@ void Tank::renderTank(implemented::CameraTema *camera, glm::mat4 projectionMatri
         modelMatrix = glm::scale(modelMatrix, glm::vec3(getScale()));
         modelMatrix = glm::rotate(modelMatrix, getAngle(), glm::vec3(0, 1, 0));
         Meshes::RenderSimpleMesh(getComponent("body"), shaders["LabShader"], modelMatrix,
-            glm::vec3(15.f/255, 39.f/255, 10.f/255), camera, time, projectionMatrix);
+            color, camera, time, projectionMatrix);
     }
     { // Track Left
         glm::mat4 modelMatrix = glm::mat4(1);
@@ -41,7 +39,7 @@ void Tank::renderTank(implemented::CameraTema *camera, glm::mat4 projectionMatri
         modelMatrix = glm::scale(modelMatrix, glm::vec3(getScale()));
         modelMatrix = glm::rotate(modelMatrix, turret->getTurretAngle(), glm::vec3(0, 1, 0));
         Meshes::RenderSimpleMesh(getComponent("turret"), shaders["LabShader"], modelMatrix,
-            glm::vec3(30.f/255, 49.f/255, 30.f/255), camera, time, projectionMatrix);
+            color + glm::vec3(15.f/255, 10.f/255, 20.f/255), camera, time, projectionMatrix);
     }
     { // Cannon
         glm::mat4 modelMatrix = glm::mat4(1);
@@ -162,86 +160,39 @@ Tracks **Tank::createTracks(float x, float y, float z)
 }
 
 
-void Tank::createTank(const float x, const float y, const float z)
+void Tank::createTank(const float x, const float y, const float z, glm::vec3 color)
 {
+    this->setPosition(glm::vec3(x,y,z));
     this->body = createBody(x, y, z);
     this->tracks = createTracks(x, y, z);
     this->turret = createTurret(x, y, z);
     this->cannon = createCannon(x, y, z);
+    this->color = color;
     components["projectile"] = Meshes::CreateMesh("projectile", "src/lab_m1/Tema2/Models/projectile/");
 }
 
 void Tank::shoot()
 {
-    projectiles.push_back(createProjectile(cannon->getCannonPosition().x, cannon->getCannonPosition().y, cannon->getCannonPosition().z, cannon->getForward(), cannon->getCannonAngle()));
+    if(canShoot)
+    {
+        canShoot = false;
+        projectiles.push_back(createProjectile(cannon->getCannonPosition().x, cannon->getCannonPosition().y, cannon->getCannonPosition().z, cannon->getForward(), cannon->getCannonAngle()));
+    }
 }
 
 void Tank::rotateTurretTowardsPlayer(glm::vec3 playerPosition)
 {
-    // glm::vec3 dir = glm::normalize(glm::vec3(cannon->getForward().x, 0, cannon->getForward().z));
-    // float x = cannon->getCannonPosition().x + dir.x * cannon->getCannonSize().x*scale;
-    // float z = cannon->getCannonPosition().z + dir.z * cannon->getCannonSize().x*scale;
-    // float angle = atan2(playerPosition.z - z, playerPosition.x - x);
-    // std::cout << angle << std::endl;
-    // std::cout << "Caca " << cannon->getCannonAngle() << std::endl;
-    // if(angle > cannon->getCannonAngle())
-    // {
-    //     cannon->rotateCannon(RADIANS(1));
-    //     turret->rotateTurret(RADIANS(1));
-    // }
-    // else if(angle < cannon->getCannonAngle())
-    // {
-    //     cannon->rotateCannon(RADIANS(-1));
-    //     turret->rotateTurret(RADIANS(-1));
-    // }
-    auto fw = glm::normalize(cannon->getForward());
-    float dotProduct = glm::dot(fw,  glm::normalize(playerPosition));
-
-    glm::vec3 dir = glm::normalize(glm::vec3(cannon->getForward().x, 0, cannon->getForward().z));
-    float x = cannon->getCannonPosition().x + dir.x * cannon->getCannonSize().x*scale;
-    float z = cannon->getCannonPosition().z + dir.z * cannon->getCannonSize().x*scale;
-
-    float angle = atan2(playerPosition.z, playerPosition.x) - atan2(z, x);
-
-    while (angle > glm::pi<float>()) {
-        angle -= glm::two_pi<float>();
-    }
-    while (angle <= -glm::pi<float>()) {
-        angle += glm::two_pi<float>();
-    }
-
-    if(angle != 0.f)
-    {
-        float rotation = RADIANS(1);
-        if(angle > glm::pi<float>() / 2 || angle < -glm::pi<float>() / 2)
-        {
-            rotation = -rotation;
-        }
-        cannon->rotateCannon(rotation);
-        turret->rotateTurret(rotation);
-    }
-    
-    // if(dotProduct != 0.f)
-    // {
-    //     if(dotProduct > 0)
-    //     {
-    //         cannon->rotateCannon(RADIANS(1));
-    //         turret->rotateTurret(RADIANS(1));
-    //     }
-    //     else
-    //     {
-    //         cannon->rotateCannon(RADIANS(-1));
-    //         turret->rotateTurret(RADIANS(-1));
-    //     }
-    // }
-    
+    cannon->setForward(this->getPosition() - playerPosition);
+    const float angle = atan2(cannon->getForward().x, cannon->getForward().z) + RADIANS(90);
+    cannon->rotateCannon(angle - cannon->getCannonAngle());
+    turret->rotateTurret(angle - turret->getTurretAngle());
 }
 
 void Tank::checkCollisionWithTank(Tank *tank)
 {
-    float razaTank1 = tank->getScale() * tank->getBody()->getBodySize().x/2;
-    float razaTank2 = getScale() * getBody()->getBodySize().x/2;
-    float distance = glm::distance(tank->getPosition(), getPosition());
+    const float razaTank1 = tank->getScale() * tank->getBody()->getBodySize().x/2;
+    const float razaTank2 = getScale() * getBody()->getBodySize().x/2;
+    const float distance = glm::distance(tank->getPosition(), getPosition());
     if(distance < razaTank1 + razaTank2)
     {
         glm::vec3 dif = tank->getPosition() - getPosition();
@@ -251,7 +202,7 @@ void Tank::checkCollisionWithTank(Tank *tank)
         }
         else
         {
-            glm::vec3 P = glm::normalize(dif) * abs(razaTank1 + razaTank2 - distance);
+            const glm::vec3 P = glm::normalize(dif) * abs(razaTank1 + razaTank2 - distance);
             moveTank(-P);
             tank->moveTank(P);
         }
@@ -269,7 +220,19 @@ void Tank::removeProjectiles()
     }
 }
 
-
+void Tank::reload(float deltaTime)
+{
+    if(!canShoot)
+    {
+        time += deltaTime;
+        if(time > cooldown)
+        {
+            canShoot = true;
+            time = 0;
+        }
+        std::cout << time << std::endl;
+    }
+}
 
 Tank::Tank()
 {
