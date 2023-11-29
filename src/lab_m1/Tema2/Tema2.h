@@ -41,6 +41,7 @@ namespace m1
         void createNTanks(int n);
         void tankCollision(Tank *tank1, Tank *tank2) const;
         static void searchForPlayer(Tank *tank, float deltaTime, glm::vec3 playerPosition);
+        void checkCollisionWithProjectiles(Tank *tank, std::vector<Projectile *> projectiles);
     
 
     protected:

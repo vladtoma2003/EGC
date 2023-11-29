@@ -18,7 +18,7 @@ namespace m1
     
     private:
         float speed = 5.0f;
-        int hp = 100;
+        int hp = 20;
         int damage = 10;
         glm::vec3 tankPosition = glm::vec3(0, 0, 0);
         float scale = 0.25f;
@@ -72,6 +72,11 @@ namespace m1
         int getHP() const
         {
             return hp;
+        }
+
+        void setHP(int hp)
+        {
+            this->hp -= hp;
         }
 
         int getDamage() const

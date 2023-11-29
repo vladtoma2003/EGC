@@ -85,7 +85,7 @@ void Tema2::FrameStart()
     glViewport(0, 0, resolution.x, resolution.y);
 }
 
-
+// AICI
 void Tema2::Update(float deltaTimeSeconds)
 {
     // Render the camera target. This is useful for understanding where
@@ -95,7 +95,7 @@ void Tema2::Update(float deltaTimeSeconds)
         glm::mat4 modelMatrix = glm::mat4(1);
         modelMatrix = glm::translate(modelMatrix, glm::vec3(0, 0.f, 0));
         modelMatrix = glm::scale(modelMatrix, glm::vec3(100.f));
-        Meshes::RenderSimpleMesh(meshes["ground"], shaders["LabShader"], modelMatrix, glm::vec3(55.f/255, 112.f/255, 32.f/255), camera, time, projectionMatrix);
+        Meshes::RenderSimpleMesh(meshes["ground"], shaders["LabShader"], modelMatrix, glm::vec3(55.f/255, 112.f/255, 32.f/255), camera, 100, projectionMatrix);
     }
     for(auto projectile:tank->getProjectiles())
     {
@@ -106,7 +106,9 @@ void Tema2::Update(float deltaTimeSeconds)
     for(auto enemyTank:enemyTanks)
     {
         enemyTank->renderTank(camera, projectionMatrix, shaders, time);
-        for(auto projectile:enemyTank->getProjectiles())
+        checkCollisionWithProjectiles(enemyTank, tank->getProjectiles());
+        checkCollisionWithProjectiles(tank, enemyTank->getProjectiles());
+        for(auto projectile:enemyTank->getProjectiles()) // enemy tank projectiles
         {
             projectile->moveProjectile(projectile->getSpeed() * deltaTimeSeconds, deltaTimeSeconds);
             projectile->checkTimeOut();
@@ -114,6 +116,10 @@ void Tema2::Update(float deltaTimeSeconds)
         enemyTank->removeProjectiles();
         // tank->checkCollisionWithTank(enemyTank);
         tankCollision(tank, enemyTank);
+        if(enemyTank->getHP() <= 0)
+        {
+            continue;
+        }
         searchForPlayer(enemyTank, deltaTimeSeconds, tank->getPosition());
         for(auto enemyTank2:enemyTanks)
         {
@@ -132,7 +138,25 @@ void Tema2::Update(float deltaTimeSeconds)
         camera->Set(tank->getPosition(), glm::vec3(0, 1, 0));
     }
     tank->reload(deltaTimeSeconds);
+    std::cout << "HP: " << tank->getHP() << std::endl;
+    
 }
+
+void Tema2::checkCollisionWithProjectiles(Tank* tank, std::vector<Projectile*> projectiles)
+{
+    for(auto projectile:projectiles)
+    {
+        float projectileRadius = tank->getScale()*projectile->getProjectileSize().x/2;
+        float tankRadius = tank->getScale()*tank->getBody()->getBodySize().x/2;
+        float distance = glm::distance(tank->getPosition(), projectile->getProjectilePosition());
+        if(distance < projectileRadius + tankRadius)
+        {
+            tank->setHP(projectile->getDamage());
+            projectile->setAlive(false);
+        }
+    }
+}
+
 
 void Tema2::tankCollision(Tank *tank1, Tank *tank2) const
 {
@@ -161,32 +185,48 @@ void Tema2::tankCollision(Tank *tank1, Tank *tank2) const
 
 void Tema2::searchForPlayer(Tank* tank, float deltaTime, glm::vec3 playerPosition)
 {
+    if(tank->getHP() <= 0)
+    {
+        return;
+    }
     if(tank->getMoveTime() < tank->getMoveTotal())
     {
         if(glm::distance(tank->getPosition(), playerPosition) > 10) // randomly move when not in range
         {
+  
             if(tank->getDecision() % 2 == 1) // Rotate            {
             {
                 if(tank->getDecision() == 1) // Right
-                {
+                    {
                     tank->rotateTank(RADIANS(1));
-                }
-                else
+                    }
+                else if (tank->getDecision() == 3) // Left
                 {
                     tank->rotateTank(RADIANS(-1));
+                } else { // Rotate turret
+                    if(tank->getDecision() == 5)
+                    {
+                        tank->getTurret()->rotateTurret(RADIANS(0.1));
+                        tank->getCannon()->rotateCannon(RADIANS(0.1));
+                    } else
+                    {
+                        tank->getTurret()->rotateTurret(-RADIANS(0.1));
+                        tank->getCannon()->rotateCannon(-RADIANS(0.1));
+                    }
                 }
             }
             else // Move
-            {
-                if(tank->getDecision() == 0 || tank->getDecision() == 2) // Forward
                 {
+                if(tank->getDecision() == 0 || tank->getDecision() == 2 || tank->getDecision() == 4) // Forward
+                    {
                     tank->moveTank(deltaTime*tank->getSpeed());
-                }
+                    }
                 else
                 {
                     tank->moveTank(-deltaTime*tank->getSpeed());
                 }
-            }
+                }
+            
             tank->setMoveTime(deltaTime);
         }
     } else
@@ -194,7 +234,7 @@ void Tema2::searchForPlayer(Tank* tank, float deltaTime, glm::vec3 playerPositio
         const float newTime = rand() % 3 + 1; // 1-3 seconds
         tank->setMoveTotal(newTime);
         tank->resetMoveTime();
-        const int decision = rand() % 5; // move or rotate
+        const int decision = rand() % 8; // move or rotate
         tank->setDecision(decision);
     }
 }

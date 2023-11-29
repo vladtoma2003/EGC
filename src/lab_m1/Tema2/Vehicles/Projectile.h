@@ -15,6 +15,7 @@ namespace m1
         float angle = 0;
         float time = 0;
         bool alive = true;
+        const int damage = 35;
 
     public:
         explicit Projectile(const float x, const float y, const float z, glm::vec3 forward, float angle)
@@ -55,6 +56,14 @@ namespace m1
         bool isAlive() const
         {
             return alive;
+        }
+        int getDamage() const
+        {
+            return damage;
+        }
+        void setAlive(bool alive)
+        {
+            this->alive = alive;
         }
         
     };

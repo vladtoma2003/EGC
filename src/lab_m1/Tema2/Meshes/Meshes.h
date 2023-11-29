@@ -10,7 +10,7 @@ namespace m1
     public:
         static Mesh *CreateMesh(const char *name, std::string path);
         static void Meshes::RenderSimpleMesh(Mesh *mesh, Shader *shader, const glm::mat4 & modelMatrix, glm::vec3 newColor, implemented::CameraTema 
-        *camera, float time, glm::mat4 projectionMatrix);
+        *camera, int hp, glm::mat4 projectionMatrix);
         static Mesh *CreateMesh(const char* name, std::vector<VertexFormat> vertices, std::vector<unsigned int> indices);
     };
 };

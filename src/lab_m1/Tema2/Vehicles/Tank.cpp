@@ -15,7 +15,7 @@ void Tank::renderTank(implemented::CameraTema *camera, glm::mat4 projectionMatri
         modelMatrix = glm::scale(modelMatrix, glm::vec3(getScale()));
         modelMatrix = glm::rotate(modelMatrix, getAngle(), glm::vec3(0, 1, 0));
         Meshes::RenderSimpleMesh(getComponent("body"), shaders["LabShader"], modelMatrix,
-            color, camera, time, projectionMatrix);
+            color, camera, hp, projectionMatrix);
     }
     { // Track Left
         glm::mat4 modelMatrix = glm::mat4(1);
@@ -23,7 +23,7 @@ void Tank::renderTank(implemented::CameraTema *camera, glm::mat4 projectionMatri
         modelMatrix = glm::scale(modelMatrix, glm::vec3(getScale()));
         modelMatrix = glm::rotate(modelMatrix, tracks[0]->getTrackAngle(), glm::vec3(0, 1, 0));
         Meshes::RenderSimpleMesh(getComponent("track"), shaders["LabShader"], modelMatrix,
-            glm::vec3(50.f/255, 50.f/255, 50.f/255), camera, time, projectionMatrix);
+            glm::vec3(50.f/255, 50.f/255, 50.f/255), camera, hp, projectionMatrix);
     }
     { // Track Right
         glm::mat4 modelMatrix = glm::mat4(1);
@@ -31,7 +31,7 @@ void Tank::renderTank(implemented::CameraTema *camera, glm::mat4 projectionMatri
         modelMatrix = glm::scale(modelMatrix, glm::vec3(getScale()));
         modelMatrix = glm::rotate(modelMatrix, tracks[1]->getTrackAngle(), glm::vec3(0, 1, 0));
         Meshes::RenderSimpleMesh(getComponent("track"), shaders["LabShader"], modelMatrix,
-            glm::vec3(50.f/255, 50.f/255, 50.f/255), camera, time, projectionMatrix);
+            glm::vec3(50.f/255, 50.f/255, 50.f/255), camera, hp, projectionMatrix);
     }
     { // Turret
         glm::mat4 modelMatrix = glm::mat4(1);
@@ -39,7 +39,7 @@ void Tank::renderTank(implemented::CameraTema *camera, glm::mat4 projectionMatri
         modelMatrix = glm::scale(modelMatrix, glm::vec3(getScale()));
         modelMatrix = glm::rotate(modelMatrix, turret->getTurretAngle(), glm::vec3(0, 1, 0));
         Meshes::RenderSimpleMesh(getComponent("turret"), shaders["LabShader"], modelMatrix,
-            color + glm::vec3(15.f/255, 10.f/255, 20.f/255), camera, time, projectionMatrix);
+            color + glm::vec3(15.f/255, 10.f/255, 20.f/255), camera, hp, projectionMatrix);
     }
     { // Cannon
         glm::mat4 modelMatrix = glm::mat4(1);
@@ -47,7 +47,7 @@ void Tank::renderTank(implemented::CameraTema *camera, glm::mat4 projectionMatri
         modelMatrix = glm::scale(modelMatrix, glm::vec3(getScale()));
         modelMatrix = glm::rotate(modelMatrix, cannon->getCannonAngle(), glm::vec3(0, 1, 0));
         Meshes::RenderSimpleMesh(getComponent("cannon"), shaders["LabShader"], modelMatrix,
-            glm::vec3(50.f/255, 50.f/255, 50.f/255), camera, time, projectionMatrix);
+            glm::vec3(50.f/255, 50.f/255, 50.f/255), camera, hp, projectionMatrix);
     }
     { // Projectiles
         for(auto projectile:projectiles)
@@ -57,7 +57,7 @@ void Tank::renderTank(implemented::CameraTema *camera, glm::mat4 projectionMatri
             modelMatrix = glm::scale(modelMatrix, glm::vec3(getScale()));
             modelMatrix = glm::rotate(modelMatrix, projectile->getProjectileAngle(), glm::vec3(0, 1, 0));
             Meshes::RenderSimpleMesh(getComponent("projectile"), shaders["LabShader"], modelMatrix,
-                glm::vec3(1,1,1), camera, time, projectionMatrix);
+                glm::vec3(1,1,1), camera, 100, projectionMatrix);
         }
     }
 }
