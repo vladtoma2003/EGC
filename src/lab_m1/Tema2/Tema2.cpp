@@ -5,7 +5,6 @@
 #include <iostream>
 
 #include "Vehicles/Cannon.h"
-#include "Vehicles/Tracks.h"
 #include "Vehicles/Turret.h"
 
 using namespace std;
@@ -160,14 +159,14 @@ void Tema2::checkCollisionWithProjectiles(Tank* tank, std::vector<Projectile*> p
 
 void Tema2::tankCollision(Tank *tank1, Tank *tank2) const
 {
-    float tank1Scale = tank1->getScale();
-    float tank2Scale = tank2->getScale();
-    float tank1Radius = tank1Scale*tank1->getBody()->getBodySize().x/2;
-    float tank2Radius = tank2Scale*tank2->getBody()->getBodySize().x/2;
-    float distance = glm::distance(tank1->getPosition(), tank2->getPosition());
+    const float tank1Scale = tank1->getScale();
+    const float tank2Scale = tank2->getScale();
+    const float tank1Radius = tank1Scale*tank1->getBody()->getBodySize().x/2;
+    const float tank2Radius = tank2Scale*tank2->getBody()->getBodySize().x/2;
+    const float distance = glm::distance(tank1->getPosition(), tank2->getPosition());
     if(distance < tank1Radius + tank2Radius)
     {
-        glm::vec3 dif = tank1->getPosition() - tank2->getPosition();
+        const glm::vec3 dif = tank1->getPosition() - tank2->getPosition();
         if(glm::any(glm::isnan(glm::normalize(dif))))
         { // protection against spawning tanks on top of each other
             tank2->moveTank(glm::vec3(tank1Scale*tank1->getBody()->getBodySize().x, 0, 0));
