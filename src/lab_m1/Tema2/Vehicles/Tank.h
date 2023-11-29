@@ -17,7 +17,7 @@ namespace m1
     class Tank : public gfxc::SimpleScene{
     
     private:
-        const int speed = 10;
+        float speed = 10;
         int hp = 100;
         int damage = 10;
         glm::vec3 tankPosition = glm::vec3(0, 0, 0);
@@ -26,6 +26,7 @@ namespace m1
         float tankAngle = 0;
         glm::vec3 forwardTank = glm::vec3(1, 0, 0);
         glm::vec3 rightTank = glm::vec3(0, 0, 1);
+        bool collide = false;
         
         Body *body;
         Tracks **tracks;
@@ -45,10 +46,13 @@ namespace m1
         void renderTank(implemented::CameraTema *camera, glm::mat4 projectionMatrix, std::unordered_map<std::string, Shader *> shaders,float time);
         void createTank(float x, float y, float z);
         void moveTank(float distance);
+        void moveTank(glm::vec3 distance);
         void updatePosition(float x, float y, float z);
         void rotateTank(float angle);
         void shoot();
         void removeProjectiles();
+        void rotateTurretTowardsPlayer(glm::vec3 playerPosition);
+        void checkCollisionWithTank(Tank *tank);
 
         // void Init();
         Tank();
@@ -130,6 +134,18 @@ namespace m1
         std::vector<Projectile*> getProjectiles() const
         {
             return projectiles;
+        }
+        void setSpeed(float speed)
+        {
+            this->speed = speed;
+        }
+        bool isColliding() const
+        {
+            return collide;
+        }
+        void setrCollision(bool collide)
+        {
+            this->collide = collide;
         }
     };
 

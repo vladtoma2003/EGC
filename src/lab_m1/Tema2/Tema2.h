@@ -38,6 +38,9 @@ namespace m1
         void OnWindowResize(int width, int height) override;
         float time;
         Tank *tank = new Tank();
+        std::vector<Tank*> enemyTanks = std::vector<Tank*>();
+
+        void tankCollision(Tank *tank1, Tank *tank2);
 
     protected:
         implemented::CameraTema *camera;
