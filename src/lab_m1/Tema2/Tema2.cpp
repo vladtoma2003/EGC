@@ -119,7 +119,7 @@ void Tema2::Update(float deltaTimeSeconds)
         }
         enemyTank->removeProjectiles();
         // tank->checkCollisionWithTank(enemyTank);
-        tankCollision(tank, enemyTank);
+        tankCollision(tank, enemyTank, deltaTimeSeconds);
         for(auto enemyTank2:enemyTanks)
         {
             if(enemyTank != enemyTank2)
@@ -148,7 +148,7 @@ void Tema2::Update(float deltaTimeSeconds)
         tank->moveTank(P);
     }
  */
-void Tema2::tankCollision(Tank *tank1, Tank *tank2)
+void Tema2::tankCollision(Tank *tank1, Tank *tank2, float deltaTime)
 {
     float tank1Scale = tank1->getScale();
     float tank2Scale = tank2->getScale();
@@ -169,15 +169,13 @@ void Tema2::tankCollision(Tank *tank1, Tank *tank2)
             tank2->moveTank(-P);
             tank1->setrCollision(true);
             float dis = glm::length(P);
-            if(!vClipping)
-            {
-                camera->MoveForward(dis, tank1->getTankForward());
-            }
+            tank1->setSpeed(dis);
         }
     }
     else
     {
         tank1->setrCollision(false);
+        tank1->setSpeed(2.0f);
     }
 }
 
@@ -200,11 +198,8 @@ void Tema2::OnInputUpdate(float deltaTime, int mods)
         {
             camera->TranslateForward(deltaTime*cameraSpeed*10);
         } else {
-            tank->moveTank(deltaTime*cameraSpeed);
-            if(!tank->isColliding())
-            {
-                camera->MoveForward(deltaTime*cameraSpeed, tank->getTankForward());
-            }
+            tank->moveTank(deltaTime*tank->getSpeed());
+            camera->MoveForward(deltaTime*tank->getSpeed(), tank->getTankForward());
         }
     }
 

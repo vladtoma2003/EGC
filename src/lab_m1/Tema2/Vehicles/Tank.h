@@ -17,7 +17,7 @@ namespace m1
     class Tank : public gfxc::SimpleScene{
     
     private:
-        float speed = 10;
+        float speed = 2.0f;
         int hp = 100;
         int damage = 10;
         glm::vec3 tankPosition = glm::vec3(0, 0, 0);
@@ -58,7 +58,7 @@ namespace m1
         Tank();
         ~Tank();
 
-        int getSpeed() const
+        float getSpeed() const
         {
             return speed;
         }

@@ -40,7 +40,7 @@ namespace m1
         Tank *tank = new Tank();
         std::vector<Tank*> enemyTanks = std::vector<Tank*>();
 
-        void tankCollision(Tank *tank1, Tank *tank2);
+        void tankCollision(Tank *tank1, Tank *tank2, float deltaTime);
 
     protected:
         implemented::CameraTema *camera;
