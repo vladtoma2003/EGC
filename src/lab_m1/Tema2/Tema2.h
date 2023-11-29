@@ -26,8 +26,6 @@ namespace m1
         void Update(float deltaTimeSeconds) override;
         void FrameEnd() override;
 
-        // void RenderSimpleMesh(Mesh *mesh, Shader *shader, const glm::mat4 &modelMatrix, const glm::vec3 newColor);
-
         void OnInputUpdate(float deltaTime, int mods) override;
         void OnKeyPress(int key, int mods) override;
         void OnKeyRelease(int key, int mods) override;
@@ -41,7 +39,8 @@ namespace m1
         std::vector<Tank*> enemyTanks = std::vector<Tank*>();
 
         void createNTanks(int n);
-        void tankCollision(Tank *tank1, Tank *tank2);
+        void tankCollision(Tank *tank1, Tank *tank2) const;
+        static void searchForPlayer(Tank *tank, float deltaTime, glm::vec3 playerPosition);
     
 
     protected:

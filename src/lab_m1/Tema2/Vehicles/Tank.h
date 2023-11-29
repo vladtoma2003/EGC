@@ -26,10 +26,12 @@ namespace m1
         glm::vec3 forwardTank = glm::vec3(1, 0, 0);
         glm::vec3 rightTank = glm::vec3(0, 0, 1);
         const float cooldown = 1.5f;
-        float time = 0;
+        float shootTime = 0;
         glm::vec3 color = glm::vec3(15.f/255, 39.f/255, 10.f/255);
-        // glm::vec3 color = glm::vec3(0.545, 0, 0.123f);
         bool canShoot = true;
+        float moveTime = 0;
+        float moveTotal = 0;
+        int decision = 0;
         
         Body *body;
         Tracks **tracks;
@@ -149,11 +151,39 @@ namespace m1
         }
         float getTime() const
         {
-            return time;
+            return shootTime;
         }
         void setTime(float time)
         {
-            this->time += time;
+            this->shootTime += time;
+        }
+        void setMoveTime(float time)
+        {
+            this->moveTime += time;
+        }
+        void resetMoveTime()
+        {
+            this->moveTime = 0;
+        }
+        float getMoveTime() const
+        {
+            return moveTime;
+        }
+        void setMoveTotal(float time)
+        {
+            this->moveTotal = time;
+        }
+        float getMoveTotal() const
+        {
+            return moveTotal;
+        }
+        void setDecision(int decision)
+        {
+            this->decision = decision;
+        }
+        int getDecision() const
+        {
+            return decision;
         }
     };
 

@@ -182,10 +182,14 @@ void Tank::shoot()
 
 void Tank::rotateTurretTowardsPlayer(glm::vec3 playerPosition)
 {
-    cannon->setForward(this->getPosition() - playerPosition);
-    const float angle = atan2(cannon->getForward().x, cannon->getForward().z) + RADIANS(90);
-    cannon->rotateCannon(angle - cannon->getCannonAngle());
-    turret->rotateTurret(angle - turret->getTurretAngle());
+    if(glm::distance(playerPosition, getPosition()) < 10)
+    {
+        cannon->setForward(playerPosition - getPosition());
+        const float angle = atan2(cannon->getForward().x, cannon->getForward().z) - RADIANS(90);
+        cannon->rotateCannon(angle - cannon->getCannonAngle());
+        turret->rotateTurret(angle - turret->getTurretAngle());
+        shoot();
+    }
 }
 
 void Tank::checkCollisionWithTank(Tank *tank)
@@ -224,15 +228,15 @@ void Tank::reload(float deltaTime)
 {
     if(!canShoot)
     {
-        time += deltaTime;
-        if(time > cooldown)
+        shootTime += deltaTime;
+        if(shootTime > cooldown)
         {
             canShoot = true;
-            time = 0;
+            shootTime = 0;
         }
-        std::cout << time << std::endl;
     }
 }
+
 
 Tank::Tank()
 {
