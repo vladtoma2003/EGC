@@ -10,7 +10,7 @@ namespace m1
     private:
         glm::vec3 position;
         glm::vec3 scale;
-        glm::vec3 color = glm::vec3( 146.f/255, 139.f/255, 126.f/255);
+        glm::vec3 color = glm::vec3( 200.f/255, 200.f/255, 200.f/255);
     public:
         Building();
         ~Building();

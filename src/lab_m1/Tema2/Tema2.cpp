@@ -80,7 +80,7 @@ void Tema2::Init()
 void Tema2::FrameStart()
 {
     // Clears the color buffer (using the previously set color) and depth buffer
-    glClearColor(28.f/255, 84.f/255, 199.f/255, 1);
+    glClearColor(68.f/255, 176.f/255, 241.f/255, 1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glm::ivec2 resolution = window->GetResolution();
@@ -100,7 +100,8 @@ void Tema2::Update(float deltaTimeSeconds)
         glm::mat4 modelMatrix = glm::mat4(1);
         modelMatrix = glm::translate(modelMatrix, glm::vec3(0, 0.f, 0));
         modelMatrix = glm::scale(modelMatrix, glm::vec3(100.f));
-        Meshes::RenderSimpleMesh(meshes["ground"], shaders["LabShader"], modelMatrix, glm::vec3(55.f/255, 112.f/255, 32.f/255), camera, 100, projectionMatrix);
+        Meshes::RenderSimpleMesh(meshes["ground"], shaders["LabShader"], modelMatrix,
+            glm::vec3(69.f/255, 158.f/255, 19.f/255), camera, 100, projectionMatrix);
     }
     // std::cout<<"CACA\n";
     for(auto projectile:tank->getProjectiles())
