@@ -267,8 +267,8 @@ void Tema2::checkBuildingsCollision(Tank* tank)
             else
             {
                 glm::vec3 P = glm::normalize(dif) * abs(tankRadius - distance);
-                tank->moveTank(P);
-                if(!vClipping && tank == this->tank)
+                // tank->moveTank(P);
+                if(!vClipping && tank == this->tank && tank->moveTank(P))
                     camera->MoveForward(P);
             }
             
@@ -330,9 +330,9 @@ void Tema2::tankCollision(Tank *tank1, Tank *tank2) const
         else
         {
             glm::vec3 P = glm::normalize(dif) * abs(tank1Radius + tank2Radius - distance);
-            tank1->moveTank(P);
+            // tank1->moveTank(P);
             tank2->moveTank(-P);
-            if(!vClipping)
+            if(!vClipping && tank1->moveTank(P))
                 camera->MoveForward(P);
             // tank->setSpeed(0.5f);
         }
@@ -374,18 +374,12 @@ void Tema2::searchForPlayer(Tank* tank, float deltaTime, glm::vec3 playerPositio
             else // Move
                 {
                 if(tank->getDecision() == 0 || tank->getDecision() == 2 || tank->getDecision() == 4) // Forward
-                    {
-                    if(tank->getPosition().x < 100 && tank->getPosition().x > -100 && tank->getPosition().z < 100 && tank->getPosition().z > -100)
-                    {
-                        tank->moveTank(deltaTime*tank->getSpeed());
-                    }
-                    }
+                {
+                    tank->moveTank(deltaTime*tank->getSpeed());
+                }
                 else
                 {
-                    if(tank->getPosition().x < 100 && tank->getPosition().x > -100 && tank->getPosition().z < 100 && tank->getPosition().z > -100)
-                    {
-                        tank->moveTank(-deltaTime*tank->getSpeed());
-                    }
+                    tank->moveTank(-deltaTime*tank->getSpeed());
                 }
             }
             
@@ -432,8 +426,8 @@ void Tema2::OnInputUpdate(float deltaTime, int mods)
         {
             camera->TranslateForward(deltaTime*cameraSpeed*10);
         } else {
-            tank->moveTank(deltaTime*tank->getSpeed());
-            camera->MoveForward(deltaTime*tank->getSpeed(), tank->getTankForward());
+            if(tank->moveTank(deltaTime*tank->getSpeed()))
+                camera->MoveForward(deltaTime*tank->getSpeed(), tank->getTankForward());
         }
     }
 
@@ -455,8 +449,8 @@ void Tema2::OnInputUpdate(float deltaTime, int mods)
         {
             camera->TranslateForward(-deltaTime*cameraSpeed*10);
         } else {
-            tank->moveTank(-deltaTime*tank->getSpeed());
-            camera->MoveForward(-deltaTime*tank->getSpeed(), tank->getTankForward());
+            if(tank->moveTank(-deltaTime*tank->getSpeed()))
+                camera->MoveForward(-deltaTime*tank->getSpeed(), tank->getTankForward());
         }
     }
 
@@ -575,7 +569,6 @@ void Tema2::OnMouseMove(int mouseX, int mouseY, int deltaX, int deltaY)
             tank->getCannon()->rotateCannon(-sensivityOY*tank->getCannon()->getDeltaX());
             tank->getTurret()->setDeltaX(0);
             tank->getCannon()->setDeltaX(0);
-            
         }
     }
     else

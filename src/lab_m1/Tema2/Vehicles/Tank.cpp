@@ -96,26 +96,36 @@ void Tank::rotateTank(float angle)
     cannon->rotateCannon(angle);
 }
 
-void Tank::moveTank(float distance)
+int Tank::moveTank(float distance)
 {
     glm::vec3 dir = glm::normalize(glm::vec3(forwardTank.x, 0, forwardTank.z));
-    tankPosition += dir*distance;
-    body->moveBody(dir * distance);
-    tracks[0]->moveTracks(dir*distance);
-    tracks[1]->moveTracks(dir*distance);
-    turret->moveTurret(dir*distance);
-    cannon->moveCannon(dir*distance);
+    if(!((tankPosition+dir).x > 100 || (tankPosition+dir).x < -100 || (tankPosition+dir).z > 100 || (tankPosition+dir).z < -100))
+    {
+        tankPosition += dir*distance;
+        body->moveBody(dir * distance);
+        tracks[0]->moveTracks(dir*distance);
+        tracks[1]->moveTracks(dir*distance);
+        turret->moveTurret(dir*distance);
+        cannon->moveCannon(dir*distance);
+        return 1;
+    }
+    return 0;
 }
 
 // This function moves the tank in a straight line
-void Tank::moveTank(glm::vec3 distance)
+int Tank::moveTank(glm::vec3 distance)
 {
-    tankPosition += distance;
-    body->moveBody(distance);
-    tracks[0]->moveTracks(distance);
-    tracks[1]->moveTracks(distance);
-    turret->moveTurret(distance);
-    cannon->moveCannon(distance);
+    if(!((tankPosition + distance).x > 100 || (tankPosition + distance).x < -100 || (tankPosition + distance).z > 100 || (tankPosition + distance).z < -100))
+    {
+        tankPosition += distance;
+        body->moveBody(distance);
+        tracks[0]->moveTracks(distance);
+        tracks[1]->moveTracks(distance);
+        turret->moveTurret(distance);
+        cannon->moveCannon(distance);
+        return 1;
+    }
+    return 0;
 }
 
 Projectile *Tank::createProjectile(float x, float y, float z, glm::vec3 forward, float angle)

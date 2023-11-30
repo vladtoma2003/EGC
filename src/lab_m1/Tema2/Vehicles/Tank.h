@@ -50,8 +50,8 @@ namespace m1
         Projectile *createProjectile(float x, float y, float z, glm::vec3 forward, float angle);
         void renderTank(implemented::CameraTema *camera, glm::mat4 projectionMatrix, std::unordered_map<std::string, Shader *> shaders,float time);
         void createTank(float x, float y, float z, glm::vec3 color);
-        void moveTank(float distance);
-        void moveTank(glm::vec3 distance);
+        int moveTank(float distance);
+        int moveTank(glm::vec3 distance);
         void updatePosition(float x, float y, float z);
         void rotateTank(float angle);
         void shoot();
