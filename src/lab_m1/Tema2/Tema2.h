@@ -35,7 +35,7 @@ namespace m1
         void OnMouseBtnRelease(int mouseX, int mouseY, int button, int mods) override;
         void OnMouseScroll(int mouseX, int mouseY, int offsetX, int offsetY) override;
         void OnWindowResize(int width, int height) override;
-        float time;
+        float time = 0;
         Tank *tank = new Tank();
         std::vector<Tank*> enemyTanks = std::vector<Tank*>();
 
@@ -48,6 +48,7 @@ namespace m1
         bool checkIfTankIsInsideBuilding(Tank *tank, Building *building);
         void spawnEnemyTank();
         bool atLeastOneTankDead();
+        void checkCollisionProjectileBuilding(Projectile *projectile);
     
 
     protected:

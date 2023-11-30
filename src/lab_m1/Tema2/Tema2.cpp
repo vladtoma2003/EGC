@@ -68,7 +68,7 @@ void Tema2::Init()
     // Cube for buildings
    meshes["cube"] = Building::createMesh();
 
-    createNTanks(5);
+    createNTanks(10);
     initBuildings();
     
     aspectRatio = window->props.aspectRatio;
@@ -93,6 +93,8 @@ void Tema2::Update(float deltaTimeSeconds)
 {
     // Render the camera target. This is useful for understanding where
     // the rotation point is, when moving in third-person camera mode.
+    time = Engine::GetElapsedTime();
+    std::cout << "time: " << time << std::endl;
     tank->renderTank(camera, projectionMatrix, shaders, time);
     {
         glm::mat4 modelMatrix = glm::mat4(1);
@@ -100,14 +102,15 @@ void Tema2::Update(float deltaTimeSeconds)
         modelMatrix = glm::scale(modelMatrix, glm::vec3(100.f));
         Meshes::RenderSimpleMesh(meshes["ground"], shaders["LabShader"], modelMatrix, glm::vec3(55.f/255, 112.f/255, 32.f/255), camera, 100, projectionMatrix);
     }
-    std::cout<<"CACA\n";
+    // std::cout<<"CACA\n";
     for(auto projectile:tank->getProjectiles())
     {
         projectile->moveProjectile(projectile->getSpeed() * deltaTimeSeconds, deltaTimeSeconds);
+        checkCollisionProjectileBuilding(projectile);
         projectile->checkTimeOut();
     }
     tank->removeProjectiles();
-    std::cout << "CACA\n";
+    // std::cout << "CACA\n";
     for(auto enemyTank:enemyTanks)
     {
         // std::cout << "Rendering enemy tank\n" << enemyTank->getPosition() << endl;
@@ -138,7 +141,7 @@ void Tema2::Update(float deltaTimeSeconds)
         enemyTank->rotateTurretTowardsPlayer(tank->getPosition());
         enemyTank->reload(deltaTimeSeconds);
         // spawnEnemyTank();
-        std::cout << tank->getHP() << endl;
+        // std::cout << tank->getHP() << endl;
     }
     
     // Set Tank position to camera
@@ -372,13 +375,19 @@ void Tema2::searchForPlayer(Tank* tank, float deltaTime, glm::vec3 playerPositio
                 {
                 if(tank->getDecision() == 0 || tank->getDecision() == 2 || tank->getDecision() == 4) // Forward
                     {
-                    tank->moveTank(deltaTime*tank->getSpeed());
+                    if(tank->getPosition().x < 100 && tank->getPosition().x > -100 && tank->getPosition().z < 100 && tank->getPosition().z > -100)
+                    {
+                        tank->moveTank(deltaTime*tank->getSpeed());
+                    }
                     }
                 else
                 {
-                    tank->moveTank(-deltaTime*tank->getSpeed());
+                    if(tank->getPosition().x < 100 && tank->getPosition().x > -100 && tank->getPosition().z < 100 && tank->getPosition().z > -100)
+                    {
+                        tank->moveTank(-deltaTime*tank->getSpeed());
+                    }
                 }
-                }
+            }
             
             tank->setMoveTime(deltaTime);
         }
@@ -586,6 +595,19 @@ void Tema2::OnMouseBtnPress(int mouseX, int mouseY, int button, int mods)
     if(button == 1)
     {
         tank->shoot();
+    }
+}
+
+void Tema2::checkCollisionProjectileBuilding(Projectile* projectile)
+{
+    for(auto building:buildings){
+        if(projectile->getProjectilePosition().x < building->getPosition().x + building->getScale().x &&
+            projectile->getProjectilePosition().x > building->getPosition().x &&
+            projectile->getProjectilePosition().z < building->getPosition().z + building->getScale().z &&
+            projectile->getProjectilePosition().z > building->getPosition().z)
+        {
+            projectile->setAlive(false);
+        }
     }
 }
 
