@@ -27,7 +27,8 @@ void main()
     frag_pos = position;
     frag_normal = normal;
     frag_uv = texCoord;
-    frag_color = ObjectColor; //
+    float multiplyer = (HP>25)?(HP/100.f):(0.25);
+    frag_color = ObjectColor*multiplyer; //
     // TODO(student): Compute gl_Position
     vec3 position2 = position; // + vec3(cos(Time), sin(Time), 0)
     gl_Position = Projection * View * Model * vec4(position2, 1.0);

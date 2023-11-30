@@ -18,7 +18,7 @@ namespace m1
     
     private:
         float speed = 5.0f;
-        int hp = 20;
+        int hp = 100;
         int damage = 10;
         glm::vec3 tankPosition = glm::vec3(0, 0, 0);
         float scale = 0.25f;
@@ -61,8 +61,9 @@ namespace m1
         void reload(float deltaTime);
 
         // void Init();
-        Tank();
+        Tank(float x, float y, float z, glm::vec3 color);
         ~Tank();
+        Tank();
 
         float getSpeed() const
         {

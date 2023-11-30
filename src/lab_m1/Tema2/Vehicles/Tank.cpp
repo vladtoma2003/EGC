@@ -245,3 +245,8 @@ Tank::Tank()
 Tank::~Tank()
 {
 }
+
+Tank::Tank(const float x, const float y, const float z, glm::vec3 color)
+{
+    createTank(x, y, z, color);
+}

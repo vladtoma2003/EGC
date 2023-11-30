@@ -2,6 +2,7 @@
 
 #include <vector>
 
+#include "Building.h"
 #include "camera.h"
 #include "components/simple_scene.h"
 #include "Vehicles/Tank.h"
@@ -42,12 +43,18 @@ namespace m1
         void tankCollision(Tank *tank1, Tank *tank2) const;
         static void searchForPlayer(Tank *tank, float deltaTime, glm::vec3 playerPosition);
         void checkCollisionWithProjectiles(Tank *tank, std::vector<Projectile *> projectiles);
+        void initBuildings();
+        void checkBuildingsCollision(Tank *tank);
+        bool checkIfTankIsInsideBuilding(Tank *tank, Building *building);
+        void spawnEnemyTank();
+        bool atLeastOneTankDead();
     
 
     protected:
         implemented::CameraTema *camera;
         glm::mat4 projectionMatrix;
         bool renderCameraTarget;
+        std::vector<Building*> buildings = std::vector<Building*>();
 
         // TODO(student): If you need any other class variables, define them here.
         float orthoLeft = 0;

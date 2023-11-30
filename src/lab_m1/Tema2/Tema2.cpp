@@ -4,6 +4,7 @@
 #include <string>
 #include <iostream>
 
+#include "Building.h"
 #include "Vehicles/Cannon.h"
 #include "Vehicles/Turret.h"
 
@@ -64,8 +65,11 @@ void Tema2::Init()
         };
         meshes["ground"] = Meshes::CreateMesh("ground", vertices, indices);
     }
+    // Cube for buildings
+   meshes["cube"] = Building::createMesh();
 
     createNTanks(5);
+    initBuildings();
     
     aspectRatio = window->props.aspectRatio;
     projectionMatrix = glm::perspective(fov, aspectRatio, zNear, zFar);
@@ -96,14 +100,17 @@ void Tema2::Update(float deltaTimeSeconds)
         modelMatrix = glm::scale(modelMatrix, glm::vec3(100.f));
         Meshes::RenderSimpleMesh(meshes["ground"], shaders["LabShader"], modelMatrix, glm::vec3(55.f/255, 112.f/255, 32.f/255), camera, 100, projectionMatrix);
     }
+    std::cout<<"CACA\n";
     for(auto projectile:tank->getProjectiles())
     {
         projectile->moveProjectile(projectile->getSpeed() * deltaTimeSeconds, deltaTimeSeconds);
         projectile->checkTimeOut();
     }
     tank->removeProjectiles();
+    std::cout << "CACA\n";
     for(auto enemyTank:enemyTanks)
     {
+        // std::cout << "Rendering enemy tank\n" << enemyTank->getPosition() << endl;
         enemyTank->renderTank(camera, projectionMatrix, shaders, time);
         checkCollisionWithProjectiles(enemyTank, tank->getProjectiles());
         checkCollisionWithProjectiles(tank, enemyTank->getProjectiles());
@@ -115,6 +122,7 @@ void Tema2::Update(float deltaTimeSeconds)
         enemyTank->removeProjectiles();
         // tank->checkCollisionWithTank(enemyTank);
         tankCollision(tank, enemyTank);
+        checkBuildingsCollision(enemyTank);
         if(enemyTank->getHP() <= 0)
         {
             continue;
@@ -129,6 +137,8 @@ void Tema2::Update(float deltaTimeSeconds)
         }
         enemyTank->rotateTurretTowardsPlayer(tank->getPosition());
         enemyTank->reload(deltaTimeSeconds);
+        // spawnEnemyTank();
+        std::cout << tank->getHP() << endl;
     }
     
     // Set Tank position to camera
@@ -137,8 +147,15 @@ void Tema2::Update(float deltaTimeSeconds)
         camera->Set(tank->getPosition(), glm::vec3(0, 1, 0));
     }
     tank->reload(deltaTimeSeconds);
-    std::cout << "HP: " << tank->getHP() << std::endl;
-    
+
+    for(auto building:buildings)
+    {
+        glm::mat4 modelMatrix = glm::mat4(1);
+        modelMatrix = glm::translate(modelMatrix, building->getPosition());
+        modelMatrix = glm::scale(modelMatrix, building->getScale());
+        Meshes::RenderSimpleMesh(meshes["cube"], shaders["LabShader"], modelMatrix, building->getColor(), camera, 100, projectionMatrix);
+    }
+    checkBuildingsCollision(tank);
 }
 
 void Tema2::checkCollisionWithProjectiles(Tank* tank, std::vector<Projectile*> projectiles)
@@ -156,6 +173,142 @@ void Tema2::checkCollisionWithProjectiles(Tank* tank, std::vector<Projectile*> p
     }
 }
 
+void Tema2::initBuildings()
+{
+    int n = rand()%6 + 10; // [10,15] buildings
+    for(int i = 0; i < n; ++i)
+    {
+        buildings.emplace_back(new Building);
+    }
+}
+
+void Tema2::checkBuildingsCollision(Tank* tank)
+{
+    for(auto building:buildings)
+    {
+        float tankRadius = tank->getScale()*tank->getBody()->getBodySize().x/2;
+        // check tank radius with each side of the building
+        glm::vec3 corner0 = building->getPosition();
+        glm::vec3 corner1 = building->getPosition() + glm::vec3(building->getScale().x, 0, 0);
+        glm::vec3 corner2 = building->getPosition() + glm::vec3(0, 0, building->getScale().z);
+        glm::vec3 corner3 = building->getPosition() + glm::vec3(building->getScale().x, 0, building->getScale().z);
+        float side0 = glm::distance(corner0, corner1);
+        float side1 = glm::distance(corner0, corner2);
+        float side2 = glm::distance(corner1, corner3);
+        float side3 = glm::distance(corner2, corner3);
+
+        glm::vec3 side0Direction = glm::normalize(corner1 - corner0);
+        glm::vec3 side1Direction = glm::normalize(corner2 - corner0);
+        glm::vec3 side2Direction = glm::normalize(corner3 - corner1);
+        glm::vec3 side3Direction = glm::normalize(corner3 - corner2);
+
+        glm::vec3 side0ToTank = tank->getPosition() - corner0;
+        glm::vec3 side1ToTank = tank->getPosition() - corner0;
+        glm::vec3 side2ToTank = tank->getPosition() - corner1;
+        glm::vec3 side3ToTank = tank->getPosition() - corner2;
+
+        float distance0 = glm::dot(side0ToTank, side0Direction);
+        distance0 = glm::clamp(distance0, 0.f, side0);
+        glm::vec3 closestPoint0 = corner0 + distance0 * side0Direction;
+        
+        float distance1 = glm::dot(side1ToTank, side1Direction);
+        distance1 = glm::clamp(distance1, 0.f, side1);
+        glm::vec3 closestPoint1 = corner0 + distance1 * side1Direction;
+        
+        float distance2 = glm::dot(side2ToTank, side2Direction);
+        distance2 = glm::clamp(distance2, 0.f, side2);
+        glm::vec3 closestPoint2 = corner1 + distance2 * side2Direction;
+        
+        float distance3 = glm::dot(side3ToTank, side3Direction);
+        distance3 = glm::clamp(distance3, 0.f, side3);
+        glm::vec3 closestPoint3 = corner2 + distance3 * side3Direction;
+
+        float distanceToTank0 = glm::distance(closestPoint0, tank->getPosition());
+        float distanceToTank1 = glm::distance(closestPoint1, tank->getPosition());
+        float distanceToTank2 = glm::distance(closestPoint2, tank->getPosition());
+        float distanceToTank3 = glm::distance(closestPoint3, tank->getPosition());
+
+        if(checkIfTankIsInsideBuilding(tank, building))
+        {
+            tank->moveTank(glm::vec3(building->getScale().x, 0, 0));
+            if(!vClipping && tank == this->tank)
+                camera->Set(tank->getPosition() + glm::vec3(-3.5f, 1.5, 0), tank->getPosition(), glm::vec3(0, 1, 0));
+        }
+        
+        if(distanceToTank0 < tankRadius || distanceToTank1 < tankRadius || distanceToTank2 < tankRadius || distanceToTank3 < tankRadius)
+        {
+            glm::vec3 closestPoint;
+            float distance;
+            if(distanceToTank0 < tankRadius)
+            {
+                closestPoint = closestPoint0;
+                distance = distanceToTank0;
+            } else if(distanceToTank1 < tankRadius)
+            {
+               closestPoint = closestPoint1;
+                distance = distanceToTank1;
+            } else if(distanceToTank2 < tankRadius)
+            {
+                closestPoint = closestPoint2;
+                distance = distanceToTank2;
+            } else
+            {
+                closestPoint = closestPoint3;
+                distance = distanceToTank3;
+            }
+            glm::vec3 dif = tank->getPosition() - closestPoint - glm::vec3(0, tank->getPosition().y, 0);
+            if(glm::any(glm::isnan(glm::normalize(dif))))
+            { // protection against spawning tanks on top of each other
+                tank->moveTank(glm::vec3(building->getScale().x+tank->getBody()->getBodySize().x,  0, 0));
+            }
+            else
+            {
+                glm::vec3 P = glm::normalize(dif) * abs(tankRadius - distance);
+                tank->moveTank(P);
+                if(!vClipping && tank == this->tank)
+                    camera->MoveForward(P);
+            }
+            
+        }
+    }
+}
+
+bool Tema2::checkIfTankIsInsideBuilding(Tank* tank, Building* building)
+{
+    if(tank->getPosition().x > building->getPosition().x && tank->getPosition().x < building->getPosition().x + building->getScale().x &&
+        tank->getPosition().z > building->getPosition().z && tank->getPosition().z < building->getPosition().z + building->getScale().z)
+    {
+        return true;
+    }
+    return false;
+}
+
+void Tema2::spawnEnemyTank()
+{
+    if(atLeastOneTankDead())
+    {
+        std::cout << "Spawning new tank" << std::endl;
+        float x = rand() % 100 - 50;
+        float z = rand() % 100 - 50;
+        Tank *newTank = new Tank();
+        newTank->createTank(x, newTank->getScale(), z, glm::vec3(0.545, 0, 0.123f));
+        std::cout << "tank created at " << x << " " << z << "\n";
+        enemyTanks.push_back(newTank);
+        std::cout << "tank pushed\n";
+    }
+}
+
+bool Tema2::atLeastOneTankDead()
+{
+    for(auto enemyTank:enemyTanks)
+    {
+        if(enemyTank->getHP() <= 0)
+        {
+            return true;
+        }
+    }
+    return false;
+}
 
 void Tema2::tankCollision(Tank *tank1, Tank *tank2) const
 {
@@ -176,7 +329,8 @@ void Tema2::tankCollision(Tank *tank1, Tank *tank2) const
             glm::vec3 P = glm::normalize(dif) * abs(tank1Radius + tank2Radius - distance);
             tank1->moveTank(P);
             tank2->moveTank(-P);
-            camera->MoveForward(P);
+            if(!vClipping)
+                camera->MoveForward(P);
             // tank->setSpeed(0.5f);
         }
     }
@@ -244,6 +398,8 @@ void Tema2::createNTanks(int n)
     {
         const float x = rand() % 100 - 50;
         const float z = rand() % 100 - 50;
+        std::cout << "Spawning tank at " << x << " " << z << std::endl;
+        // enemyTanks.push_back(new Tank(x, enemyTanks[0]->getScale(), z, glm::vec3(0.545, 0, 0.123f)));
         enemyTanks.push_back(new Tank());
         enemyTanks[enemyTanks.size()-1]->createTank(x, enemyTanks[enemyTanks.size()-1]->getScale(), z, glm::vec3(0.545, 0, 0.123f));
     }
@@ -279,9 +435,9 @@ void Tema2::OnInputUpdate(float deltaTime, int mods)
         } else
         {
             tank->rotateTank(RADIANS(1));
-            camera->TranslateForward(2);
+            // camera->TranslateForward(2);
             camera->RotateThirdPerson_OY(RADIANS(1));
-            camera->TranslateForward(-2);
+            // camera->TranslateForward(-2);
         }
     }
 
@@ -302,9 +458,9 @@ void Tema2::OnInputUpdate(float deltaTime, int mods)
         } else
         {
             tank->rotateTank(-RADIANS(1));
-            camera->TranslateForward(2);
+            // camera->TranslateForward(2);
             camera->RotateThirdPerson_OY(-RADIANS(1));
-            camera->TranslateForward(-2);
+            // camera->TranslateForward(-2);
         }
     }
 
