@@ -68,6 +68,7 @@ namespace m1
         float zFar = 200.0f;
         bool isPerspective = true;
         bool vClipping = false;
+        bool gameOver = false;
     };
     
 }   // namespace m1

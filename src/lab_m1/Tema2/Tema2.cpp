@@ -94,6 +94,7 @@ void Tema2::Update(float deltaTimeSeconds)
     // Render the camera target. This is useful for understanding where
     // the rotation point is, when moving in third-person camera mode.
     time = Engine::GetElapsedTime();
+    
     std::cout << "time: " << time << std::endl;
     tank->renderTank(camera, projectionMatrix, shaders, time);
     {
@@ -103,55 +104,10 @@ void Tema2::Update(float deltaTimeSeconds)
         Meshes::RenderSimpleMesh(meshes["ground"], shaders["LabShader"], modelMatrix,
             glm::vec3(69.f/255, 158.f/255, 19.f/255), camera, 100, projectionMatrix);
     }
-    // std::cout<<"CACA\n";
-    for(auto projectile:tank->getProjectiles())
-    {
-        projectile->moveProjectile(projectile->getSpeed() * deltaTimeSeconds, deltaTimeSeconds);
-        checkCollisionProjectileBuilding(projectile);
-        projectile->checkTimeOut();
-    }
-    tank->removeProjectiles();
-    // std::cout << "CACA\n";
     for(auto enemyTank:enemyTanks)
     {
-        // std::cout << "Rendering enemy tank\n" << enemyTank->getPosition() << endl;
         enemyTank->renderTank(camera, projectionMatrix, shaders, time);
-        checkCollisionWithProjectiles(enemyTank, tank->getProjectiles());
-        checkCollisionWithProjectiles(tank, enemyTank->getProjectiles());
-        for(auto projectile:enemyTank->getProjectiles()) // enemy tank projectiles
-        {
-            projectile->moveProjectile(projectile->getSpeed() * deltaTimeSeconds, deltaTimeSeconds);
-            projectile->checkTimeOut();
-        }
-        enemyTank->removeProjectiles();
-        // tank->checkCollisionWithTank(enemyTank);
-        tankCollision(tank, enemyTank);
-        checkBuildingsCollision(enemyTank);
-        if(enemyTank->getHP() <= 0)
-        {
-            continue;
-        }
-        searchForPlayer(enemyTank, deltaTimeSeconds, tank->getPosition());
-        for(auto enemyTank2:enemyTanks)
-        {
-            if(enemyTank != enemyTank2)
-            {
-                enemyTank->checkCollisionWithTank(enemyTank2);
-            }
-        }
-        enemyTank->rotateTurretTowardsPlayer(tank->getPosition());
-        enemyTank->reload(deltaTimeSeconds);
-        // spawnEnemyTank();
-        // std::cout << tank->getHP() << endl;
     }
-    
-    // Set Tank position to camera
-    if(!vClipping)
-    {
-        camera->Set(tank->getPosition(), glm::vec3(0, 1, 0));
-    }
-    tank->reload(deltaTimeSeconds);
-
     for(auto building:buildings)
     {
         glm::mat4 modelMatrix = glm::mat4(1);
@@ -159,7 +115,65 @@ void Tema2::Update(float deltaTimeSeconds)
         modelMatrix = glm::scale(modelMatrix, building->getScale());
         Meshes::RenderSimpleMesh(meshes["cube"], shaders["LabShader"], modelMatrix, building->getColor(), camera, 100, projectionMatrix);
     }
-    checkBuildingsCollision(tank);
+    if(time > 60 || tank->getHP() <= 0)
+    {
+        gameOver = true;
+        vClipping = true;
+        std::cout << "GAME OVER\n";
+    }
+    if(!gameOver)
+    {
+        std::cout<<"CACA\n";
+        for(auto projectile:tank->getProjectiles())
+        {
+            projectile->moveProjectile(projectile->getSpeed() * deltaTimeSeconds, deltaTimeSeconds);
+            checkCollisionProjectileBuilding(projectile);
+            projectile->checkTimeOut();
+        }
+        tank->removeProjectiles();
+        // std::cout << "CACA\n";
+        for(auto enemyTank:enemyTanks)
+        {
+            // std::cout << "Rendering enemy tank\n" << enemyTank->getPosition() << endl;
+            checkCollisionWithProjectiles(enemyTank, tank->getProjectiles());
+            checkCollisionWithProjectiles(tank, enemyTank->getProjectiles());
+            for(auto projectile:enemyTank->getProjectiles()) // enemy tank projectiles
+                {
+                projectile->moveProjectile(projectile->getSpeed() * deltaTimeSeconds, deltaTimeSeconds);
+                projectile->checkTimeOut();
+                }
+            enemyTank->removeProjectiles();
+            // tank->checkCollisionWithTank(enemyTank);
+            tankCollision(tank, enemyTank);
+            checkBuildingsCollision(enemyTank);
+            if(enemyTank->getHP() <= 0)
+            {
+                continue;
+            }
+            searchForPlayer(enemyTank, deltaTimeSeconds, tank->getPosition());
+            for(auto enemyTank2:enemyTanks)
+            {
+                if(enemyTank != enemyTank2)
+                {
+                    enemyTank->checkCollisionWithTank(enemyTank2);
+                    checkCollisionWithProjectiles(enemyTank, enemyTank2->getProjectiles());
+                    checkCollisionWithProjectiles(enemyTank2, enemyTank->getProjectiles());
+                }
+            }
+            enemyTank->rotateTurretTowardsPlayer(tank->getPosition());
+            enemyTank->reload(deltaTimeSeconds);
+            // spawnEnemyTank();
+            // std::cout << tank->getHP() << endl;
+        }
+    
+        // Set Tank position to camera
+        if(!vClipping)
+        {
+            camera->Set(tank->getPosition(), glm::vec3(0, 1, 0));
+        }
+        tank->reload(deltaTimeSeconds);
+        checkBuildingsCollision(tank);
+    }
 }
 
 void Tema2::checkCollisionWithProjectiles(Tank* tank, std::vector<Projectile*> projectiles)
@@ -531,6 +545,11 @@ void Tema2::OnKeyPress(int key, int mods)
             newPos += glm::vec3(0, -1.5, 0);
             camera->Set(tank->getPosition() - newPos , tank->getPosition(), glm::vec3(0, 1, 0));
         }
+    }
+
+    if(key == GLFW_KEY_M)
+    {
+        tank->updateHP(100000);
     }
 
     // if(key == GLFW_KEY_L)

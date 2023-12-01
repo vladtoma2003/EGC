@@ -80,6 +80,11 @@ namespace m1
             this->hp -= hp;
         }
 
+        void updateHP(int hp)
+        {
+            this->hp = hp;
+        }
+
         int getDamage() const
         {
             return damage;
