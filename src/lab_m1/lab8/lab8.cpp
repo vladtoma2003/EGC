@@ -92,7 +92,7 @@ void Lab8::Update(float deltaTimeSeconds)
         modelMatrix = glm::rotate(modelMatrix, RADIANS(60.0f), glm::vec3(1, 0, 0));
         modelMatrix = glm::scale(modelMatrix, glm::vec3(0.5f));
         // TODO(student): Add or change the object colors
-        RenderSimpleMesh(meshes["box"], shaders["LabShader"], modelMatrix);
+        RenderSimpleMesh(meshes["box"], shaders["LabShader"], modelMatrix, glm::vec3(0.75, 0.25, 0.25));
 
     }
 
@@ -109,7 +109,7 @@ void Lab8::Update(float deltaTimeSeconds)
         modelMatrix = glm::translate(modelMatrix, glm::vec3(0, 0.01f, 0));
         modelMatrix = glm::scale(modelMatrix, glm::vec3(0.25f));
         // TODO(student): Add or change the object colors
-        RenderSimpleMesh(meshes["plane"], shaders["LabShader"], modelMatrix);
+        RenderSimpleMesh(meshes["plane"], shaders["LabShader"], modelMatrix, glm::vec3(0.5, 0.5, 0.5));
 
     }
 
@@ -119,7 +119,15 @@ void Lab8::Update(float deltaTimeSeconds)
         modelMatrix = glm::translate(modelMatrix, lightPosition);
         modelMatrix = glm::scale(modelMatrix, glm::vec3(0.1f));
         RenderMesh(meshes["sphere"], shaders["Simple"], modelMatrix);
+
     }
+
+    // {
+    //     glm::mat4 modelMatrix = glm::mat4(1);
+    //     modelMatrix = glm::translate(modelMatrix, glm::vec3(0, 1, 1));
+    //     modelMatrix = glm::scale(modelMatrix, glm::vec3(0.1f));
+    //     RenderMesh(meshes["sphere"], shaders["Simple"], modelMatrix);
+    // }
 }
 
 
@@ -141,8 +149,22 @@ void Lab8::RenderSimpleMesh(Mesh *mesh, Shader *shader, const glm::mat4 & modelM
     int light_position = glGetUniformLocation(shader->program, "light_position");
     glUniform3f(light_position, lightPosition.x, lightPosition.y, lightPosition.z);
 
+    // GLint location = glGetUniformLocation(shader->program, "light_position");
+    // glUniform3fv(location, 9, glm::value_ptr(lightPosition));
+
+    // glm::vec3 lights[2] = {lightPosition, glm::vec3(0, 1, 1)};
+    // for (int i = 0;i < 2;++i)
+    // {
+    //     std::string name = std::string("light_position[") + std::to_string(i) + std::string("].position");
+    //     GLuint location = glGetUniformLocation(shader->program, name.c_str());
+    //     glUniform3fv(location, 1, glm::value_ptr(lights[i]));
+    // }
+    
     int light_direction = glGetUniformLocation(shader->program, "light_direction");
     glUniform3f(light_direction, lightDirection.x, lightDirection.y, lightDirection.z);
+
+    // int light_direction2 = glGetUniformLocation(shader->program, "light_direction");
+    // glUniform3f(light_direction, lightDirection.x, lightDirection.y, lightDirection.z);
 
     // Set eye position (camera position) uniform
     glm::vec3 eyePosition = GetSceneCamera()->m_transform->GetWorldPosition();
@@ -164,6 +186,11 @@ void Lab8::RenderSimpleMesh(Mesh *mesh, Shader *shader, const glm::mat4 & modelM
 
     // TODO(student): Set any other shader uniforms that you need
 
+    // Bind light type
+    int light_type = glGetUniformLocation(shader->program, "light_type");
+    glUniform1i(light_type, lightType);
+    
+    
     // Bind model matrix
     GLint loc_model_matrix = glGetUniformLocation(shader->program, "Model");
     glUniformMatrix4fv(loc_model_matrix, 1, GL_FALSE, glm::value_ptr(modelMatrix));
@@ -220,6 +247,10 @@ void Lab8::OnKeyPress(int key, int mods)
     // Add key press event
 
     // TODO(student): Set keys that you might need
+    if(key == GLFW_KEY_F)
+    {
+        lightType = (lightType + 1) % 2; // 0 - normala, 1 - speculara
+    }
 
 }
 

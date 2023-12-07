@@ -46,8 +46,8 @@ int main(int argc, char **argv)
     // Create a new 3D world and start running it
     // World *world = new gfxc::SimpleScene();
     // World* world = new m1::Lab2();
-    // World *world = new m1::Lab5();
-    World *world = new m1::Tema2();
+    World *world = new m1::Lab8();
+    // World *world = new m1::Tema2();
 
     world->Init();
     world->Run();
