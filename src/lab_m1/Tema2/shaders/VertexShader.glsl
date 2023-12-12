@@ -13,6 +13,7 @@ uniform mat4 View;
 uniform mat4 Projection;
 uniform vec3 ObjectColor;
 uniform int HP;
+uniform vec2 deformationDirection;
 
 // Output
 // TODO(student): Output values to fragment shader
@@ -28,8 +29,10 @@ void main()
     frag_normal = normal;
     frag_uv = texCoord;
     float multiplyer = (HP>25)?((HP>100?100:HP)/100.f):(0.25);
+    float deformationOx = deformationDirection.x*(min((1-(HP>100?100:HP)/100.f), 0.5f));
+    float deformationOz = deformationDirection.y*(min((1-(HP>100?100:HP)/100.f), 0.5f));
     frag_color = ObjectColor*multiplyer;
     //vec3 position2 = position;
-    gl_Position = Projection * View * Model * vec4(position, 1.0);
+    gl_Position = Projection * View * Model * (vec4(position+glm::vec3(deformationOx, 0, deformationOz), 1.0));
 
 }

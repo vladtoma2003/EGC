@@ -14,6 +14,7 @@ namespace m1
         float cannonAngle = 0;
         float deltaX = 0;
         glm::vec3 forward;
+        glm::vec2 deformationDirection;
     public:
         explicit Cannon(const float x, const float y, const float z, glm::vec3 distanceFromBody, glm::vec3 bodyPos, glm::vec3 forward)
         {
@@ -21,6 +22,7 @@ namespace m1
             this->distanceFromBody = distanceFromBody;
             center = bodyPos;
             this->forward = forward;
+            deformationDirection = glm::vec2(rand() % 2 == 0 ? -1 : 1, rand() % 2 == 0 ? -1 : 1);
         }
         void setCannonPosition(float x, float y, float z)
         {
@@ -85,6 +87,10 @@ namespace m1
         void setCannonAngle(float angle)
         {
             cannonAngle += angle;
+        }
+        glm::vec2 getDeformationDirection() const
+        {
+            return deformationDirection;
         }
     };
 }

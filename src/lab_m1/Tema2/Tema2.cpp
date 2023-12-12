@@ -102,7 +102,7 @@ void Tema2::Update(float deltaTimeSeconds)
         modelMatrix = glm::translate(modelMatrix, glm::vec3(0, 0.f, 0));
         modelMatrix = glm::scale(modelMatrix, glm::vec3(100.f));
         Meshes::RenderSimpleMesh(meshes["ground"], shaders["LabShader"], modelMatrix,
-            glm::vec3(69.f/255, 158.f/255, 19.f/255), camera, 100, projectionMatrix);
+            glm::vec3(69.f/255, 158.f/255, 19.f/255), camera, 100, projectionMatrix, glm::vec2(0));
     }
     for(auto enemyTank:enemyTanks)
     {
@@ -113,7 +113,7 @@ void Tema2::Update(float deltaTimeSeconds)
         glm::mat4 modelMatrix = glm::mat4(1);
         modelMatrix = glm::translate(modelMatrix, building->getPosition());
         modelMatrix = glm::scale(modelMatrix, building->getScale());
-        Meshes::RenderSimpleMesh(meshes["cube"], shaders["LabShader"], modelMatrix, building->getColor(), camera, 100, projectionMatrix);
+        Meshes::RenderSimpleMesh(meshes["cube"], shaders["LabShader"], modelMatrix, building->getColor(), camera, 100, projectionMatrix, glm::vec2(0));
     }
     if(time > 60 || tank->getHP() <= 0)
     {

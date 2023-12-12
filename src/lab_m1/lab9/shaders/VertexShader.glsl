@@ -11,6 +11,7 @@ uniform mat4 View;
 uniform mat4 Projection;
 
 uniform float time;
+uniform bool isQuad;
 
 out vec2 texcoord;
 
@@ -21,6 +22,8 @@ void main()
 
 	if(time >= 0)
 		texcoord = vec2(texcoord.x - time / 10, texcoord.y);
+    
+    
 
 	gl_Position = Projection * View * Model * vec4(v_position, 1.0);
 }

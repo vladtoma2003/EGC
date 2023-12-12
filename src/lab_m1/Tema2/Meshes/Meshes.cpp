@@ -61,7 +61,7 @@ Mesh *Meshes::CreateMesh(const char* name, std::vector<VertexFormat> vertices, s
     return mesh;
 }
 void Meshes::RenderSimpleMesh(Mesh *mesh, Shader *shader, const glm::mat4 & modelMatrix, glm::vec3 newColor, implemented::CameraTema *camera,
-                              const int hp, glm::mat4 projectionMatrix)
+                              const int hp, glm::mat4 projectionMatrix, glm::vec2 deformationDirection)
 {
     if (!mesh || !shader || !shader->GetProgramID())
         return;
@@ -94,6 +94,9 @@ void Meshes::RenderSimpleMesh(Mesh *mesh, Shader *shader, const glm::mat4 & mode
     int hpLocation = glGetUniformLocation(shader->program, "HP");
     glUniform1i(hpLocation, hp);
 
+    int deformationLocation = glGetUniformLocation(shader->program, "deformationDirection");
+    glUniform2fv(deformationLocation, 1, glm::value_ptr(deformationDirection));
+    
     // glm::vec3 newColor = glm::vec3(15.f/2555, 39.f/255, 10.f/255);
     int colorLocation = glGetUniformLocation(shader->program, "ObjectColor");
     glUniform3fv(colorLocation, 1, glm::value_ptr(newColor));

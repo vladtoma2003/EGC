@@ -11,6 +11,7 @@ namespace m1
         glm::vec3 distanceFromBody;
         glm::vec3 center;
         float trackAngle;
+        glm::vec2 deformationDirection;
     public:
         explicit Tracks(const float x, const float y, const float z, glm::vec3 distanceFromBody, glm::vec3 bodyPos, float angle)
         {
@@ -18,6 +19,7 @@ namespace m1
             this->distanceFromBody = distanceFromBody;
             center = bodyPos;
             trackAngle = angle;
+            deformationDirection = glm::vec2(rand() % 2 == 0 ? -1 : 1, rand() % 2 == 0 ? -1 : 1);
         }
         void setTracksPosition(float x, float y, float z)
         {
@@ -55,6 +57,10 @@ namespace m1
             trackAngle += angle;
             position.x = center.x + distanceFromBody.z * sin(trackAngle);
             position.z = center.z + distanceFromBody.z * cos(trackAngle);
+        }
+        glm::vec2 getDeformationDirection() const
+        {
+            return deformationDirection;
         }
     };
 }

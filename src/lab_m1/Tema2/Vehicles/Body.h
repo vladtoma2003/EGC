@@ -11,10 +11,12 @@ namespace m1
         glm::vec3 position;
         glm::vec3 size = glm::vec3(8, 1, 4);
         float bodyAngle = 0;
+        glm::vec2 deformationDirection;
     public:
         explicit Body(const float x, const float y, const float z)
         {
             position = glm::vec3(x, y, z);
+            deformationDirection = glm::vec2(rand() % 2 == 0 ? -1 : 1, rand() % 2 == 0 ? -1 : 1);
         }
         glm::vec3 getBodyPosition() const
         {
@@ -38,6 +40,10 @@ namespace m1
         void rotateBody(float angle)
         {
             bodyAngle += angle;
+        }
+        glm::vec2 getDeformationDirection() const
+        {
+            return deformationDirection;
         }
     };
 }

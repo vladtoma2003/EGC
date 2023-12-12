@@ -12,12 +12,14 @@ namespace m1
         glm::vec3 center;
         float turretAngle = 0;
         float deltaX = 0;
+        glm::vec2 deformationDirection;
         public:
         explicit Turret(const float x, const float y, const float z, glm::vec3 distanceFromBody, glm::vec3 bodyPos)
         {
             position = glm::vec3(x, y, z);
             this->distanceFromBody = distanceFromBody;
             center = bodyPos;
+            deformationDirection = glm::vec2(rand() % 2 == 0 ? -1 : 1, rand() % 2 == 0 ? -1 : 1);
         }
         void setTurretPosition(float x, float y, float z)
         {
@@ -67,6 +69,10 @@ namespace m1
         void incDeltaX(float value)
         {
             deltaX += value;
+        }
+        glm::vec2 getDeformationDirection() const
+        {
+            return deformationDirection;
         }
     };
 }

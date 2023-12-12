@@ -82,6 +82,18 @@ void Lab9::Init()
         meshes[mesh->GetMeshID()] = mesh;
     }
 
+    {
+        Texture2D* texture = new Texture2D();
+        texture->Load2D(PATH_JOIN(sourceTextureDir, "capy.png").c_str(), GL_REPEAT);
+        mapTextures["capy"] = texture;
+    }
+    {
+        Texture2D* texture = new Texture2D();
+        texture->Load2D(PATH_JOIN(sourceTextureDir, "psong.png").c_str(), GL_REPEAT);
+        mapTextures["minecraft"] = texture;
+    }
+    
+
     // Create a simple quad
     {
         vector<glm::vec3> vertices
@@ -169,7 +181,7 @@ void Lab9::Update(float deltaTimeSeconds)
         modelMatrix = glm::translate(modelMatrix, glm::vec3(2, 0.5f, 0));
         modelMatrix = glm::rotate(modelMatrix, RADIANS(60.0f), glm::vec3(1, 0, 0));
         modelMatrix = glm::scale(modelMatrix, glm::vec3(0.75f));
-        RenderSimpleMesh(meshes["box"], shaders["LabShader"], modelMatrix, mapTextures["earth"],mapTextures["crate"]);
+        RenderSimpleMesh(meshes["box"], shaders["LabShader"], modelMatrix, mapTextures["minecraft"],mapTextures["crate"]);
     }
 
     {
@@ -184,8 +196,13 @@ void Lab9::Update(float deltaTimeSeconds)
         glm::mat4 modelMatrix = glm::mat4(1);
         modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 0.5f, 0.0f));
         modelMatrix = glm::scale(modelMatrix, glm::vec3(0.5f));
+
+        const glm::vec3 camera_position = GetSceneCamera()->m_transform->GetWorldPosition();
+        float angle = atan2(camera_position.x, camera_position.z) - atan2(modelMatrix[3].x, modelMatrix[3].z);
+        modelMatrix = glm::rotate(modelMatrix, angle, glm::vec3(0, 1, 0));
+        
         mixTextures = true;
-        RenderSimpleMesh(meshes["square"], shaders["LabShader"], modelMatrix, mapTextures["grass"], mapTextures["crate"]);
+        RenderSimpleMesh(meshes["square"], shaders["LabShader"], modelMatrix, mapTextures["grass"], mapTextures["capy"]);
         mixTextures = false;
     }
 
@@ -227,6 +244,10 @@ void Lab9::RenderSimpleMesh(Mesh *mesh, Shader *shader, const glm::mat4 & modelM
     glUniformMatrix4fv(loc_projection_matrix, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
 
     GLint locTime = glGetUniformLocation(shader->program, "time");
+    bool isQuad = mesh->GetMeshID() == "square";
+
+    GLint locIsQuad = glGetUniformLocation(shader->program, "isQuad");
+    glUniform1i(locIsQuad, isQuad);
 
     if (mesh == meshes["sphere"])
     {
