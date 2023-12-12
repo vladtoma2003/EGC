@@ -95,7 +95,7 @@ void Tema2::Update(float deltaTimeSeconds)
     // the rotation point is, when moving in third-person camera mode.
     time = Engine::GetElapsedTime();
     
-    std::cout << "time: " << time << std::endl;
+    // std::cout << "time: " << time << std::endl;
     tank->renderTank(camera, projectionMatrix, shaders, time);
     {
         glm::mat4 modelMatrix = glm::mat4(1);
@@ -119,11 +119,11 @@ void Tema2::Update(float deltaTimeSeconds)
     {
         gameOver = true;
         vClipping = true;
-        std::cout << "GAME OVER\n";
+        // std::cout << "GAME OVER\n";
     }
     if(!gameOver)
     {
-        std::cout<<"CACA\n";
+        // std::cout<<"CACA\n";
         for(auto projectile:tank->getProjectiles())
         {
             projectile->moveProjectile(projectile->getSpeed() * deltaTimeSeconds, deltaTimeSeconds);
@@ -138,19 +138,19 @@ void Tema2::Update(float deltaTimeSeconds)
             checkCollisionWithProjectiles(enemyTank, tank->getProjectiles());
             checkCollisionWithProjectiles(tank, enemyTank->getProjectiles());
             for(auto projectile:enemyTank->getProjectiles()) // enemy tank projectiles
-                {
+            {
                 projectile->moveProjectile(projectile->getSpeed() * deltaTimeSeconds, deltaTimeSeconds);
                 projectile->checkTimeOut();
-                }
+            }
             enemyTank->removeProjectiles();
             // tank->checkCollisionWithTank(enemyTank);
             tankCollision(tank, enemyTank);
-            checkBuildingsCollision(enemyTank);
             if(enemyTank->getHP() <= 0)
             {
                 continue;
             }
             searchForPlayer(enemyTank, deltaTimeSeconds, tank->getPosition());
+            checkBuildingsCollision(enemyTank);
             for(auto enemyTank2:enemyTanks)
             {
                 if(enemyTank != enemyTank2)
@@ -249,14 +249,15 @@ void Tema2::checkBuildingsCollision(Tank* tank)
         if(checkIfTankIsInsideBuilding(tank, building))
         {
             tank->moveTank(glm::vec3(building->getScale().x, 0, 0));
+            std::cout << "CheckCheckCheckCheckCheckCheckCheckCheckCheckCheckCheckCheckCheckCheckCheckCheckCheckCheckCheckCheck\n";
             if(!vClipping && tank == this->tank)
                 camera->Set(tank->getPosition() + glm::vec3(-3.5f, 1.5, 0), tank->getPosition(), glm::vec3(0, 1, 0));
         }
         
         if(distanceToTank0 < tankRadius || distanceToTank1 < tankRadius || distanceToTank2 < tankRadius || distanceToTank3 < tankRadius)
         {
-            glm::vec3 closestPoint;
-            float distance;
+            glm::vec3 closestPoint = glm::vec3(0);
+            float distance = 0;
             if(distanceToTank0 < tankRadius)
             {
                 closestPoint = closestPoint0;
@@ -269,24 +270,25 @@ void Tema2::checkBuildingsCollision(Tank* tank)
             {
                 closestPoint = closestPoint2;
                 distance = distanceToTank2;
-            } else
+            } else if(distanceToTank3 < tankRadius)
             {
                 closestPoint = closestPoint3;
                 distance = distanceToTank3;
             }
             glm::vec3 dif = tank->getPosition() - closestPoint - glm::vec3(0, tank->getPosition().y, 0);
             if(glm::any(glm::isnan(glm::normalize(dif))))
-            { // protection against spawning tanks on top of each other
+            { // protection against spawning tanks inside buildings
+                std::cout << "InsideInsideInsideInsideInsideInsideInsideInsideInsideInsideInsideInsideInsideInsideInsideInside\n";
                 tank->moveTank(glm::vec3(building->getScale().x+tank->getBody()->getBodySize().x,  0, 0));
             }
             else
             {
                 glm::vec3 P = glm::normalize(dif) * abs(tankRadius - distance);
-                // tank->moveTank(P);
+                tank->moveTank(-P*0.5f);
+                std::cout<<"OutsideOutsideOutsideOutsideOutsideOutsideOutsideOutsideOutsideOutsideOutsideOutsideOutsideOutside\n";
                 if(!vClipping && tank == this->tank && tank->moveTank(P))
-                    camera->MoveForward(P);
+                    camera->MoveForward(P*0.5f);
             }
-            
         }
     }
 }
@@ -346,9 +348,9 @@ void Tema2::tankCollision(Tank *tank1, Tank *tank2) const
         {
             glm::vec3 P = glm::normalize(dif) * abs(tank1Radius + tank2Radius - distance);
             // tank1->moveTank(P);
-            tank2->moveTank(-P);
-            if(!vClipping && tank1->moveTank(P))
-                camera->MoveForward(P);
+            tank2->moveTank(-P*0.5f);
+            if(!vClipping && tank1->moveTank(P*0.5f))
+                camera->MoveForward(P*0.5f);
             // tank->setSpeed(0.5f);
         }
     }
@@ -397,7 +399,6 @@ void Tema2::searchForPlayer(Tank* tank, float deltaTime, glm::vec3 playerPositio
                     tank->moveTank(-deltaTime*tank->getSpeed());
                 }
             }
-            
             tank->setMoveTime(deltaTime);
         }
     } else

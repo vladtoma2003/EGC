@@ -99,7 +99,7 @@ void Tank::rotateTank(float angle)
 int Tank::moveTank(float distance)
 {
     glm::vec3 dir = glm::normalize(glm::vec3(forwardTank.x, 0, forwardTank.z));
-    if(!((tankPosition+dir).x > 100 || (tankPosition+dir).x < -100 || (tankPosition+dir).z > 100 || (tankPosition+dir).z < -100))
+    if(!((tankPosition+dir).x > 100 || (tankPosition+dir).x < -100 || (tankPosition+dir).z > 100 || (tankPosition+dir).z < -100) && canMove)
     {
         tankPosition += dir*distance;
         body->moveBody(dir * distance);
@@ -217,8 +217,8 @@ void Tank::checkCollisionWithTank(Tank *tank)
         else
         {
             const glm::vec3 P = glm::normalize(dif) * abs(razaTank1 + razaTank2 - distance);
-            moveTank(-P);
-            tank->moveTank(P);
+            moveTank(-P*0.5f);
+            tank->moveTank(P*0.5f);
         }
     }
 }

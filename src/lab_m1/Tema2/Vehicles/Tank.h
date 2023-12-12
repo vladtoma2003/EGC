@@ -32,6 +32,7 @@ namespace m1
         float moveTime = 0;
         float moveTotal = 0;
         int decision = 0;
+        bool canMove = true;
         
         Body *body;
         Tracks **tracks;
@@ -195,6 +196,14 @@ namespace m1
         int getDecision() const
         {
             return decision;
+        }
+        void setCanMove(bool canMove)
+        {
+            this->canMove = canMove;
+        }
+        bool getCanMove() const
+        {
+            return canMove;
         }
     };
 
