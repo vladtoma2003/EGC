@@ -11,13 +11,13 @@ namespace m1
 {
     class Lab9 : public gfxc::SimpleScene
     {
-     public:
+    public:
         Lab9();
         ~Lab9();
 
         void Init() override;
 
-     private:
+    private:
         void FrameStart() override;
         void Update(float deltaTimeSeconds) override;
         void FrameEnd() override;
@@ -35,5 +35,7 @@ namespace m1
         void OnWindowResize(int width, int height) override;
 
         std::unordered_map<std::string, Texture2D *> mapTextures;
+        GLboolean mixTextures;
+
     };
 }   // namespace m1
